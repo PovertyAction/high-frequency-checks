@@ -1,7 +1,8 @@
 
 
+	set more off
 
-	use "SHPS tracking/data_cleaned.dta" , clear
+	use `preproc_data' , clear
 
 	
 ********************************************************************************	
@@ -14,6 +15,15 @@
 	isid $survey_id
 	
 	
+*Check survey completion
+****************************************
+	*LIST incomplete surveys - simple export excel
+
+
+*Drop incomplete surveys
+****************************************
+	
+	
 *Fix known errors
 ****************************************
 	*readreplace using stufff
@@ -23,7 +33,6 @@
 ********************************************************************************
 *Now recode missing values
 ********************************************************************************
-	use "$raw_data" , clear
 	/* now we'd load in the missing value data from the excel sheet,
 		but for now I'll just do this manually */
 	forval x = 1/$kk_miss {
@@ -47,17 +56,95 @@
 ********************We need to add in fixes to the value labels here as well,
 *but that's low priority.
 
+	*Save the recoded dataset. We need this because of the way the output is
+		*written in later steps.
+	tempfile recoded_data
+	save `recoded_data' 
+
+
+********************************************************************************
+*Check don't know/ refusal percentage (item nonresponse) for all variables
+********************************************************************************
+
+	* /!\ we need to add in the number of non-missing obs as well.
 	
+	use `recoded_data' , clear
+	tempfile item_nonr_output
+	cap file close myfile
+	file open myfile using `item_nonr_output' , text write replace
+	file write myfile "Variable,Label,N,ItemNonResponsePercent,DontKnowPercent,RefusalPercent" _n 
+	foreach var of varlist _all {
+		cap loc varlabb: variable label `var'
+		cap loc varlabb = subinstr(`"`varlabb'"',",","-",.)
+		cap confirm numeric var `var' 
+		if _rc == 0 {
+			qui count if `var' != .
+			loc nonskip = r(N)
+			qui count if inlist(`var',.d,.r) // Here you can add other missing 
+				// value codes if necessary
+			loc nonresp_perc = r(N)/`nonskip'
+			qui count if `var' == .d
+			loc dk_perc = r(N)/`nonskip'
+			qui count if `var' == .r
+			loc ref_perc = r(N)/`nonskip'
+			if `nonresp_perc' > $missing_perc & `nonskip' != 0 {
+				file write myfile "`var',`varlabb',`nonskip',`nonresp_perc',`dk_perc',`ref_perc'" _n	
+			}
+		}
+		else {
+			qui count if `var' != ""
+			loc nonskip = r(N)
+			qui count if inlist(`var',".don't know",".refusal")
+			loc nonresp_perc = r(N)/`nonskip'
+			qui count if `var' == ".don't know"
+			loc dk_perc = r(N)/`nonskip'
+			qui count if `var' == ".refusal"
+			loc ref_perc = r(N)/`nonskip'
+			if `nonresp_perc' > $missing_perc & `nonskip' != 0  {
+				file write myfile "`var',`varlabb',`nonskip',`nonresp_perc',`dk_perc',`ref_perc'" _n	
+			}
+		}
+	}
+	file close myfile
+			
+			
+*Output this to Excel:
+	insheet using `item_nonr_output' , comma case clear
+	
+	*Format the variables
+	foreach var in ItemNonResponsePercent DontKnowPercent RefusalPercent {
+		replace `var' = round(`var',.01) 
+	}
+	
+	*Export
+	
+	/* do we need this?
+	qui count
+	if r(N) == 0 { 
+		set obs 1
+		tostring Variable
+		replace Variable = "No variables have high item non-response"
+	}
+	*/
+	
+	cap export excel using "New HFC templates/Example_HFC output.xlsx" , sheet("Item Non-Response") sheetreplace firstrow(variables) nolabel
+	if _rc != 0 { 
+		di as error "Check that your minimum percentage global is in the correct format."
+		exit 198
+	}
+
+
+
 	
 ********************************************************************************	
 *Check minimums & maximums
 ********************************************************************************
-	
+	use `recoded_data' , clear
 	set more off
 	*set trace on 
-	tempfile output_tmp
+	tempfile minmax_output
 	cap file close myfile
-	file open myfile using `output_tmp' /* "New HFC templates/writeout_trial.csv" */ , text write replace
+	file open myfile using `minmax_output' , text write replace
 	file write myfile "Enumerator,Survey ID,Variable,Label,Value,Message" _n 
 
 	forval v=1/$kk_outlier {
@@ -107,7 +194,7 @@
 		
 		
 *Output this to Excel:
-	insheet using `output_tmp' , comma case clear
+	insheet using `minmax_output' , comma case clear
 	export excel using "New HFC templates/Example_HFC output.xlsx" , sheet("Outliers") sheetreplace firstrow(variables) nolabel
 		
 	
@@ -123,4 +210,4 @@
 	
 	*/
 	
-	
+	*/
