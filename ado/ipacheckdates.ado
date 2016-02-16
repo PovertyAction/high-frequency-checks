@@ -139,8 +139,8 @@ program ipacheckdates, rclass
 				append using `tmp'
 			}
 			save `tmp', replace
-			restore
 		}
+		restore
 	}
 
 	/* =======================
