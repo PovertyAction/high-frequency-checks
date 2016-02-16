@@ -15,7 +15,7 @@ program ipachecknomiss, rclass
 	di "HFC 4 => Checking that certain critical variables have no missing values..."
 	qui {
 
-	syntax varlist, saving(string) id(name) enumerator(name) [modify replace]
+	syntax varlist, saving(string) id(name) enumerator(name) [sheetmodify sheetreplace]
 	
 	tempfile tmp
 
@@ -38,35 +38,44 @@ program ipachecknomiss, rclass
 
 	// numeric variables
 	ds `varlist', has(type numeric)
-	foreach var of `r(varlist)' {
+	foreach var in `r(varlist)' {
 		local npvar = 0
-		forval i = 1/`_N' {
+		forval i = 1/`=_N' {
 			local value = `var'[`i']
 			if `value' == . {
 				local message = "Interview is missing value of `var'."
 				local nmiss = `nmiss' + 1
 				local npvar = `npvar' + 1
-				file write myfile `"`id',`enum',`var',`varl',`value',`message'"' _n			}
+				file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) (`value') _char(44) ("`message'") _n
 		}
 		noisily di "  Variable `var' has `npvar' missing values"
 	}
 
 	// string variables
 	ds `varlist', has(type string)
-	foreach var of `r(varlist)' {
+	foreach var in `r(varlist)' {
 		local npvar = 0
-		forval i = 1/`_N' {
-			local value = `var'[`i']
+		forval i = 1/`=_N' {
+			local value = `"`var'[`i']"'
 			if `value' == "" {
 				local message = "Interview is missing value of `var'."
 				local nmiss = `nmiss' + 1
 				local npvar = `npvar' + 1
-				file write myfile `"`id',`enum',`var',`varl',`value',`message'"' _n
+				file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) (`value') _char(44) ("`message'") _n
 			}
 		}
 		noisily di "  Variable `var' has `npvar' missing values"
 	}
 
+	file close myfile
+
+	preserve
+	import delimited using `tmp', clear
+	g notes = ""
+	g drop = ""
+	g newvalue = ""
+	export excel using `saving', firstrow(var) sheet("4. no miss") `sheetmodify' `sheetreplace'
+	restore
 	}
 	return scalar nmiss = `nmiss'
 	di ""
