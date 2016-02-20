@@ -7,8 +7,8 @@ A Stata template for high frequency checks of field data at Innovations for Pove
    2. ~~Check that there are no duplicate observations~~
    3. Check that all surveys have consent
    4. ~~Check that certain critical variables have no missing values~~
-   5. Check that follow up record ids match original
-   6. Check that no variable has only one distinct value
+   5. ~~Check that follow up record ids match original~~
+   6. Check skip patterns and constraints
    7. ~~Check that no variable has all missing values~~
    8. ~~Check hard/soft constraints~~
    9. ~~Check specify other vars for items that can be included~~
@@ -23,8 +23,8 @@ A Stata template for high frequency checks of field data at Innovations for Pove
    3. Check the percentage of survey refusals by enumerator
    4. Check the number of surveys per day by enumerator
    5. Check average interview duration by enumerator
-   6. Check that duration of consent by enumerator
-   7. Check that duration of other (anthropometrics, games, etc)
+   6. Check the duration of consent by enumerator
+   7. Check the duration of other (anthropometrics, games, etc)
 
 ## Research Dashboards
 
