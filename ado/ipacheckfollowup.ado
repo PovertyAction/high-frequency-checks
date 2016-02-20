@@ -34,16 +34,20 @@ program ipacheckfollowup, rclass
 	    saving(`tmp', replace variable("variable") masterval("current_value") ///
 		  usingval("tracking_value") keepmaster(enumerator) properties(varlabel("label")))
 
+	// record returned values
 	local ncomp = `r(N)'
 	local ndiscrep = `r(discrep)'
 	local nonlym = `r(Nonlym)'
 	local nonlyu = `r(Nonlyu)'
 
+	// export to excel
 	use `tmp', clear
 	export excel using `saving', firstrow(var) sheet("5. follow up") `sheetmodify' `sheetreplace'
 
 	restore
 	}
+	
+	// alert the user 
 	di "  Compared master and using on `ncomp' values."
 	di "  Found `ndiscrep' discrepancies."
 	di "  Found `nonlym' ids only in current data set."
