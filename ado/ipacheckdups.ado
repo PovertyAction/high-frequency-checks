@@ -11,6 +11,8 @@
 
 capture program drop ipacheckdups
 program ipacheckdups, rclass
+	di ""
+	di ""
 	qui {
 
 	syntax varlist(max=1), saving(string) enumerator(string) [uniquevars(varlist) sheetmodify sheetreplace]
