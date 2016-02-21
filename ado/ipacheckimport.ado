@@ -13,126 +13,52 @@ program ipacheckimport, rclass
 	di ""
 	qui {
 
-	syntax using ,  Version(string) [noclear maxvar(numlist) matsize(numlist)]
+	syntax using/ , 
+	
+	preserve
+	
+	#delimit ;
+	local sheets `""1. incomplete" "2. duplicates" "3. consent" "4. no miss" "5. follow up" "6. distinct" "7. all miss" "8. constraints" "9. specify" "10. dates" "11. outliers" "12. duration""' ;
+	#delimit cr
+	
+	*nois di `"`sheets'"'
+	
+	local wc: word count `sheets'
+	*nois di "`wc'"
 
-	/* <=========== HFC 1. Check that all interviews were completed ===========> */
-
-	import excel using "`using'" , sheet("1. incomplete") firstrow case(preserve) clear
-	unab allvars: _all
-	di "`allvars'"
-
-	drop if mi(variable)
-	local kk_outlier = _N
-
- 	//Turn the variables into locals
-	forval x=1/`=_N' {
-		foreach var of local allvars {
-			if `x'==1 local `var' ""
-			local `var' `"${`var'} `"`=`var'[`x']'"'"'
+    foreach sheet in `sheets' {
+		nois di `"`sheet'"'
+    	// read the data from the input file
+    	cap import excel using "`using'", sheet(`"`sheet'"') firstrow clear
+		
+		// return error if unable to read sheet
+		if _rc {
+			di as err "Input sheet `sheet' not found"
+			error 198
 		}
-	}
-
-	/* <======== HFC 2. Check that there are no duplicate observations ========> */
-
-	import excel using "`using'" , sheet("2. duplicates") firstrow case(preserve) clear
-	unab allvars: _all
-
-	/* <============== HFC 3. Check that all surveys have consent =============> */
-
-	import excel using "`using'" , sheet("3. consent") firstrow case(preserve) clear
-	unab allvars: _all
-
-	/* <===== HFC 4. Check that critical variables have no missing values =====> */
-
-	import excel using "`using'" , sheet("4. no miss") firstrow case(preserve) clear
-	unab allvars: _all
-
-	drop if mi(variable)
-	local kk_outlier = _N
-
- 	//Turn the variables into locals
-	forval x=1/`=_N' {
-		foreach var of local allvars {
-			if `x'==1 local `var' ""
-			local `var' `"${`var'} `"`=`var'[`x']'"'"'
-		}
-	}
-
-	/* <======== HFC 5. Check that follow up record ids match original ========> */
-
-	import excel using "`using'" , sheet("5. follow up") firstrow case(preserve) clear
-	unab allvars: _all
-
-	/* <====== HFC 6. Check that no variable has only one distinct value ======> */
-
-	import excel using "`using'" , sheet("6. distinct") firstrow case(preserve) clear
-	unab allvars: _all
-
-
-	/* <======== HFC 7. Check that no variable has all missing values =========> */
-
-	import excel using "`using'" , sheet("7. all miss") firstrow case(preserve) clear
-	unab allvars: _all
-
-	drop if mi(variable)
-	local kk_outlier = _N
-
- 	//Turn the variables into locals
-	forval x=1/`=_N' {
-		foreach var of local allvars {
-			if `x'==1 local `var' ""
-			local `var' `"${`var'} `"`=`var'[`x']'"'"'
-		}
-	}
-
-	/* <============= HFC 8. Check for outliers/soft constraints ==============> */
-
-	import excel using "`using'" , sheet("8. constraints") firstrow case(preserve) clear
-	unab allvars: _all
-	di "`allvars'"
-
-	drop if mi(variable)
-	local kk_outlier = _N
-
- 	//Turn the variables into locals
-	forval x=1/`=_N' {
-		foreach var of local allvars {
-			if `x'==1 local `var' ""
-			local `var' `"${`var'} `"`=`var'[`x']'"'"'
-		}
-	}
-
-	/* <================== HFC 9. Check specify other values ==================> */
-
-	import excel using "`using'" , sheet("9. other") firstrow case(preserve) clear
-	unab allvars: _all
-
-	/* <========== HFC 10. Check that dates fall within survey range ==========> */
-
-	import excel using "`using'" , sheet("10. date") firstrow case(preserve) clear
-	unab allvars: _all
-	di "`allvars'"
-
-	drop if mi(variable)
-	local kk_outlier = _N
-
- 	//Turn the variables into locals
-	forval x=1/`=_N' {
-		foreach var of local allvars {
-			if `x'==1 local `var' ""
-			local `var' `"${`var'} `"`=`var'[`x']'"'"'
-		}
-	}
-
-	/* <============= HFC 11. Check for outliers/soft constraints =============> */
-
-	import excel using "`using'" , sheet("11. outlier") firstrow case(preserve) clear
-	unab allvars: _all
-
-	/* <============= HFC 12. Check survey and section durations ==============> */
-
-	import excel using "`using'" , sheet("12. duration") firstrow case(preserve) clear
-	unab allvars: _all
+		
+    	// collect the headers
+    	unab allvars: _all
+				
+    	// drop missing rows
+		local idvar : word 1 of `allvars'
+    	drop if mi(`idvar')
+		
+    	// get current sheet number and row numbers
+    	local n : list posof `"`sheet'"' in sheets		
+		local rows = _N
+		*nois di "position is `n' and there are `rows' rows"
+    	foreach var of local allvars {
+			*nois di "Variable is `var'"
+			mata: st_global("`var'`n'", "")
+    		forval i=1/`rows' {
+    			mata: st_global("`var'`n'", `"${`var'`n'} `=`var'[`i']'"')
+    		}
+			*nois di "${`var'`n'}"
+    	}
+		
+    }
+	restore
 
 	}
 
