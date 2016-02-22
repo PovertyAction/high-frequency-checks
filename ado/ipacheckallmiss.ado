@@ -15,15 +15,19 @@ program ipacheckallmiss, rclass
 	di "HFC 7 => Checking that no variables have only missing values..."
 	qui {
 
-	syntax,  saving(string) [modify replace]
+	syntax,  id(varlist) enumerator(varlist) saving(string) [sheetmodify sheetreplace]
 	
 	version 13.1
+	
+	local sheetmodify = cond("`sheetmodify'" == "", "", "modify")
+	local sheetreplace = cond("`sheetreplace'" == "", "", "replace")
+
 
 	/* Check that no variables have only missing values, where missing indicates
 	   a skip. This could mean that the routing of the CAI survey program was
 	   incorrectly programmed. */
 
-	putexcel set "`saving'", sheet("all missing") `modify' `replace'
+	putexcel set "`saving'", sheet("7. all missing") `sheetmodify' `sheetreplace'
 	putexcel A1=("Variable") B1=("Message")
 	local i = 2
 	quietly ds, has(type numeric)

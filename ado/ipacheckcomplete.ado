@@ -15,7 +15,7 @@ program ipacheckcomplete, rclass
 	di "HFC 1 => Checking that all interviews are complete..."
 	qui {
 
-	syntax varlist(max=1),  saving(string) ivalue(integer) id(name) enumerator(name) [sheetmodify sheetreplace]
+	syntax varlist(max=1),  saving(string) ivalue(integer) id(varlist) enumerator(varlist) [sheetmodify sheetreplace]
 	
 	version 13.1
 	 

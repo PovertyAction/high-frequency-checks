@@ -14,8 +14,8 @@ program ipacheckdates, rclass
 	di ""
 	di "HFC 10 => Checking that certain date variables fall within survey range..."
 	qui {
-	syntax varlist(min=2 max=2), SURVEYstart(integer) [ SAVing(string) Id(name) ENUMerator(name) ENUMArea(name) Days(integer 4) MODify Replace ]
-	
+	syntax varlist(min=2 max=2), SURVEYstart(integer) SAVing(string) Id(varlist) ENUMerator(varlist) [ ENUMArea(varlist) Days(integer 4) sheetmodify sheetreplace ]
+
 	version 13.1
 
 	/* ================
@@ -25,10 +25,6 @@ program ipacheckdates, rclass
 	// set start and end date variables
 	gettoken startdate rest : varlist
 	gettoken enddate : rest
-	
-	// set export options
-	local sheetmodify = cond("`modify'" == "", "", "sheetmodify")
-	local sheetreplace = cond("`replace" == "", "", "sheetreplace")
 
 	// set tempfile
 	tempfile tmp nomiss
@@ -40,7 +36,7 @@ program ipacheckdates, rclass
 	if "`id'" != "" {
 		sort `id'
 	}
-	
+
 	/* =====================
 	    PERFORM DATE CHECKS
 	   ===================== */	
@@ -53,7 +49,7 @@ program ipacheckdates, rclass
 		keep if missing(`startdate') | missing(`enddate')
 		keep `id' `enumerator' `enumarea' `startdate' `enddate' message 
 		order `id' `enumerator' `enumarea' `startdate' `enddate' message 
-		local missing = _N
+		local missing = cond(_N > 1, _N, 0)
 		save `tmp'
 		restore
 	}
@@ -72,7 +68,7 @@ program ipacheckdates, rclass
 		keep if `startdate' != `enddate'
 		keep `id' `enumerator' `enumarea' `startdate' `enddate' message 
 		order `id' `enumerator' `enumarea' `startdate' `enddate' message 
-		local diff_end = _N
+		local diff_end  = cond(_N > 1, _N, 0)
 		cap confirm file `tmp'
 		if _rc == 0 {
 			append using `tmp'
@@ -91,7 +87,7 @@ program ipacheckdates, rclass
 		keep if `startdate' < `surveystart'
 		keep `id' `enumerator' `enumarea' `startdate' `enddate' message 
 		order `id' `enumerator' `enumarea' `startdate' `enddate' message 
-		local diff_start = _N
+		local diff_start = cond(_N > 1, _N, 0)
 		cap confirm file `tmp'
 		if _rc == 0 {
 			append using `tmp'
@@ -99,7 +95,7 @@ program ipacheckdates, rclass
 		save `tmp', replace
 		restore
 	}
-
+	
 	// Check that interview date is not after the system date.
 	local today = date(c(current_date), "DMY")
 	local today_f : di %tdnn/dd/YY `today'
@@ -111,7 +107,7 @@ program ipacheckdates, rclass
 		keep if `startdate' > `today'
 		keep `id' `enumerator' `enumarea' `startdate' `enddate' message
 		order `id' `enumerator' `enumarea' `startdate' `enddate' message 
-		local diff_today = _N
+		local diff_today  = cond(_N > 1, _N, 0)
 		cap confirm file `tmp'
 		if _rc == 0 {
 			append using `tmp'
@@ -133,7 +129,7 @@ program ipacheckdates, rclass
 			keep if `startdate' > modedate + `days'
 			keep `id' `enumerator' `enumarea' `startdate' `enddate' message
 			order `id' `enumerator' `enumarea' `startdate' `enddate' message 
-			local diff_enumarea = _N
+			local diff_enumarea  = cond(_N > 1, _N, 0)
 			cap confirm file `tmp'
 			if _rc == 0 {
 				append using `tmp'
@@ -146,14 +142,15 @@ program ipacheckdates, rclass
 	/* =======================
 	    RETURN, SAVE & REPORT
 	   ======================= */	
-
+	/*nois di "sucks"
+	nois di "`missing'"
 	// return list
-	return scalar missing       = cond("`missing'" == "", 0, `missing')
-	return scalar diff_end      = cond("`diff_end'" == "", 0, `diff_end')
-	return scalar diff_start    = cond("`diff_start'" == "", 0, `diff_start')
-	return scalar diff_today    = cond("`diff_today'" == "", 0, `diff_today')
-	return scalar diff_enumarea = cond("`diff_enumarea'" == "", 0, `diff_enumarea')
-
+	return scalar missing = `missing'
+	return scalar diff_end = `diff_end'
+	return scalar diff_start = `diff_start'
+	return scalar diff_today = `diff_today'
+	return scalar diff_enumarea = `diff_enumarea'*/
+	
 	// save errors to excel file
 	if "`saving'" != "" {
 		preserve

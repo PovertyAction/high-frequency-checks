@@ -15,7 +15,7 @@ program ipacheckdups, rclass
 	di ""
 	qui {
 
-	syntax varlist(max=1), saving(string) enumerator(string) [uniquevars(varlist) sheetmodify sheetreplace]
+	syntax varlist, saving(string) enumerator(varlist) [uniquevars(varlist) sheetmodify sheetreplace]
 	
 	version 13.1
 	

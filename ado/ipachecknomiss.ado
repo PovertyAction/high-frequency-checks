@@ -47,6 +47,7 @@ program ipachecknomiss, rclass
 				local nmiss = `nmiss' + 1
 				local npvar = `npvar' + 1
 				file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) (`value') _char(44) ("`message'") _n
+			}
 		}
 		noisily di "  Variable `var' has `npvar' missing values"
 	}

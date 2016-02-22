@@ -15,7 +15,7 @@ program ipacheckconsent, rclass
 	di "HFC 3 => Checking that all interviews have consent..."
 	qui {
 
-	syntax varlist(max=1),  saving(string) consetvalue(integer) id(name) enumerator(name) [sheetmodify sheetreplace]
+	syntax varlist(max=1),  saving(string) consentvalue(integer) id(name) enumerator(name) [sheetmodify sheetreplace]
 	
 	version 13.1
 	 

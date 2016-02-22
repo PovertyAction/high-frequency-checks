@@ -13,9 +13,14 @@ capture program drop ipacheckdistinct
 program ipacheckdistinct, rclass
 	qui {
 
-	syntax ,  saving(string) [enumerator(string) modify replace]
+	syntax, assert(string) condition(string) saving(string) id(name) enumerator(name) [sheetmodify sheetreplace]
 	
 	version 13.1
-	
+
+	cap assert "`assert' if `condition'"
+	if _rc {
+		list `id' `enumerator' if "`assert' & `condition'"
+	}
+
 	}
 end
