@@ -34,19 +34,22 @@ program ipacheckspecify, rclass
 
 	// loop through other specify variables in varlist and find nonmissing values
 	foreach var in `varlist' {
-		g nonmissing = `var' != ""
-		gsort -nonmissing
-		count if nonmissing
-		local n = `r(N)'
-		forval i = 1/`n' {
-			local value = `var'[`i']
-			local varl : variable label `var'
-			local message "Other value specified. Check for recodes."
-			file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+		cap confirm string variable `var'
+		if !_rc {
+			g nonmissing = `var' != ""
+			gsort -nonmissing
+			count if nonmissing
+			local n = `r(N)'
+			forval i = 1/`n' {
+				local value = `var'[`i']
+				local varl : variable label `var'
+				local message "Other value specified. Check for recodes."
+				file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+			}
+			drop nonmissing
+			noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
+			local nother = `nother' + `n'
 		}
-		drop nonmissing
-		noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
-		local nother = `nother' + `n'
 	}
 	file close myfile
 

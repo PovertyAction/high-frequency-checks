@@ -14,7 +14,7 @@ program ipacheckdates, rclass
 	di ""
 	di "HFC 10 => Checking that certain date variables fall within survey range..."
 	qui {
-	syntax varlist(min=2 max=2), SURVEYstart(integer) SAVing(string) Id(varlist) ENUMerator(varlist) [ ENUMArea(varlist) Days(integer 4) sheetmodify sheetreplace ]
+	syntax varlist(min=2 max=2), SURVEYstart(integer) SAVing(string) Id(varname) ENUMerator(varname) [ ENUMArea(varname) Days(integer 4) sheetmodify sheetreplace ]
 
 	version 13.1
 
@@ -40,7 +40,7 @@ program ipacheckdates, rclass
 	/* =====================
 	    PERFORM DATE CHECKS
 	   ===================== */	
-	   
+
 	// Check that no dates are missing
 	cap assert !(missing(`startdate') | missing(`enddate'))
 	if _rc {
@@ -117,7 +117,7 @@ program ipacheckdates, rclass
 	}
 
 	// Last check only applies if an enumeration area is specified
-	if "`enumarea" != "" {
+	if "`enumarea'" != "" {
 		preserve
 		use `nomiss', clear
 		bysort `enumarea': egen modedate = mode(`startdate')
