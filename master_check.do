@@ -57,68 +57,68 @@ ipacheckimport using "hfc_inputs.xlsx"
    =============================================================== */
 
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
-/*ipacheckcomplete ${variable1}, ivalue(${incomplete_value1}) ///
-                               id(`id') ///
-                               enumerator(`enum') ///
-                               saving(`outfile') ///
-                               sheetreplace*/
+ipacheckcomplete ${variable1}, ivalue(${incomplete_value1}) ///
+    id(`id') ///
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetreplace
                                
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
 ipacheckdups ${variable2}, enumerator(`enum') ///
-                           saving(`outfile') ///
-                           sheetreplace
+    saving(`outfile') ///
+    sheetreplace
 
 /* <============== HFC 3. Check that all surveys have consent =============> */
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
-                              id(`id') ///
-                              enumerator(`enum') ///
-                              saving(`outfile') ///
-                              sheetreplace
+    id(`id') ///
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetreplace
 
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 ipachecknomiss ${variable4}, id(`id') /// 
-                             enumerator(`enum') ///
-                             saving(`outfile') ///
-                             sheetreplace
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetreplace
 
 /* <======== HFC 5. Check that follow up record ids match original ========> */
 /*ipacheckfollowup using "master_tracking_list.dta", id(`id') ///
-                                                   enumerator(`enum') ///
-                                                   saving(`outfile') ///
-                                                   sheetreplace*/
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetreplace*/
 
 /* <====== HFC 6. Check that no variable has only one distinct value ======> */
-*ipacheckdistinct var, saving(`outfile') enumerator(`enum')
+*ipacheckskip var, saving(`outfile') enumerator(`enum')
 
 /* <======== HFC 7. Check that no variable has all missing values =========> */
 ipacheckallmiss, id(`id') ///
-                 enumerator(`enum') ///
-                 saving(`outfile') ///
-                 sheetmodify
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetmodify
 
 /* <=============== HFC 8. Check for hard/soft constraints ================> */
 ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
-                                  smax(${soft_max8}) ///
-                                  id(`id') ///
-                                  enumerator(`enum') ///
-                                  saving(`outfile') ///
-                                  sheetreplace
+    smax(${soft_max8}) ///
+    id(`id') ///
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetreplace
 
 /* <================== HFC 9. Check specify other values ==================> */
 ipacheckspecify ${specify_variable9}, id(`id') ///
-                                      enumerator(`enum') ///
-                                      saving(`outfile') ///
-                                      sheetreplace
+    enumerator(`enum') ///
+    saving(`outfile') ///
+    sheetreplace
 
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
-                                           id(`id') ///
-                                           enumerator(`enum') ///
-										   enumarea(ward_clean) ///
-										   days(7) ///
-                                           saving(`outfile') ///
-                                           sheetreplace
+    id(`id') ///
+    enumerator(`enum') ///
+    enumarea(ward_clean) ///
+    days(7) ///
+    saving(`outfile') ///
+    sheetreplace
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
 *ipacheckoutliers var, saving(`outfile') enumerator(`enum')
@@ -130,6 +130,7 @@ ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
 /* ===============================================================
    =============== User Checks Programming Template ==============
    =============================================================== */
+
 
 
 /* ===============================================================
