@@ -5,7 +5,7 @@ A Stata template for high frequency checks of field data at Innovations for Pove
 
    1. ~~Check that all interviews were completed~~
    2. ~~Check that there are no duplicate observations~~
-   3. Check that all surveys have consent
+   3. ~~Check that all surveys have consent~~
    4. ~~Check that certain critical variables have no missing values~~
    5. ~~Check that follow up record ids match original~~
    6. Check skip patterns and constraints
