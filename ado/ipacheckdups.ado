@@ -35,6 +35,11 @@ program ipacheckdups, rclass
 	// tag duplicates of id variable 
 	duplicates tag `var', gen(`dup1')
 
+	// sort data set
+	if "`id'" != "" {
+		sort `id'
+	}
+	
 	// if there are any duplicates
 	cap assert `dup1' == 0 
 	if _rc {
@@ -70,10 +75,10 @@ program ipacheckdups, rclass
 				/* note -this still needs to be edited so that the excel output 
 				   makes sense for duplicates with multiple id variables." */
 				forval i = 1 / `=_N' {
-					local value = `var'[`i']
+					local value "`=`var'[`i']'"
 					local varl : variable label `var'
 					local message = "Duplicate observation for `var' `value'"
-					file write myfile (`var'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) (`value') _char(44) ("`message'") _n
+					file write myfile ("`=`var'[`i']'") _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
 				}
 				
 				// close the file
@@ -104,10 +109,10 @@ program ipacheckdups, rclass
 			
 			// record the duplicate observations
 			forval i = 1 / `=_N' {
-				local value = `var'[`i']
+				local value "`=`var'[`i']'"
 				local varl : variable label `var'
 				local message = "Duplicate observation for `var' `value'"
-				file write myfile (`var'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) (`value') _char(44) ("`message'") _n
+				file write myfile ("`=`var'[`i']'") _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
 			
 			}
 			
