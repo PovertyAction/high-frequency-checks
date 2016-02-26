@@ -19,36 +19,55 @@ program ipacheckallmiss, rclass
 	
 	version 13.1
 	
-	local sheetmodify = cond("`sheetmodify'" == "", "", "modify")
-	local sheetreplace = cond("`sheetreplace'" == "", "", "replace")
-
-
+	preserve
+	
 	/* Check that no variables have only missing values, where missing indicates
 	   a skip. This could mean that the routing of the CAI survey program was
 	   incorrectly programmed. */
+	
+	// create temporary file for recording specify other values
+	tempfile tmp
+	file open myfile using `tmp', text write replace
+	file write myfile "id,enumerator,variable,label,value,message" _n 
 
-	putexcel set "`saving'", sheet("7. all missing") `sheetmodify' `sheetreplace'
-	putexcel A1=("Variable") B1=("Message")
-	local i = 2
-	quietly ds, has(type numeric)
+	local i = 0
+	
+	// check numeric variables
+	ds, has(type numeric)
 	foreach var in `r(varlist)' {
-		quietly count if `var' == .
+		count if `var' == .
 		if r(N) == _N {
-			display "`var' has only missing values."
-			putexcel A`i'=("`var'") B`i'=("Variable `var' has only missing values. Consider checking survey programming and skip patterns.")
+			nois display "  Variable `var' has only missing values."
+			local varl : variable label `var'
+			local message "  Variable `var' has only missing values. Consider checking survey programming and skip patterns."
+			file write myfile ("") _char(44) ("") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("") _char(44) ("`message'") _n
 			local i = `i' + 1
 		}
 	}
-	local i = 2
-	quietly ds, has(type string)
+
+    // check string variables
+	ds, has(type string)
 	foreach var in `r(varlist)' {
-		quietly count if `var' == ""
+		count if `var' == ""
 		if r(N) == _N {
-			display "`var' has only missing values."
-			putexcel A`i'=("`var'") B`i'=("`var' has only missing values. Consider checking survey programming and skip patterns.")
+			nois display "  Variable `var' has only missing values."
+			local varl : variable label `var'
+			local message "  Variable `var' has only missing values. Consider checking survey programming and skip patterns."
+			file write myfile ("") _char(44) ("") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("") _char(44) ("`message'") _n
 			local i = `i' + 1
 		}
 	}
-	putexcel clear
+	
+	file close myfile
+	
+	import delimited using `tmp', clear
+	g notes = ""
+	g drop = ""
+	g newvalue = ""	
+	export excel using "`saving'", sheet("7. all missing") `sheetreplace' `sheetmodify' firstrow(var)
+	
 	}
+	di ""
+	di "  Found `i' variables with all missing values."
+	return scalar nallmiss = `i'
 end
