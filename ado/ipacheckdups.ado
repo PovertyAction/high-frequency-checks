@@ -36,8 +36,8 @@ program ipacheckdups, rclass
 	duplicates tag `var', gen(`dup1')
 
 	// sort data set
-	if "`id'" != "" {
-		sort `id'
+	if "`var'" != "" {
+		sort `var'
 	}
 	
 	// if there are any duplicates
