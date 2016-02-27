@@ -20,6 +20,8 @@ program ipacheckdups, rclass
 	version 13.1
 	
 	local var `varlist'
+	local ndups1 = 0
+	local ndups2 = 0
 	
 	// define temporary variables 
 	tempfile tmp orig
@@ -78,7 +80,7 @@ program ipacheckdups, rclass
 					local value "`=`var'[`i']'"
 					local varl : variable label `var'
 					local message = "Duplicate observation for `var' `value'"
-					file write myfile ("`=`var'[`i']'") _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+					file write myfile ("`=`var'[`i']'") _char(44) ("`=`enumerator'[`i']'") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
 				}
 				
 				// close the file
@@ -112,7 +114,7 @@ program ipacheckdups, rclass
 				local value "`=`var'[`i']'"
 				local varl : variable label `var'
 				local message = "Duplicate observation for `var' `value'"
-				file write myfile ("`=`var'[`i']'") _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+				file write myfile ("`=`var'[`i']'") _char(44) ("`=`enumerator'[`i']'") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
 			
 			}
 			
@@ -138,5 +140,8 @@ program ipacheckdups, rclass
 	// restore original data set
 	use `orig', clear
 	}
+	
+	return scalar ndups1 = `ndups1'
+	return scalar ndups2 = `ndups2'
 
 end

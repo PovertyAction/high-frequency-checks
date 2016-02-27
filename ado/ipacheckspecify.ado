@@ -65,6 +65,6 @@ program ipacheckspecify, rclass
 
 	di ""
 	di "  Found {cmd:`nother'} total specified values."
-	return scalar nother = `nother'
+	return scalar nspecify = `nother'
 
 end

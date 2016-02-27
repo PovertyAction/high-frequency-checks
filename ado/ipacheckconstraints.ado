@@ -25,6 +25,8 @@ program ipacheckconstraints, rclass
 
 	local i = 1
 	local nviol = 0 
+	local nhard = 0
+	local nsoft = 0
 	ds `varlist'
 	foreach var of varlist `r(varlist)' {
 		loc minsoft: word `i' of `smin'
@@ -51,6 +53,7 @@ program ipacheckconstraints, rclass
 				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
 				local nviol = `nviol' + 1
 				local npvar = `npvar' + 1
+				local nhard = `nhard' + 1
 
 			}
 			else if `varval' < `minsoft' & `minsoft' < . {
@@ -58,6 +61,7 @@ program ipacheckconstraints, rclass
 				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
 				local nviol = `nviol' + 1
 				local npvar = `npvar' + 1
+				local nsoft = `nsoft' + 1
 			}
 			
 			*Check Hard and Soft Maximums
@@ -66,16 +70,20 @@ program ipacheckconstraints, rclass
 				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
 				local nviol = `nviol' + 1
 				local npvar = `npvar' + 1
+				local nhard = `nhard' + 1
 			}
 			else if `varval' > `maxsoft' & `maxsoft' < . & `varval' < . {
 				loc message `"Value is high. Soft Max. = `maxsoft'"'
 				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
 				local nviol = `nviol' + 1
 				local npvar = `npvar' + 1
+				local nsoft = `nsoft' + 1
 			}
 
 		}
-		noisily di "  Variable `var' has `npvar' constraint violations."
+		if `npvar' > 0 {
+			noisily di "  Variable `var' has `npvar' constraint violations."
+		}
 		local i = `i' + 1
 	}
 	file close myfile	
@@ -90,6 +98,8 @@ program ipacheckconstraints, rclass
 	restore
 	}
 	di ""
-	di "  Found `nviol' total constraint violations."
+	di "  Found `nviol' total constraint violations: `nhard' hard and `nsoft' soft."
 	return scalar nviol = `nviol'
+	return scalar nhard = `nhard'
+	return scalar nsoft = `nsoft'
 end

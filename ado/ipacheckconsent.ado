@@ -38,6 +38,6 @@ program ipacheckconsent, rclass
 		export excel using `saving' , sheet("3. consent") sheetreplace firstrow(variables) nolabel
 	restore
 	}
-	di "  Found `numnoconsent' total incomplete interviews."
-	return scalar nincomplete = `numnoconsent'
+	di "  Found `numnoconsent' interviews with no consent."
+	return scalar noconsent = `numnoconsent'
 end

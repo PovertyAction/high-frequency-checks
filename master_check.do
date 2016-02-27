@@ -9,7 +9,7 @@
 
 // this line adds standard boilerplate headings
 ipadoheader, version(13.0)
-use "data/maximum_diva_cleaned.dta", clear
+use "data/Mongolia SHPS Tracking_with TA_PII removed_Raw.dta", clear
  
 /*
  overview:
@@ -30,20 +30,44 @@ use "data/maximum_diva_cleaned.dta", clear
 
 // dtanotes
 
-// local definitions
-local infile  "hfc_inputs.xlsx"
+// local definitions (EDIT THESE)
+local infile  "matt_input.xlsx"
 local outfile "hfc_outputs.xlsx"
 local repfile "hfc_replacements.xlsx"
-local id "qnum"
-local enum "surnum"
-local startdate "startdate"
+local master "master_tracking_list.dta"
+local id "surveyid"
+local enum "enumeratorid"
 
+
+/* =============================================================== 
+   ================== Pre-process Import Data  =================== 
+   =============================================================== */
+qui {
+	// generate start and end dates from SCTO values
+	g startdate = dofc(starttime)
+	g enddate = dofc(endtime)
+	format %td startdate enddate
+
+	// recode don't know/refusal values
+	ds, has(type numeric)
+	local numeric `r(varlist)'
+	recode `numeric' (8888 = .d)
+	recode `numeric' (9999 = .r)
+	recode `numeric' (7777 = .n)
+	
+	// get the current date
+	local today = date(c(current_date), "DMY")
+	local today_f : di %tdnn/dd/YY `today'
+	
+	// get total number of interviews
+	local n = _N
+}
 
 /* =============================================================== 
    ================== Import locals from Excel  ================== 
    =============================================================== */
 
-ipacheckimport using "hfc_inputs.xlsx"
+ipacheckimport using "`infile'"
 
 /* =============================================================== 
    ================= Replacements and Corrections ================ 
@@ -56,19 +80,29 @@ ipacheckimport using "hfc_inputs.xlsx"
    ==================== High Frequency Checks ==================== 
    =============================================================== */
 
+putexcel A1=("HFC Summary Report") ///
+         A2=("Report Date") B2=("`today_f'") ///
+		 A3=("Total Interviews") B3=("`n'") ///
+		 using `outfile', sheet("0. summary") replace
+
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
-ipacheckcomplete ${variable1}, ivalue(${incomplete_value1}) ///
+/*ipacheckcomplete ${variable1}, ivalue(${incomplete_value1}) ///
     id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
-    sheetreplace
-                               
+    sheetreplace*/
+	
+*putexcel A4=("HFC 1") A5=("number of incompletes") B5=("`r(nincomplete)'") using `outfile', ///
+*    sheet("0. summary") modify
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
 ipacheckdups ${variable2}, enumerator(`enum') ///
     saving(`outfile') ///
     sheetreplace
 
+putexcel A6=("HFC 2") A7=("number of duplicates") B7=("`r(ndups1)'") using `outfile', ///
+    sheet("0. summary") modify
+	
 /* <============== HFC 3. Check that all surveys have consent =============> */
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     id(`id') ///
@@ -76,14 +110,24 @@ ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     saving(`outfile') ///
     sheetreplace
 
+putexcel A8=("HFC 3") A9=("number without consent") B9 =("`r(noconsent)'") using `outfile', ///
+    sheet("0. summary") modify
+
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 ipachecknomiss ${variable4}, id(`id') /// 
     enumerator(`enum') ///
     saving(`outfile') ///
     sheetreplace
 
+putexcel A10=("HFC 4") ///
+         A11=("number of variables with a miss.") ///
+		 A12=("number of missing values") ///
+		 B11=("`r(missvar)'") ///
+		 B12=("`r(nmiss)'") ///
+		 using `outfile', sheet("0. summary") modify
+	
 /* <======== HFC 5. Check that follow up record ids match original ========> */
-/*ipacheckfollowup using "master_tracking_list.dta", id(`id') ///
+/*ipacheckfollowup using `master', id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
     sheetreplace*/
@@ -97,6 +141,9 @@ ipacheckallmiss, id(`id') ///
     saving(`outfile') ///
     sheetmodify
 
+putexcel A17=("HFC 7") A18=("number of all missing variables") B18 =("`r(nallmiss)'") using `outfile', ///
+    sheet("0. summary") modify
+
 /* <=============== HFC 8. Check for hard/soft constraints ================> */
 ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
     smax(${soft_max8}) ///
@@ -105,20 +152,39 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
     saving(`outfile') ///
     sheetreplace
 
+putexcel A19=("HFC 8") ///
+         A20=("number of soft constraint violations.") ///
+		 A21=("number of hard constraint violations.") ///
+		 B20=("`r(nsoft)'") ///
+		 B21=("`r(nhard)'") ///
+		 using `outfile', sheet("0. summary") modify
+
 /* <================== HFC 9. Check specify other values ==================> */
 ipacheckspecify ${specify_variable9}, id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
     sheetreplace
 
+putexcel A22=("HFC 9") A23=("number of times other specified") B23 =("`r(nspecify)'") using `outfile', ///
+    sheet("0. summary") modify
+	
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     id(`id') ///
     enumerator(`enum') ///
-    enumarea(ward_clean) ///
-    days(7) ///
     saving(`outfile') ///
     sheetreplace
+
+putexcel A24=("HFC 10") ///
+         A25=("number of missing start or end dates.") ///
+         A26=("number with unequal start/end dates.") ///
+		 A27=("number of dates before survey start.") ///
+		 A28=("number with start after current date.") ///
+		 B25=("`r(missing)'") ///
+		 B26=("`r(diff_end)'") ///
+		 B27=("`r(diff_start)'") ///
+		 B28=("`r(diff_today)'") ///
+		 using `outfile', sheet("0. summary") modify
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
 *ipacheckoutliers var, saving(`outfile') enumerator(`enum')
@@ -132,7 +198,11 @@ ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
    =============================================================== */
 
 
-
 /* ===============================================================
-   ================= High Frequency Check Report =================
+   ================= Create Enumerator Dashboard =================
+   =============================================================== */
+   
+   
+/* ===============================================================
+   ================== Create Research Dashboard ==================
    =============================================================== */

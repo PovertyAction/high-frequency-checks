@@ -33,6 +33,7 @@ program ipachecknomiss, rclass
 
 	sort `id'
 	local nmiss = 0
+	local missvar = 0
 
 	// For simplicity, we'll check numeric and string variables separately.
 
@@ -50,6 +51,9 @@ program ipachecknomiss, rclass
 			}
 		}
 		noisily di "  Variable `var' has `npvar' missing values"
+		if `npvar' > 0 { 
+			local missvar = `missvar' + 1 
+		}
 	}
 
 	// string variables
@@ -66,6 +70,9 @@ program ipachecknomiss, rclass
 			}
 		}
 		noisily di "  Variable `var' has `npvar' missing values"
+		if `npvar' > 0 { 
+			local missvar = `missvar' + 1 
+		}
 	}
 
 	file close myfile
@@ -79,6 +86,7 @@ program ipachecknomiss, rclass
 	restore
 	}
 	return scalar nmiss = `nmiss'
+	return scalar missvar = `missvar'
 	di ""
-	di "  Found `nmiss' total missing values."
+	di "  Found `nmiss' total missing values among `missvar' variables."
 end
