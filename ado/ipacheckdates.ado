@@ -29,8 +29,12 @@ program ipacheckdates, rclass
 	// set tempfile
 	tempfile tmp nomiss
 	
-	*tempname memhold
-	*postfile `memhold' `id' str32 `enumerator' `enumarea' `startdate' `enddate' message
+	// initialize locals
+	local missing = 0
+	local diff_end = 0
+	local diff_start = 0
+	local diff_today = 0
+	local diff_enumarea = 0
 	
 	// sort data set
 	if "`id'" != "" {
@@ -142,14 +146,13 @@ program ipacheckdates, rclass
 	/* =======================
 	    RETURN, SAVE & REPORT
 	   ======================= */	
-	/*nois di "sucks"
-	nois di "`missing'"
+
 	// return list
 	return scalar missing = `missing'
 	return scalar diff_end = `diff_end'
 	return scalar diff_start = `diff_start'
 	return scalar diff_today = `diff_today'
-	return scalar diff_enumarea = `diff_enumarea'*/
+	return scalar diff_enumarea = `diff_enumarea'
 	
 	// save errors to excel file
 	if "`saving'" != "" {
@@ -167,7 +170,7 @@ program ipacheckdates, rclass
 	local message2 = return(diff_end)
 	local message3 = return(diff_start)
 	local message4 = return(diff_today)
-	local message5 = return(diff_end)
+	local message5 = return(diff_enumarea)
 
 	// report QA stats
 	di "  Number of interviews with missing start or end dates: `message1'"
