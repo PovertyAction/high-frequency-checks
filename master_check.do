@@ -187,8 +187,15 @@ putexcel A24=("HFC 10") ///
 		 using `outfile', sheet("0. summary") modify
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
-*ipacheckoutliers var, saving(`outfile') enumerator(`enum')
+ipacheckoutliers ${variable11}, id(`id') ///
+                                enumerator(`enum') ///
+								iqrmulti(${iqr_multiplier11}) ///
+								saving(`outfile') ///
+								sheetreplace
 
+putexcel A29=("HFC 11") A30=("number of potential outliers") B30 =("`r(noutliers)'") using `outfile', ///
+    sheet("0. summary") modify
+	
 /* <============= HFC 12. Check survey and section durations ==============> */
 *ipacheckduration var, saving(`outfile') enumerator(`enum')
 
