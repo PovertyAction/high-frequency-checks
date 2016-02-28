@@ -94,7 +94,7 @@ program ipacheckconstraints, rclass
 	g notes = ""
 	g drop = ""
 	g newvalue = ""	
-	export excel using `saving' , sheet("8. constraints") sheetreplace firstrow(variables) nolabel
+	export excel using `saving' , sheet("8. constraints") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
 	restore
 	}
 	di ""

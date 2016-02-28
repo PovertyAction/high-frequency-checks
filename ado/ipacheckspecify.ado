@@ -44,7 +44,7 @@ program ipacheckspecify, rclass
 				local value = `var'[`i']
 				local varl : variable label `var'
 				local message "Other value specified. Check for recodes."
-				file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+				file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) ("`value'") _char(44) ("`message'") _n
 			}
 			drop nonmissing
 			noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."

@@ -80,7 +80,7 @@ program ipacheckdups, rclass
 					local value "`=`var'[`i']'"
 					local varl : variable label `var'
 					local message = "Duplicate observation for `var' `value'"
-					file write myfile ("`=`var'[`i']'") _char(44) ("`=`enumerator'[`i']'") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+					file write myfile ("`=`var'[`i']'") _char(44) ("`=`enumerator'[`i']'") _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) ("`value'") _char(44) ("`message'") _n
 				}
 				
 				// close the file
@@ -114,7 +114,7 @@ program ipacheckdups, rclass
 				local value "`=`var'[`i']'"
 				local varl : variable label `var'
 				local message = "Duplicate observation for `var' `value'"
-				file write myfile ("`=`var'[`i']'") _char(44) ("`=`enumerator'[`i']'") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("`value'") _char(44) ("`message'") _n
+				file write myfile ("`=`var'[`i']'") _char(44) ("`=`enumerator'[`i']'") _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) ("`value'") _char(44) ("`message'") _n
 			
 			}
 			

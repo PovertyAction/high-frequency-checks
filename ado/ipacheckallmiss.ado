@@ -40,7 +40,7 @@ program ipacheckallmiss, rclass
 			nois display "  Variable `var' has only missing values."
 			local varl : variable label `var'
 			local message "  Variable `var' has only missing values. Consider checking survey programming and skip patterns."
-			file write myfile ("") _char(44) ("") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("") _char(44) ("`message'") _n
+			file write myfile ("") _char(44) ("") _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) ("") _char(44) ("`message'") _n
 			local i = `i' + 1
 		}
 	}
@@ -53,7 +53,7 @@ program ipacheckallmiss, rclass
 			nois display "  Variable `var' has only missing values."
 			local varl : variable label `var'
 			local message "  Variable `var' has only missing values. Consider checking survey programming and skip patterns."
-			file write myfile ("") _char(44) ("") _char(44) ("`var'") _char(44) ("`varl'") _char(44) ("") _char(44) ("`message'") _n
+			file write myfile ("") _char(44) ("") _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) ("") _char(44) ("`message'") _n
 			local i = `i' + 1
 		}
 	}
