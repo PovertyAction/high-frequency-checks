@@ -41,7 +41,7 @@ program ipacheckcomplete, rclass
 				local message "Interview is marked as incomplete."
 				local value = `varlist'[`i']
 				local varl : variable label `varlist'
-				file write myfile (`varlist'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`varlist'") _char(44) ("`varl'") _char(44) (`value') _char(44) ("`message'") _n
+				file write myfile (`varlist'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`varlist'") _char(44) (`""`varl'""') _char(44) (`value') _char(44) ("`message'") _n
 			}
 		    file close myfile
 			import delimited using `tmp', clear
