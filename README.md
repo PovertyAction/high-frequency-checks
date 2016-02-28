@@ -13,7 +13,7 @@ A Stata template for high frequency checks of field data at Innovations for Pove
    8. ~~Check hard/soft constraints~~
    9. ~~Check specify other vars for items that can be included~~
    10. ~~Check that date values fall within survey range~~
-   11. Check that there are no outliers for unconstrained vars
+   11. ~~Check that there are no outliers for unconstrained vars~~
    12. Check that survey and section durations fall within limits
 
 ## Enumerator Dashboards
