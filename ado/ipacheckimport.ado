@@ -18,7 +18,7 @@ program ipacheckimport, rclass
 	preserve
 	
 	#delimit ;
-	local sheets `""1. incomplete" "2. duplicates" "3. consent" "4. no miss" "5. follow up" "6. distinct" "7. all miss" "8. constraints" "9. specify" "10. dates" "11. outliers" "12. duration""' ;
+	local sheets `""1. incomplete" "2. duplicates" "3. consent" "4. no miss" "5. follow up" "6. distinct" "7. all miss" "8. constraints" "9. specify" "10. dates" "11. outliers" "12. duration" "enumdb""' ;
 	#delimit cr
 	
 	*nois di `"`sheets'"'
