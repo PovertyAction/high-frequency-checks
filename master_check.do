@@ -118,7 +118,7 @@ ipachecknomiss ${variable4}, id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
     sheetreplace
-
+		
 putexcel A10=("HFC 4") ///
          A11=("number of variables with a miss.") ///
 		 A12=("number of missing values") ///
@@ -208,8 +208,125 @@ putexcel A29=("HFC 11") A30=("number of potential outliers") B30 =("`r(noutliers
 /* ===============================================================
    ================= Create Enumerator Dashboard =================
    =============================================================== */
-   
-   
+keep if q1_4_result == 1
+*drop ta_*
+#delimit ;
+ipacheckfo enumeratorid using "hfc_enumerators.xlsx", 
+   dkrfvars(q3_1
+            q3_1_1
+q3_2_1
+q3_6_phone
+q3_8
+q3_8_1_1
+q3_8_2_1
+q3_8_3
+q3_10
+q3_10_1_1
+q3_10_2_1
+q3_11
+q3_13
+q3_17
+q3_19_1
+q3_20
+q3_24
+q3_26_1
+q4_2_2
+q4_2_2_1
+q4_2_2_2
+q4_2_2_3
+q4_2_2_4
+q4_2_4
+q4_2_5
+q4_2_5_1_1
+q4_2_5_1_2
+q4_2_7
+q4_2_8
+q4_2_10
+q4_2_11
+q4_2_12_1
+q4_2_14
+q4_3
+q4_3_1
+q4_4_1
+q4_4_2
+q4_4_5
+q4_4_5_1
+q4_4_5_2
+q4_4_5_3
+q4_4_5_4
+q4_4_7
+q4_4_8
+q4_4_11
+q4_4_13
+q4_4_14
+q4_4_17
+q4_5
+q4_6_1
+q4_6_4
+q4_6_5
+q4_6_7
+q4_6_8
+q4_6_9
+q4_6_10
+q4_6_11
+q4_6_12
+q4_8
+q4_10_1
+q4_10_2
+q4_10_3
+q4_10_4
+q5_1
+q5_3_1
+q6_1
+q6_3_1
+q6_3_3
+q6_3_4
+q6_3_5
+q6_4_4
+q6_4_5
+q6_5_5
+q6_6
+q6_6_1
+q6_6_2_1
+q7_2_1
+q7_3_1
+q7_3_1_1
+q8_1_1
+q8_3_1
+q8_5_1
+q8_5_2
+q8_5_3
+q8_6_1
+q8_7_2
+q9
+q9_3)
+   missvars(c1_1_consent 
+            c1_1_consent_sign
+			treatment) 
+   durvars(ta_*) 
+   exclude(SubmissionDate 
+           starttime 
+		   endtime 
+		   deviceid 
+		   subscriberid 
+		   simid 
+		   devicephonenum 
+		   comments 
+		   text_audit 
+		   metainstanceID 
+		   KEY 
+		   comfield1 
+		   comfield2 
+		   audio_audit 
+		   comfield3 
+		   comfield4 
+		   startdate 
+		   enddate 
+		   sdate
+		   ta_*)
+   subdate(sdate);
+#delimit cr
+
 /* ===============================================================
    ================== Create Research Dashboard ==================
    =============================================================== */
