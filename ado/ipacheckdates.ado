@@ -21,7 +21,7 @@ program ipacheckdates, rclass
 	/* ================
 	    VALIDATE INPUT 
 	   ================ */
-
+	   
 	// set start and end date variables
 	gettoken startdate rest : varlist
 	gettoken enddate : rest
