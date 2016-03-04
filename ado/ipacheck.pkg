@@ -1,15 +1,17 @@
 v 3
 d IPA stata high frequency checks
-f ipadoheader.ado [program to stadardize do-file headers]
-f ipacheckimport.ado [program to import HFC arguments from input file]
-f ipacheckcomplete.ado [HFC check #1]
-f ipacheckdups.ado [HFC check #2]
-f ipacheckconsent.ado [HFC check #3]  
-f ipachecknomiss.ado [HFC check #4]
-f ipacheckfollowup.ado [HFC check #5]
-f ipacheckdistinct.ado [HFC check #6]
-f ipacheckallmiss.ado [HFC check #7]
-f ipacheckconstraints.ado [HFC check #8]
-f ipacheckspecify.ado [HFC check #9]
-f ipacheckdates.ado [HFC check #10] 
-f ipacheckoutliers.ado [HFC check #11]
+f ipadoheader.ado
+f ipacheckimport.ado
+f ipacheckcomplete.ado
+f ipacheckdups.ado
+f ipacheckconsent.ado
+f ipachecknomiss.ado
+f ipacheckfollowup.ado
+f ipacheckskip.ado
+f ipacheckallmiss.ado
+f ipacheckconstraints.ado
+f ipacheckspecify.ado
+f ipacheckdates.ado
+f ipacheckoutliers.ado 
+f ipacheckenum.ado
+f ipacheckresearch.ado
