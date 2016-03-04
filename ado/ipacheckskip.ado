@@ -1,5 +1,5 @@
 /*----------------------------------------*
- |file:    ipacheckdistinct.ado            | 
+ |file:    ipacheckskip.ado               |    
  |project: high frequency checks          |
  |author:  christopher boyer              |
  |         matthew bombyk                 |
@@ -7,20 +7,15 @@
  |date:    2016-02-13                     |
  *----------------------------------------*/
 
- // this program checks that all interviews are complete
+ // this program checks skip patterns and logical constraints
 
-capture program drop ipacheckdistinct
-program ipacheckdistinct, rclass
+capture program drop ipacheckskip
+program ipacheckskip, rclass
 	qui {
 
 	syntax, assert(string) condition(string) saving(string) id(name) enumerator(name) [sheetmodify sheetreplace]
 	
 	version 13.1
-
-	cap assert "`assert' if `condition'"
-	if _rc {
-		list `id' `enumerator' if "`assert' & `condition'"
-	}
 
 	}
 end

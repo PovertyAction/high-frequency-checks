@@ -7,9 +7,11 @@ f ipacheckdups.ado
 f ipacheckconsent.ado
 f ipachecknomiss.ado
 f ipacheckfollowup.ado
-f ipacheckdistinct.ado
+f ipacheckskip.ado
 f ipacheckallmiss.ado
 f ipacheckconstraints.ado
 f ipacheckspecify.ado
 f ipacheckdates.ado
 f ipacheckoutliers.ado 
+f ipacheckenum.ado
+f ipacheckresearch.ado
