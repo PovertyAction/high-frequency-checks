@@ -34,18 +34,17 @@ program ipacheckskip, rclass
 		if "`condition'" == "" {
 			cap assert `cond1'
 			if _rc {
-				g fine = `cond1'
+				g _fine = `cond1'
 			}
 			else {
 				local i = `i' + 1
 				continue
 			}
 		} 
-		
 		else {
 			cap assert `cond1' if `cond2'
 			if _rc {
-				g fine = `cond1' & `cond2'
+				g _fine = `cond1' if `cond2'
 			}
 			else {
 				local i = `i' + 1
@@ -53,26 +52,28 @@ program ipacheckskip, rclass
 			}
 		}
 		
-		sort fine
-		count if fine == 0
+		sort _fine
+		count if _fine == 0
 		local viol = `r(N)'
-		forval i=1/`viol' {
+		forval j=1/`viol' {
 			local message `"Assertion `cond1' if `cond2' is invalid "'
-			local varl : variable label `varl'
-			local value = `var'[`i']
-			local idv = `id'[`i']
-			local enum = `enumerator'[`i']
+			local varl : variable label `var'
+			local varl = subinstr(`"`varl'"',",","-",.)
+			local value = `var'[`j']
+			local idv = `id'[`j']
+			local enum = `enumerator'[`j']
 			local outline `"`idv',`enum',`var',`varl',`value',`message'"'
 			if "`addvars'" != "" {
 				foreach addvar in `addvars' {
-					local addval = `addvar'[`i']
+					local addval = `addvar'[`j']
 					local outline `"`outline',`addval'"'
 				}
 			}
-			file write myfile `outline' _n
+			file write myfile "`outline'" _n
 		}
 		local i = `i' + 1
 		local nviol = `nviol' + `viol'
+		drop _fine
 	}
 
 	file close myfile
