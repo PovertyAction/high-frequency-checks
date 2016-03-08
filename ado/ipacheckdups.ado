@@ -12,13 +12,12 @@
 capture program drop ipacheckdups
 program ipacheckdups, rclass
 	di ""
-	di ""
 	qui {
 
-	syntax varlist, saving(string) enumerator(varlist) [uniquevars(varlist) sheetmodify sheetreplace]
+	syntax varlist, saving(string) enumerator(varname) [uniquevars(varlist) sheetmodify sheetreplace]
 	
 	version 13.1
-	
+	/* needs to work for a variable list */
 	local var `varlist'
 	local ndups1 = 0
 	local ndups2 = 0
