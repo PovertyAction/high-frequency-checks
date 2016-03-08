@@ -15,7 +15,7 @@ program ipacheckoutliers, rclass
 	di "HFC 11 => Checking that unconstrained variables have no outliers..."
 	qui {
 
-	syntax varlist, saving(string) id(varname) enumerator(varname) [ iqrmulti(real 1.5) sheetmodify sheetreplace ]
+	syntax varlist, saving(string) id(varname) enumerator(varname) iqrmulti(numlist missingokay) [ sheetmodify sheetreplace ]
 	
 	version 13.1
 
@@ -30,6 +30,7 @@ program ipacheckoutliers, rclass
 
 	// set locals
 	local noutliers = 0
+	local i = 1
  	
 	// set tempfile
 	tempfile tmp
@@ -39,14 +40,17 @@ program ipacheckoutliers, rclass
 	file write myfile "id,enumerator,variable,label,value,message" _n 
 
 	foreach var in `varlist' {
+		// get current value of iqr
+		local iqrval : word `i' of `iqrmulti'
+		
 		// calculate iqr stats
 		egen _iqr = iqr(`var')
 		egen _q1 = pctile(`var'), p(25)
 		egen _q3 = pctile(`var'), p(75)
 
 		// calculate min/max 
-		g _max = _q3 + `iqrmulti' * _iqr
-		g _min = _q1 - `iqrmulti' * _iqr
+		g _max = _q3 + `iqrval' * _iqr
+		g _min = _q1 - `iqrval' * _iqr
 		g _outlier = (`var' > _max | `var' < _min) & !mi(`var')
 
 		// sort and count outliers
@@ -55,13 +59,13 @@ program ipacheckoutliers, rclass
 
 		// loop through outliers and output them to file
 		local n = `r(N)'
-		forval i = 1/`n' {
-			local value = `var'[`i']
-			local min = _min[`i']
-			local max = _max[`i']
+		forval j = 1/`n' {
+			local value = `var'[`j']
+			local min = _min[`j']
+			local max = _max[`j']
 			local varl : variable label `var'
-			local message = "Potential outlier `value' in variable `var' (`iqrmulti' * IQR: `min' to `max')."
-			file write myfile (`id'[`i']) _char(44) (`enumerator'[`i']) _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) (`value') _char(44) ("`message'") _n
+			local message = "Potential outlier `value' in variable `var' (`iqrval' * IQR: `min' to `max')."
+			file write myfile ("`=`id'[`j']'") _char(44) ("`=`enumerator'[`j']'") _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) (`value') _char(44) ("`message'") _n
 		}
 
 		// update outlier count

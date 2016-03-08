@@ -44,7 +44,7 @@ program ipacheckenum
 	   nonmissing and missing responses; don't knows; refusals and
 	   durations by enumerator */
 	foreach var of varlist `loopvars' {
-		nois di "`var'"
+
 		cap confirm numeric variable `var' 
 		// numeric variables
 		if _rc == 0 {
@@ -120,7 +120,7 @@ program ipacheckenum
 	preserve 
 	
 	// caluculate subtotals by enumerator
-	collapse (sum) interviews row_nonmiss row_miss row_dk row_rf (mean) duration, by(`enum')
+	collapse (sum) interviews row_nonmiss row_miss row_dk row_rf (mean) duration, by(`enum') cw
 
 	// calculate rates
 	g missing = row_miss / (row_miss + row_nonmiss)
@@ -137,10 +137,10 @@ program ipacheckenum
 
 	// restrict to specified number of days
 	local today = date(c(current_date), "DMY")
-	keep if `subdate' < `today' - `days' 
+	keep if `subdate' > `today' - `days' 
 
-	// caluculate subtoatls by enumerator
-	collapse (sum) interviews row_nonmiss row_miss row_dk row_rf (mean) duration, by(`enum')
+	// caluculate subtotals by enumerator
+	collapse (sum) interviews row_nonmiss row_miss row_dk row_rf (mean) duration, by(`enum') cw
 
 	// calculate rates
 	g interviews_`days'days = interviews
@@ -166,7 +166,7 @@ program ipacheckenum
 	drop interviews row_* duration
 
 	preserve
-	
+
 	// set export locals
 	local i = 0
 	local sheet_names "summary missing dontknow refusal duration"
@@ -183,13 +183,15 @@ program ipacheckenum
 		cap confirm file `sheet'	
 		if !_rc {
 			use `sheet', clear
-			if "`name'" == "summary" {
-				// summary sheet conditions
-				export excel using `using', sheet("`name'") sheetmodify cell(A4) missing("0")
-			} 
-			else {
-				// sub sheet conditions
-				export excel using `using', sheet("`name'") firstrow(var) sheetmodify cell(A1) missing("0")
+			if _N > 0 {
+				if "`name'" == "summary" {
+					// summary sheet conditions
+					export excel using `using', sheet("`name'") sheetmodify cell(A4) missing("0")
+				} 
+				else {
+					// sub sheet conditions
+					export excel using `using', sheet("`name'") firstrow(var) sheetmodify cell(A1) missing("0")
+				}
 			}
 		}
 	}
