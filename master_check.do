@@ -9,7 +9,7 @@
 
 // this line adds standard boilerplate headings
 ipadoheader, version(13.0)
-use "data/Mongolia SHPS Tracking_with TA_PII removed_Raw.dta", clear
+use "data/survey_data.dta", clear
  
 /*
  overview:
@@ -19,26 +19,25 @@ use "data/Mongolia SHPS Tracking_with TA_PII removed_Raw.dta", clear
      3. Check that all surveys have consent
      4. Check that certain critical variables have no missing values
      5. Check that follow up record ids match original
-     6. Check that no variable has only one distinct value
+     6. Check skip patterns and survey logic
      7. Check that no variable has all missing values
      8. Check hard/soft constraints
      9. Check specify other vars for items that can be included
      10. Check that date values fall within survey range
      11. Check that there are no outliers for unconstrained vars
-     12. Check that survey and section durations fall within limits
 */
 
 // dtanotes
 
 // local definitions (EDIT THESE)
-local infile     "matt_input.xlsx"
+local infile     "hfc_inputs.xlsx"
 local outfile    "hfc_outputs.xlsx"
 local repfile    "hfc_replacements.xlsx"
 local enumdb     "hfc_enumerators.xlsx"
 local researchdb "hfc_research.xlsx"
-local master     "master_tracking_list.dta"
-local id         "surveyid"
-local enum       "enumeratorid"
+*local master     "master_tracking_list.dta"
+local id         "id"
+local enum       "enumid"
 
 
 /* =============================================================== 
@@ -53,9 +52,9 @@ qui {
 	// recode don't know/refusal values
 	ds, has(type numeric)
 	local numeric `r(varlist)'
-	recode `numeric' (8888 = .d)
-	recode `numeric' (9999 = .r)
-	recode `numeric' (7777 = .n)
+	recode `numeric' (999 = .d)
+	recode `numeric' (998 = .r)
+	recode `numeric' (888 = .n)
 	
 	// get the current date
 	local today = date(c(current_date), "DMY")
@@ -74,8 +73,17 @@ ipacheckimport using "`infile'"
 /* =============================================================== 
    ================= Replacements and Corrections ================ 
    =============================================================== */
-
-*readreplace using "hfc_replacements.xlsx", id("id") variable("variable") value("newvalue") excel
+/* 
+merge 1:1 `id' using "hfc_replacements.xlsx", keepusing(drop)
+drop if drop == "y" | drop == "yes"
+drop drop
+*/
+readreplace using "hfc_replacements.xlsx", ///
+    id("id") ///
+	variable("variable") ///
+	value("newvalue") ///
+	excel ///
+	import(firstrow)
 
 
 /* =============================================================== 
@@ -88,14 +96,14 @@ putexcel A1=("HFC Summary Report") ///
 		 using `outfile', sheet("0. summary") replace
 
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
-/*ipacheckcomplete ${variable1}, ivalue(${incomplete_value1}) ///
+ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
     id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
-    sheetreplace*/
+    sheetreplace
 	
-*putexcel A4=("HFC 1") A5=("number of incompletes") B5=("`r(nincomplete)'") using `outfile', ///
-*    sheet("0. summary") modify
+putexcel A4=("HFC 1") A5=("number of incompletes") B5=("`r(nincomplete)'") using `outfile', ///
+    sheet("0. summary") modify
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
 ipacheckdups ${variable2}, enumerator(`enum') ///
@@ -135,8 +143,17 @@ putexcel A10=("HFC 4") ///
     sheetreplace*/
 
 /* <====== HFC 6. Check that no variable has only one distinct value ======> */
-*ipacheckskip var, saving(`outfile') enumerator(`enum')
+ipacheckskip ${variable6}, assert(${assert6}) ///
+    condition(${if_condition6}) ///
+	id(`id') ///
+	enumerator(`enum') ///
+	saving(`outfile') 
 
+putexcel A15=("HFC 6") ///
+         A16=("number of skip pattern and logic violations.") ///
+		 B16=("`r(nviol)'") ///
+		 using `outfile', sheet("0. summary") modify
+		 
 /* <======== HFC 7. Check that no variable has all missing values =========> */
 ipacheckallmiss, id(`id') ///
     enumerator(`enum') ///
@@ -191,16 +208,12 @@ putexcel A24=("HFC 10") ///
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
 ipacheckoutliers ${variable11}, id(`id') ///
                                 enumerator(`enum') ///
-								iqrmulti(${iqr_multiplier11}) ///
-								saving(`outfile') ///
-								sheetreplace
+                                iqrmulti(${iqr_multiplier11}) ///
+                                saving(`outfile') ///
+                                sheetreplace
 
 putexcel A29=("HFC 11") A30=("number of potential outliers") B30 =("`r(noutliers)'") using `outfile', ///
     sheet("0. summary") modify
-	
-/* <============= HFC 12. Check survey and section durations ==============> */
-*ipacheckduration var, saving(`outfile') enumerator(`enum')
-
 
 /* ===============================================================
    =============== User Checks Programming Template ==============
@@ -210,18 +223,16 @@ putexcel A29=("HFC 11") A30=("number of potential outliers") B30 =("`r(noutliers
 /* ===============================================================
    ================= Create Enumerator Dashboard =================
    =============================================================== */
-   
-keep if q1_4_result == 1
 
-#delimit ;
-ipacheckenum `enum' using "hfc_enumerators.xlsx", 
-   dkrfvars(${dkrf_variables13})
-   missvars(${missing_variables13}) 
-   durvars(${duration_variables13}) 
-   exclude(${exclude_variables13})
-   subdate(${submission_date13});
-#delimit cr
+ipacheckenum `enum' using "hfc_enumerators.xlsx", ///
+   dkrfvars(${dkrf_variable12}) ///
+   missvars(${missing_variable12}) ///
+   durvars(${duration_variable12}) ///
+   exclude(${exclude_variable12}) ///
+   subdate(${submission_date12})
 
 /* ===============================================================
    ================== Create Research Dashboard ==================
    =============================================================== */
+
+   /* coming soon! */
