@@ -74,17 +74,13 @@ ipacheckimport using "`infile'"
    ================= Replacements and Corrections ================ 
    =============================================================== */
 /* 
-merge 1:1 `id' using "hfc_replacements.xlsx", keepusing(drop)
-drop if drop == "y" | drop == "yes"
-drop drop
-*/
 readreplace using "hfc_replacements.xlsx", ///
     id("id") ///
 	variable("variable") ///
 	value("newvalue") ///
 	excel ///
 	import(firstrow)
-
+*/
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
@@ -137,7 +133,7 @@ putexcel A10=("HFC 4") ///
 		 using `outfile', sheet("0. summary") modify
 	
 /* <======== HFC 5. Check that follow up record ids match original ========> */
-/*ipacheckfollowup using `master', id(`id') ///
+/*ipacheckfollowup ${variable5} using `master', id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
     sheetreplace*/
