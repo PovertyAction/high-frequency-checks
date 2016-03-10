@@ -52,10 +52,7 @@ program ipacheckcomplete, rclass
 			}
 			drop _complete
 		}
-		else {
-			local num = _N
-		}
-		local nincomplete = `nincomplete' + _N - `num'
+		local nincomplete = `nincomplete' + `num'
 		local i = `i' + 1
 	}
 
