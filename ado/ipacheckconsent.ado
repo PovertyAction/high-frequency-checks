@@ -53,9 +53,9 @@ program ipacheckconsent, rclass
 			drop _consent
 		}
 		else {
-			local num = _N
+			local num = 0
 		}
-		local numnoconsent = `numnoconsent' + _N - `num'
+		local numnoconsent = `numnoconsent' + `num'
 		local i = `i' + 1
 	}
 
