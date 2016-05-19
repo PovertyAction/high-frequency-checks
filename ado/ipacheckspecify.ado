@@ -52,14 +52,17 @@ program ipacheckspecify, rclass
 		}
 	}
 	file close myfile
-
-	// Export to excel
-	import delimited using `tmp', clear
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
-	export excel using "`saving'", sheet("9. other") sheetreplace firstrow(var)
+	restore
 	
+	// Export to excel
+	preserve
+	import delimited using `tmp', clear
+	if `=_N' > 0 {
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+		export excel using `saving' , sheet("8. constraints") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
+	}
 	restore
 	}
 

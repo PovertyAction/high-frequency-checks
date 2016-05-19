@@ -52,6 +52,9 @@ program ipacheckcomplete, rclass
 			}
 			drop _complete
 		}
+		else {
+			local num = _N
+		}
 		local nincomplete = `nincomplete' + `num'
 		local i = `i' + 1
 	}
@@ -64,13 +67,14 @@ program ipacheckcomplete, rclass
 	// close tmp file
 	file close myfile
 
-	// export to Excel
 	import delimited using `tmp', clear
-	g notes = ""
-	g drop = ""
-	g newvalue = ""
-	export excel using `saving' , sheet("1. incomplete") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
-
+	if `=_N' > 0 {
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+		export excel using `saving' , sheet("1. incomplete") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
+	}
+	
 	use `org', clear
 	}
 	// display stats and return 

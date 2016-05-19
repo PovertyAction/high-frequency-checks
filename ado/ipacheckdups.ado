@@ -122,10 +122,12 @@ program ipacheckdups, rclass
 			
 			// export to excel
 			import delimited using `tmp', clear
-			g notes = ""
-			g drop = ""
-			g newvalue = ""
-			export excel using `saving', firstrow(var) sheet("2. duplicates") `sheetmodify' `sheetreplace'
+			if `=_N' > 0 {
+				g notes = ""
+				g drop = ""
+				g newvalue = ""	
+				export excel using `saving', firstrow(var) sheet("2. duplicates") `sheetmodify' `sheetreplace'
+			}		
 		}
 	}
 	else {

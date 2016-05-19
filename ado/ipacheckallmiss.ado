@@ -61,11 +61,13 @@ program ipacheckallmiss, rclass
 	file close myfile
 	
 	import delimited using `tmp', clear
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
-	export excel using "`saving'", sheet("7. all missing") `sheetreplace' `sheetmodify' firstrow(var)
-	
+	if `=_N' > 0 {
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+		export excel using "`saving'", sheet("7. all missing") `sheetreplace' `sheetmodify' firstrow(var)
+	}
+	restore
 	}
 	di ""
 	di "  Found `i' variables with all missing values."

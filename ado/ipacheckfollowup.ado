@@ -42,8 +42,9 @@ program ipacheckfollowup, rclass
 
 	// export to excel
 	use `tmp', clear
-	export excel using `saving', firstrow(var) sheet("5. follow up") `sheetmodify' `sheetreplace'
-
+	if `=_N' > 0 {
+		export excel using `saving', firstrow(var) sheet("5. follow up") `sheetmodify' `sheetreplace'
+	}
 	restore
 	}
 	

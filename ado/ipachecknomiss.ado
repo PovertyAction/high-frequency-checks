@@ -80,11 +80,14 @@ program ipachecknomiss, rclass
 	file close myfile
 
 	preserve
+	// export to excel
 	import delimited using `tmp', clear
-	g notes = ""
-	g drop = ""
-	g newvalue = ""
-	export excel using `saving', firstrow(var) sheet("4. no miss") `sheetmodify' `sheetreplace'
+	if `=_N' > 0 {
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+		export excel using `saving', firstrow(var) sheet("4. no miss") `sheetmodify' `sheetreplace'
+	}		
 	restore
 	}
 	return scalar nmiss = `nmiss'

@@ -52,7 +52,10 @@ program ipacheckconsent, rclass
 			}
 			drop _consent
 		}
-		local numnoconsent = `numnoconsent' + `num'
+		else {
+			local num = _N
+		}
+		local numnoconsent = `numnoconsent' + _N - `num'
 		local i = `i' + 1
 	}
 
@@ -64,13 +67,14 @@ program ipacheckconsent, rclass
 	// close tmp file
 	file close myfile
 
-	// export to Excel
 	import delimited using `tmp', clear
-	g notes = ""
-	g drop = ""
-	g newvalue = ""
-	export excel using `saving' , sheet("3. consent") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
-
+	if `=_N' > 0 {
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+		export excel using `saving' , sheet("3. consent") `sheetreplace' `sheetmodify' firstrow(variables) nolabel	
+	}	
+	
 	restore
 	}
 

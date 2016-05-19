@@ -158,10 +158,12 @@ program ipacheckdates, rclass
 	if "`saving'" != "" {
 		preserve
 		use `tmp', clear
-		g notes = ""
-		g drop = ""
-		g newvalue = ""
-		export excel using `saving', firstrow(var) sheet("10. dates") `sheetmodify' `sheetreplace'
+		if `=_N' > 0 {
+			g notes = ""
+			g drop = ""
+			g newvalue = ""
+			export excel using `saving', firstrow(var) sheet("10. dates") `sheetmodify' `sheetreplace'
+		}
 		restore
 	}
 	}

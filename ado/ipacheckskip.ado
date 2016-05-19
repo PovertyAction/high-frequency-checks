@@ -82,10 +82,12 @@ program ipacheckskip, rclass
 	// Output temp file to Excel
 	preserve
 	import delimited using `tmp', clear
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
-	export excel using `saving' , sheet("6. skip") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
+	if `=_N' > 0 {
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+		export excel using `saving' , sheet("6. skip") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
+	}
 	restore
 	}
 	di ""
