@@ -61,7 +61,7 @@ program ipacheckspecify, rclass
 		g notes = ""
 		g drop = ""
 		g newvalue = ""	
-		export excel using `saving' , sheet("8. constraints") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
+		export excel using `saving' , sheet("9. specify") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
 	}
 	restore
 	}
