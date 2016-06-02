@@ -1,26 +1,25 @@
-/*----------------------------------------*
- |file:    ipacheckoutliers.ado           | 
- |project: high frequency checks          |
- |author:  christopher boyer              |
- |         matthew bombyk                 |
- |         innovations for poverty action |
- |date:    2016-02-13                     |
- *----------------------------------------*/
+*! version 1.0.0 Christopher Boyer 04may2016
 
- // this program checks for outliers among unconstrained survey variables
-
-capture program drop ipacheckoutliers
 program ipacheckoutliers, rclass
-	di ""
-	di "HFC 11 => Checking that unconstrained variables have no outliers..."
-	qui {
+	/* This program checks for outliers among 
+	   unconstrained survey variables. */
+	version 13
 
-	syntax varlist, saving(string) id(varname) enumerator(varname) iqrmulti(numlist missingokay) [ sheetmodify sheetreplace ]
+	#d ;
+	syntax varlist, 
+		/* consent options */
+	    MULTIplier(numlist missingokay) [SD]
+		/* output filename */
+	    saving(string) 
+	    /* output options */
+        id(varname) ENUMerator(varname) [KEEPvars(string)] 
+		/* other options */
+		[SHEETMODify SHEETREPlace NOLabel];	
+	#d cr
 	
-	version 13.1
-
-	// check that all variables are numeric
+	* test for fatal conditions
 	foreach var in `varlist' {
+	    * check that all variables are numeric
 		cap confirm numeric variable `var'
 		if _rc {
 			di as err "Variable `var' is not numeric."
@@ -28,72 +27,195 @@ program ipacheckoutliers, rclass
 		}
 	}
 
-	// set locals
+	di ""
+	di "HFC 11 => Checking that unconstrained variables have no outliers..."
+	qui {
+
+	* count nvars
+	unab vars : _all
+	local nvars : word count `vars'
+
+	* define temporary files 
+	tempfile tmp org
+	save `org'
+
+	* define temporary variable
+	tempvar outlier min max
+	g `outlier' = .
+	g `min' = .
+	g `max' = .
+
+	* define default output variable list
+	unab admin : `id' `enumerator'
+	local meta `"variable label value message"'
+
+	* add user-specified keep vars to output list
+    local lines : subinstr local keepvars ";" "", all
+    local lines : subinstr local lines "." "", all
+
+    local unique : list uniq lines
+    local keeplist : list admin | unique
+    local keeplist : list keeplist | meta
+
+    * initialize local counters
 	local noutliers = 0
 	local i = 1
- 	
-	// set tempfile
-	tempfile tmp
-	
-	// set output file
-	file open myfile using `tmp', text write replace
-	file write myfile "id,enumerator,variable,label,value,message" _n 
+
+	* initialize meta data variables
+	foreach var in `meta' {
+		g `var' = ""
+	}
+
+	* initialize temporary output file
+	touch `tmp', var(`keeplist')
 
 	foreach var in `varlist' {
-		// get current value of iqr
-		local iqrval : word `i' of `iqrmulti'
+		* get current value of iqr
+		local val : word `i' of `multiplier'
 		
-		// calculate iqr stats
-		egen _iqr = iqr(`var')
-		egen _q1 = pctile(`var'), p(25)
-		egen _q3 = pctile(`var'), p(75)
+		* capture variable label
+		local varl : variable label `var'
 
-		// calculate min/max 
-		g _max = _q3 + `iqrval' * _iqr
-		g _min = _q1 - `iqrval' * _iqr
-		g _outlier = (`var' > _max | `var' < _min) & !mi(`var')
+		* update values for additional variables
+		replace variable = "`var'"
+		replace label = "`varl'"
+		replace value = string(`var')
 
-		// sort and count outliers
-		gsort -_outlier
-		count if _outlier == 1
+		if "`sd'" == "" {
+			* create temp stats variables
+			tempvar sigma q1 q3
 
-		// loop through outliers and output them to file
-		local n = `r(N)'
-		forval j = 1/`n' {
-			local value = `var'[`j']
-			local min = _min[`j']
-			local max = _max[`j']
-			local varl : variable label `var'
-			local message = "Potential outlier `value' in variable `var' (`iqrval' * IQR: `min' to `max')."
-			file write myfile ("`=`id'[`j']'") _char(44) ("`=`enumerator'[`j']'") _char(44) ("`var'") _char(44) (`""`varl'""') _char(44) (`value') _char(44) ("`message'") _n
+			* calculate iqr stats
+			egen `sigma' = iqr(`var')
+			egen `q1' = pctile(`var'), p(25)
+			egen `q3' = pctile(`var'), p(75)
+			replace `max' = `q3' + `val' * `sigma'
+			replace `min' = `q1' - `val' * `sigma'
+
+			* drop reused egen variables
+			drop `sigma' `q1' `q3'
+
+			replace message = "Potential outlier " + value + ///
+			    " in variable `var' (`val' * IQR: " + ///
+			    string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
+		}
+		else {
+			* create temp stats variables
+			tempvar sigma  mu
+
+			* calculate sd stats
+			egen `sigma' = sd(`var')
+			egen `mu' = mean(`var')
+			replace `max' = `mu' + `val' * `sigma'
+			replace `min' = `mu' - `val' * `sigma'
+
+			* drop reused egen variables
+			drop `sigma' `mu'
+
+			replace message = "Potential outlier " + value + ///
+			    " in variable `var' (`val' * SD: " + ///
+			    string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
 		}
 
-		// update outlier count
+		* identify outliers 
+		replace `outlier' = (`var' > `max' | `var' < `min') & !mi(`var')
+
+
+		* count outliers
+		count if `outlier' == 1
+		local n = `r(N)'
 		local noutliers = `noutliers' + `n'
 
-		// alert user
+		* append violations to the temporary data set
+		saveappend using `tmp' if `outlier' == 1, ///
+		    keep("`keeplist'") sort(`id')
+
+		* alert user
 		nois di "  Variable `var' has `n' potential outliers."
-
-		// drop variables
-		drop _iqr _q1 _q3 _min _max _outlier
 	}
 
-	// close the output file
-	file close myfile	
+	* import compiled list of violations
+	use `tmp', clear
 
-	// export outlier list to excel
-	preserve
-	import delimited using `tmp', clear
-	if `=_N' > 0 {
-		g notes = ""
-		g drop = ""
-		g newvalue = ""	
-		export excel using `saving' , sheet("11. outliers") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
-	}
-	restore
+	* if there are no violations
+	if `=_N' == 0 {
+		set obs 1
+	} 
+
+	* create additional meta data for tracking
+	g notes = ""
+	g drop = ""
+	g newvalue = ""	
+
+	order `keeplist' notes drop newvalue
+
+	* export compiled list to excel
+	export excel using `saving' ,  ///
+		sheet("11. outliers") `sheetreplace' `sheetmodify' ///
+		firstrow(variables) `nolabel'
+
+	* revert to original
+	use `org', clear
 	}
 
-	// return scalars
+	* return scalars
 	return scalar noutliers = `noutliers'
+
+end
+
+program saveappend
+	/* this program appends the data in memory, or a subset 
+	   of that data, to a stata file on disk. */
+	syntax using/ [if] [in] [, keep(varlist) sort(varlist)]
+
+	marksample touse 
+	preserve
+
+	keep if `touse'
+
+	if "`keep'" != "" {
+		keep `keep' `touse'
+	}
+
+	append using `using'
+
+	if "`sort'" != "" {
+		sort `sort'
+	}
+
+	drop `touse'
+	save `using', replace
+
+	restore
+end
+
+program touch
+	syntax [anything], [var(varlist)] [replace] 
+
+	* remove quotes from filename, if present
+	local file = `"`=subinstr(`"`anything'"', `"""', "", .)'"'
+
+	* test fatal conditions
+	cap assert "`file'" != "" 
+	if _rc {
+		di as err "must specify valid filename."
+		error 100
+	}
+
+	preserve 
+
+	if "`var'" != "" {
+		keep `var'
+		drop if _n > 0
+	}
+	else {
+		drop _all
+		g var = 1
+		drop var
+	}
+	* save 
+	save "`file'", emptyok `replace'
+
+	restore
 
 end

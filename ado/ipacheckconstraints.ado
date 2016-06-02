@@ -1,107 +1,256 @@
-/*----------------------------------------*
- |file:    ipacheckconstraints.ado        | 
- |project: high frequency checks          |
- |author:  christopher boyer              |
- |         matthew bombyk                 |
- |         innovations for poverty action |
- |date:    2016-02-13                     |
- *----------------------------------------*/
+*! version 1.0.0 Christopher Boyer 04may2016
 
- // this program checks for hard and soft constraint violations
-
-capture program drop ipacheckconstraints
 program ipacheckconstraints, rclass
+	/* Check that certain numeric variables fall within
+	   reasonable hard and soft constraints..
+
+	   Most numeric questions that are asked during an 
+	   interview have a logical range of possible values.
+	   Entries that exceed these limits could be a sign of
+	   misentry or fraud. */
+	version 13
+
+	#d ;
+	syntax varlist, 
+		/* soft constraint options */
+	    [smin(numlist miss) smax(numlist miss)]
+		/* hard constraint options */
+	    [hmin(numlist miss) hmax(numlist miss)]
+		/* output filename */
+	    saving(string) 
+	    /* output options */
+        id(varname) ENUMerator(varname) [KEEPvars(string)] 
+		/* other options */
+		[SHEETMODify SHEETREPlace NOLabel];	
+	#d cr
+
+	* test for fatal conditions
+	if mi("`smin'`smax'`hmin'`hmax'") {
+			di as err "must specify at least one constraint value."
+			error 198
+	}
+
 	di ""
 	di "HFC 8 => Checking that values do not exceed soft/hard minimums and maximums..."
+
 	qui {
+	* count nvars
+	unab vars : _all
+	local nvars : word count `vars'
 
-	syntax varlist, saving(string) id(name) smin(numlist) smax(numlist) enumerator(name)  [hmin(numlist) hmax(numlist) sheetmodify sheetreplace]
-	
-	version 13.1
+	* define temporary files 
+	tempfile tmp org
+	save `org'
 
-	tempfile tmp
-	file open myfile using `tmp', text write replace
-	file write myfile "id,enumerator,variable,label,value,message" _n 
+	* define temporary variable
+	tempvar viol
+	g `viol' = .
 
-	local i = 1
+	* define default output variable list
+	unab admin : `id' `enumerator'
+	local meta `"variable label value message"'
+
+	* add user-specified keep vars to output list
+    local lines : subinstr local keepvars ";" "", all
+    local lines : subinstr local lines "." "", all
+
+    local unique : list uniq lines
+    local keeplist : list admin | unique
+    local keeplist : list keeplist | meta
+
+ 	* define loop locals
 	local nviol = 0 
 	local nhard = 0
 	local nsoft = 0
-	ds `varlist'
-	foreach var of varlist `r(varlist)' {
-		loc minsoft: word `i' of `smin'
-		loc minhard: word `i' of `hmin'
-		loc maxsoft: word `i' of `smax'
-		loc maxhard: word `i' of `hmax'
+	local i = 1
+
+	* initialize meta data variables
+	foreach var in `meta' {
+		g `var' = ""
+	}
+
+	* initialize temporary output file
+	touch `tmp', var(`keeplist')
+
+	/* loop through varlist and check that values
+	   fall within hard and soft constraints */
+	foreach var in `varlist' {
+		* get constraint values for current variable
+		local minsoft: word `i' of `smin'
+		local minhard: word `i' of `hmin'
+		local maxsoft: word `i' of `smax'
+		local maxhard: word `i' of `hmax'
 		local npvar = 0
 		
-		if `"`minsoft'"' == "" loc minsoft .
-		if `"`minhard'"' == "" loc minhard .
-		if `"`maxsoft'"' == "" loc maxsoft .
-		if `"`maxhard'"' == "" loc maxhard .		
+		* replace unspecified constraints with Stata missing value
+		if `"`minsoft'"' == "" local minsoft .
+		if `"`minhard'"' == "" local minhard .
+		if `"`maxsoft'"' == "" local maxsoft .
+		if `"`maxhard'"' == "" local maxhard .		
 
-		cap loc varlabb: variable label `var'
-		cap loc varlabb = subinstr(`"`varlabb'"',",","-",.)
-		forval x = 1/`=_N' {
-			loc enum = `enumerator'[`x']
-			loc survey = `id'[`x']
-			loc varval = `var'[`x']
+		* capture variable label
+		local varl : variable label `var'
+
+		* update values for additional variables
+		replace variable = "`var'"
+		replace label = "`varl'"
+		replace value = string(`var')
 			
-			*Check Hard and Soft minimums
-			if `varval' < `minhard' & `minhard' < . {
-				loc message `"Value is too small. Hard Min. = `minhard'"'
-				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
-				local nviol = `nviol' + 1
-				local npvar = `npvar' + 1
-				local nhard = `nhard' + 1
+		/* =======================
+		   = check hard minimums =
+		   ======================= */
+		replace `viol' = `var' < `minhard' & `minhard' < .
+		replace message = "Value is too small. Hard Min. = `minhard'"
 
-			}
-			else if `varval' < `minsoft' & `minsoft' < . {
-				loc message `"Value is small. Soft Min. = `minsoft'"'
-				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
-				local nviol = `nviol' + 1
-				local npvar = `npvar' + 1
-				local nsoft = `nsoft' + 1
-			}
-			
-			*Check Hard and Soft Maximums
-			if `varval' > `maxhard' & `maxhard' < . & `varval' < . {
-				loc message `"Value is too high. Hard Max. = `maxhard'"'
-				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
-				local nviol = `nviol' + 1
-				local npvar = `npvar' + 1
-				local nhard = `nhard' + 1
-			}
-			else if `varval' > `maxsoft' & `maxsoft' < . & `varval' < . {
-				loc message `"Value is high. Soft Max. = `maxsoft'"'
-				file write myfile `"`survey',`enum',`var',`varlabb',`varval',`message'"' _n
-				local nviol = `nviol' + 1
-				local npvar = `npvar' + 1
-				local nsoft = `nsoft' + 1
-			}
+		* count the violations
+		count if `viol' == 1
+		local nviol = `nviol' + `r(N)'
+		local npvar = `npvar' + `r(N)'
+		local nhard = `nhard' + `r(N)'
 
-		}
+		* append violations to the temporary data set
+		saveappend using `tmp' if `viol' == 1, ///
+			    keep("`keeplist'") sort(`id')
+
+		/* =======================
+		   = check hard maximums =
+		   ======================= */
+		replace `viol' = `var' > `maxhard' & `maxhard' < . & `var' < . 
+		replace message = "Value is too high. Hard Max. = `maxhard'"
+
+		* count the violations
+		count if `viol' == 1
+		local nviol = `nviol' + `r(N)'
+		local npvar = `npvar' + `r(N)'
+		local nhard = `nhard' + `r(N)'
+
+		* append violations to the temporary data set
+		saveappend using `tmp' if `viol' == 1, ///
+			    keep("`keeplist'") sort(`id')
+
+	    /* =======================
+		   = check soft minimums =
+		   ======================= */
+
+		replace `viol' = `var' < `minsoft' & `minsoft' < .
+		replace message = "Value is too small. Soft Min. = `minsoft'"
+
+		* count the violations
+		count if `viol' == 1
+		local nviol = `nviol' + `r(N)'
+		local npvar = `npvar' + `r(N)'
+		local nsoft = `nsoft' + `r(N)'
+
+		* append violations to the temporary data set
+		saveappend using `tmp' if `viol' == 1, ///
+			    keep("`keeplist'") sort(`id')
+
+		/* =======================
+		   = check soft maximums =
+		   ======================= */
+
+		replace `viol' = `var' > `maxsoft' & `maxsoft' < . & `var' < . 
+		replace message = "Value is too high. Soft Max. = `maxsoft'"
+
+		* count the violations
+		count if `viol' == 1
+		local nviol = `nviol' + `r(N)'
+		local npvar = `npvar' + `r(N)'
+		local nsoft = `nsoft' + `r(N)'
+
+		* append violations to the temporary data set
+		saveappend using `tmp' if `viol' == 1, ///
+			    keep("`keeplist'") sort(`id')
+
 		if `npvar' > 0 {
-			noisily di "  Variable `var' has `npvar' constraint violations."
+			nois di "  Variable `var' has `npvar' constraint violations."
 		}
 		local i = `i' + 1
 	}
-	file close myfile	
-		
-	// Output this to Excel:
-	preserve
-	import delimited using `tmp', clear
-	if `=_N' > 0 {
-		g notes = ""
-		g drop = ""
-		g newvalue = ""	
-		export excel using `saving' , sheet("8. constraints") `sheetreplace' `sheetmodify' firstrow(variables) nolabel
-	}	
-	restore
+
+	* import compiled list of violations
+	use `tmp', clear
+
+	* if there are no violations
+	if `=_N' == 0 {
+		set obs 1
+	} 
+
+	* create additional meta data for tracking
+	g notes = ""
+	g drop = ""
+	g newvalue = ""	
+
+	* export compiled list to excel
+	export excel using `saving' ,  ///
+		sheet("8. constraints") `sheetreplace' `sheetmodify' ///
+		firstrow(variables) `nolabel'
+
+	* revert to original
+	use `org', clear
 	}
+	* display check statistics to output screen
 	di ""
 	di "  Found `nviol' total constraint violations: `nhard' hard and `nsoft' soft."
 	return scalar nviol = `nviol'
 	return scalar nhard = `nhard'
 	return scalar nsoft = `nsoft'
 end
+
+program saveappend
+	/* this program appends the data in memory, or a subset 
+	   of that data, to a stata file on disk. */
+	syntax using/ [if] [in] [, keep(varlist) sort(varlist)]
+
+	marksample touse 
+	preserve
+
+	keep if `touse'
+
+	if "`keep'" != "" {
+		keep `keep' `touse'
+	}
+
+	append using `using'
+
+	if "`sort'" != "" {
+		sort `sort'
+	}
+
+	drop `touse'
+	save `using', replace
+
+	restore
+end
+
+program touch
+	syntax [anything], [var(varlist)] [replace] 
+
+	* remove quotes from filename, if present
+	local file = `"`=subinstr(`"`anything'"', `"""', "", .)'"'
+
+	* test fatal conditions
+	cap assert "`file'" != "" 
+	if _rc {
+		di as err "must specify valid filename."
+		error 100
+	}
+
+	preserve 
+
+	if "`var'" != "" {
+		keep `var'
+		drop if _n > 0
+	}
+	else {
+		drop _all
+		g var = 1
+		drop var
+	}
+	* save 
+	save "`file'", emptyok `replace'
+
+	restore
+
+end
+

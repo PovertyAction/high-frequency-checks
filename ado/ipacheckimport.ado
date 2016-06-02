@@ -1,64 +1,74 @@
-/*----------------------------------------*
- |file:    ipacheckimport.ado             | 
- |project: high frequency checks          |
- |author:  christopher boyer              |
- |         innovations for poverty action |
- |date:    2016-02-13                     |
- *----------------------------------------*/
+*! version 1.0.0 Christopher Boyer 04may2016
 
- // this program imports metadata from the input file
-
-capture program drop ipacheckimport
 program ipacheckimport, rclass
-	di ""
-	qui {
+	/* This program imports high frequency check inputs
+	   as Stata globals from an excel spreadsheet. The 
+	   checks are based on IPA's minimum checks for 
+	   data quality assurance */
+	version 13
 
-	syntax using/ , 
+	syntax using/ , [DOfile]
 	
+	di ""
+	di "Reading `using'..."
+
+	qui {
 	preserve
 	
-	#delimit ;
-	local sheets `""1. incomplete" "2. duplicates" "3. consent" "4. no miss" "5. follow up" "6. skip" "7. all miss" "8. constraints" "9. specify" "10. dates" "11. outliers" "enumdb" "researchdb""' ;
-	#delimit cr
-	
-	*nois di `"`sheets'"'
-	
-	local wc: word count `sheets'
-	*nois di "`wc'"
+	if mi("`dofile'") {
+		#d ;	
+		local sheets `""1. incomplete" "2. duplicates" "3. consent" "4. no miss" "5. follow up" "6. skip" "7. all miss" "8. constraints" "9. specify" "10. dates" "11. outliers" "enumdb" "researchdb""' ;
+		#d cr
+		
+		* store number of sheets
+		local wc: word count `sheets'
 
-    foreach sheet in `sheets' {
-		nois di `"`sheet'"'
-    	// read the data from the input file
-    	cap import excel using "`using'", sheet(`"`sheet'"') firstrow clear
-		
-		// return error if unable to read sheet
-		if _rc {
-			di as err "Input sheet `sheet' not found"
-			error 198
-		}
-		
-    	// collect the headers
-    	unab allvars: _all
-				
-    	// drop missing rows
-		local idvar : word 1 of `allvars'
-    	drop if mi(`idvar')
-		
-    	// get current sheet number and row numbers
-    	local n : list posof `"`sheet'"' in sheets		
-		local rows = _N
-		*nois di "position is `n' and there are `rows' rows"
-    	foreach var of local allvars {
-			*nois di "Variable is `var'"
-			mata: st_global("`var'`n'", "")
-    		forval i=1/`rows' {
-    			mata: st_global("`var'`n'", `"${`var'`n'} `=`var'[`i']'"')
-    		}
-			*nois di "${`var'`n'}"
-    	}
-		
-    }
-	restore
+	    foreach sheet in `sheets' {
+	    	* display sheet name to be read
+			nois di `"`sheet'"'
+
+	    	* read the data from the input file
+	    	cap import excel using "`using'", sheet(`"`sheet'"') firstrow clear
+			
+			* return error if unable to read sheet
+			if _rc {
+				di as err "Input sheet `sheet' not found"
+				error 198
+			}
+			
+	    	* collect the headers
+	    	unab colnames: _all
+					
+	    	* drop missing and/or incomplete rows
+			local col1 : word 1 of `colnames'
+	    	drop if mi(`col1')
+			
+	    	* get current sheet number
+	    	local n : list posof `"`sheet'"' in sheets	
+
+	    	* count number of rows
+			local rows = _N
+
+			* loop through columns
+	    	foreach var of local colnames {
+	    		* initialize Stata global
+				mata: st_global("`var'`n'", "")
+
+				* loop through rows
+	    		forval i=1/`rows' {
+    				* append entries to global list
+    				mata: st_global("`var'`n'", `"${`var'`n'} `=`var'[`i']'"')
+
+	    			* if the keep_variable column
+	    			if inlist("`var'", "keep", "assert", "if_condition") {
+	    				* add a semi-colon signifying the end of the line
+	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
+	    			}  		
+	    		}
+	    	}
+	    }
+		restore
+	}
 
 	}
 
