@@ -76,7 +76,7 @@ program ipacheckallmiss, rclass
 
 			* append violations to the temporary data set
 			saveappend using `tmp' if _n == 1, ///
-				keep("`keeplist'")
+				keep("`meta'")
 
 			noi di "  Variable `var' has ALL missing values"
 			local nallmiss = `nallmiss' +  1
@@ -103,7 +103,7 @@ program ipacheckallmiss, rclass
 
 			* append violations to the temporary data set
 			saveappend using `tmp' if _n == 1, ///
-				keep("`keeplist'")
+				keep("`meta'")
 
 			noi di "  Variable `var' has ALL missing values"
 			local nallmiss = `nallmiss' +  1
