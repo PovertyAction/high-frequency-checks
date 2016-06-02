@@ -29,16 +29,24 @@ use "survey_data.dta", clear
 
 // dtanotes
 
-// local definitions (EDIT THESE)
-local infile     "hfc_inputs.xlsx"
-local outfile    "hfc_outputs.xlsx"
-local repfile    "hfc_replacements.xlsx"
-local enumdb     "hfc_enumerators.xlsx"
-local researchdb "hfc_research.xlsx"
+// local file definitions (EDIT THESE)
+local infile     "answers/hfc_inputs.xlsx"
+local outfile    "answers/hfc_outputs.xlsx"
+local repfile    "answers/hfc_replacements.xlsx"
+local enumdb     "answers/hfc_enumerators.xlsx"
+local researchdb "answers/hfc_research.xlsx"
 *local master     "master_tracking_list.dta"
+
+// local variable definitions
+local date       "SubmissionDate"
 local id         "id"
 local enum       "enumid"
 
+// local options definitions
+local target     2000
+local sd     	 "sd"
+local nolabel    "nolabel"
+local replace    ""
 
 /* =============================================================== 
    ================== Pre-process Import Data  =================== 
@@ -93,18 +101,22 @@ putexcel A1=("HFC Summary Report") ///
 
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
+	percent(${complete_percent1}) ///
     id(`id') ///
     enumerator(`enum') ///
+	keepvars("${keep1}") ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 	
 putexcel A4=("HFC 1") A5=("number of incompletes") B5=("`r(nincomplete)'") using `outfile', ///
     sheet("0. summary") modify
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
-ipacheckdups ${variable2}, enumerator(`enum') ///
+ipacheckdups ${variable2}, id(`id') ///
+    enumerator(`enum') ///
+	keepvars(${keep2}) ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 
 putexcel A6=("HFC 2") A7=("number of duplicates") B7=("`r(ndups1)'") using `outfile', ///
     sheet("0. summary") modify
@@ -113,8 +125,9 @@ putexcel A6=("HFC 2") A7=("number of duplicates") B7=("`r(ndups1)'") using `outf
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     id(`id') ///
     enumerator(`enum') ///
+	keepvars(${keep3}) ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 
 putexcel A8=("HFC 3") A9=("number without consent") B9 =("`r(noconsent)'") using `outfile', ///
     sheet("0. summary") modify
@@ -122,8 +135,9 @@ putexcel A8=("HFC 3") A9=("number without consent") B9 =("`r(noconsent)'") using
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 ipachecknomiss ${variable4}, id(`id') /// 
     enumerator(`enum') ///
+	keepvars(${keep4}) ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 		
 putexcel A10=("HFC 4") ///
          A11=("number of variables with a miss.") ///
@@ -143,18 +157,20 @@ ipacheckskip ${variable6}, assert(${assert6}) ///
     condition(${if_condition6}) ///
 	id(`id') ///
 	enumerator(`enum') ///
-	saving(`outfile') 
-
+	keepvars(${keep6}) ///
+	saving(`outfile') ///
+    sheetreplace `nolabel'
+	
 putexcel A15=("HFC 6") ///
          A16=("number of skip pattern and logic violations.") ///
 		 B16=("`r(nviol)'") ///
 		 using `outfile', sheet("0. summary") modify
 		 
 /* <======== HFC 7. Check that no variable has all missing values =========> */
-ipacheckallmiss, id(`id') ///
+ipacheckallmiss ${variable7}, id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
-    sheetmodify
+    sheetreplace `nolabel'
 
 putexcel A17=("HFC 7") A18=("number of all missing variables") B18 =("`r(nallmiss)'") using `outfile', ///
     sheet("0. summary") modify
@@ -164,8 +180,9 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
     smax(${soft_max8}) ///
     id(`id') ///
     enumerator(`enum') ///
+	keepvars(${keep8}) ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 
 putexcel A19=("HFC 8") ///
          A20=("number of soft constraint violations.") ///
@@ -175,10 +192,13 @@ putexcel A19=("HFC 8") ///
 		 using `outfile', sheet("0. summary") modify
 
 /* <================== HFC 9. Check specify other values ==================> */
-ipacheckspecify ${specify_variable9}, id(`id') ///
+ipacheckspecify ${specify_variable9}, ///
+	othervars(${other_variable9}) ///
+    id(`id') ///
     enumerator(`enum') ///
+	keepvars(${keep9}) ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 
 putexcel A22=("HFC 9") A23=("number of times other specified") B23 =("`r(nspecify)'") using `outfile', ///
     sheet("0. summary") modify
@@ -187,8 +207,9 @@ putexcel A22=("HFC 9") A23=("number of times other specified") B23 =("`r(nspecif
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     id(`id') ///
     enumerator(`enum') ///
+	keepvars(${keep10}) ///
     saving(`outfile') ///
-    sheetreplace
+    sheetreplace `nolabel'
 
 putexcel A24=("HFC 10") ///
          A25=("number of missing start or end dates.") ///
@@ -203,10 +224,11 @@ putexcel A24=("HFC 10") ///
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
 ipacheckoutliers ${variable11}, id(`id') ///
-                                enumerator(`enum') ///
-                                iqrmulti(${iqr_multiplier11}) ///
-                                saving(`outfile') ///
-                                sheetreplace
+    enumerator(`enum') ///
+    multiplier(${multiplier11}) ///
+	keepvars(${keep11}) ///
+    saving(`outfile') ///
+    sheetreplace `nolabel' `sd'
 
 putexcel A29=("HFC 11") A30=("number of potential outliers") B30 =("`r(noutliers)'") using `outfile', ///
     sheet("0. summary") modify
