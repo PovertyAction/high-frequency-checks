@@ -1,4 +1,6 @@
-
+*_out.xlsx
+*_outputs.xlsx
+~*
 #ignore the output file
 Example_HFC output.xlsx
 
