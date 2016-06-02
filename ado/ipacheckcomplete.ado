@@ -148,6 +148,8 @@ program ipacheckcomplete, rclass
 	g drop = ""
 	g newvalue = ""	
 
+	order `keeplist' notes drop newvalue
+
 	* export compiled list to excel
 	export excel using `saving' ,  ///
 		sheet("1. incomplete") `sheetreplace' `sheetmodify' ///

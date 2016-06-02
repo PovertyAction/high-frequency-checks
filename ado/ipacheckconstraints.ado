@@ -181,6 +181,8 @@ program ipacheckconstraints, rclass
 	g drop = ""
 	g newvalue = ""	
 
+	order `keeplist' notes drop newvalue
+
 	* export compiled list to excel
 	export excel using `saving' ,  ///
 		sheet("8. constraints") `sheetreplace' `sheetmodify' ///

@@ -48,7 +48,7 @@ program ipacheckconsent, rclass
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
     local lines : subinstr local lines "." "", all
-    
+
     local unique : list uniq lines
     local keeplist : list admin | unique
     local keeplist : list keeplist | meta
@@ -113,6 +113,8 @@ program ipacheckconsent, rclass
 	g notes = ""
 	g drop = ""
 	g newvalue = ""	
+
+	order `keeplist' notes drop newvalue
 
 	* export compiled list to excel
 	export excel using `saving' ,  ///
