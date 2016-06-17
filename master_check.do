@@ -86,7 +86,7 @@ ipacheckimport using "`infile'"
    =============================================================== */
 /* 
 readreplace using "hfc_replacements.xlsx", ///
-    id("id") ///
+  id("id") ///
 	variable("variable") ///
 	value("newvalue") ///
 	excel ///
@@ -96,147 +96,128 @@ readreplace using "hfc_replacements.xlsx", ///
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
    =============================================================== */
-   
-putexcel set `outfile', sheet("0. summary") replace
+set trace off
+ipachecksummary using `outfile', target(`target') modify
+local row = `r(i)'
 
-putexcel A1=("HFC Summary Report") ///
-         A2=("Report Date") B2=("`today_f'") ///
-		 A3=("Total Interviews") B3=("`n'")
-
-		 
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
-	percent(${complete_percent1}) ///
-    id(`id') ///
-    enumerator(`enum') ///
-	keepvars("${keep1}") ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  percent(${complete_percent1}) ///
+  id(`id') ///
+  enumerator(`enum') ///
+  keepvars("${keep1}") ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 	
-putexcel A4=("HFC 1") A5=("number of incompletes") B5=("`r(nincomplete)'")
+putexcel F`row'=(`r(nincomplete)')
 
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
 ipacheckdups ${variable2}, id(`id') ///
-    enumerator(`enum') ///
-	keepvars(${keep2}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  enumerator(`enum') ///
+  keepvars(${keep2}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 
-putexcel A6=("HFC 2") A7=("number of duplicates") B7=("`r(ndups1)'")
+putexcel G`row'=(`r(ndups1)')
 	
 	
 /* <============== HFC 3. Check that all surveys have consent =============> */
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
-    id(`id') ///
-    enumerator(`enum') ///
-	keepvars(${keep3}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  id(`id') ///
+  enumerator(`enum') ///
+  keepvars(${keep3}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 
-putexcel A8=("HFC 3") A9=("number without consent") B9 =("`r(noconsent)'")
+putexcel H`row'=(`r(noconsent)')
 
 
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 ipachecknomiss ${variable4}, id(`id') /// 
-    enumerator(`enum') ///
-	keepvars(${keep4}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  enumerator(`enum') ///
+  keepvars(${keep4}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 		
-putexcel A10=("HFC 4") ///
-         A11=("number of variables with a miss.") ///
-		 A12=("number of missing values") ///
-		 B11=("`r(missvar)'") ///
-		 B12=("`r(nmiss)'")
+putexcel I`row'=(`r(nmiss)')
 	
 	
 /* <======== HFC 5. Check that follow up record ids match original ========> */
 /*ipacheckfollowup ${variable5} using `master', id(`id') ///
     enumerator(`enum') ///
     saving(`outfile') ///
-    sheetreplace*/
+    sheetreplace
 
-	
+putexcel J`row'=(`r(discrep)') */
+
+
 /* <====== HFC 6. Check that no variable has only one distinct value ======> */
 ipacheckskip ${variable6}, assert(${assert6}) ///
-    condition(${if_condition6}) ///
-	id(`id') ///
-	enumerator(`enum') ///
-	keepvars(${keep6}) ///
-	saving(`outfile') ///
-    sheetreplace `nolabel'
+  condition(${if_condition6}) ///
+  id(`id') ///
+  enumerator(`enum') ///
+  keepvars(${keep6}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 	
-putexcel A15=("HFC 6") ///
-         A16=("number of skip pattern and logic violations.") ///
-		 B16=("`r(nviol)'")
+putexcel K`row'=(`r(nviol)')
 		 
 		 
 /* <======== HFC 7. Check that no variable has all missing values =========> */
 ipacheckallmiss ${variable7}, id(`id') ///
-    enumerator(`enum') ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  enumerator(`enum') ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 
-putexcel A17=("HFC 7") A18=("number of all missing variables") B18 =("`r(nallmiss)'")
+putexcel L`row'=(`r(nallmiss)')
 
 
 /* <=============== HFC 8. Check for hard/soft constraints ================> */
 ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
-    smax(${soft_max8}) ///
-    id(`id') ///
-    enumerator(`enum') ///
-	keepvars(${keep8}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  smax(${soft_max8}) ///
+  id(`id') ///
+  enumerator(`enum') ///
+  keepvars(${keep8}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 
-putexcel A19=("HFC 8") ///
-         A20=("number of soft constraint violations.") ///
-		 A21=("number of hard constraint violations.") ///
-		 B20=("`r(nsoft)'") ///
-		 B21=("`r(nhard)'") 
+putexcel M`row' =(`r(nsoft)' + `r(nhard)') 
 		 
 
 /* <================== HFC 9. Check specify other values ==================> */
 ipacheckspecify ${specify_variable9}, ///
-	othervars(${other_variable9}) ///
-    id(`id') ///
-    enumerator(`enum') ///
-	keepvars(${keep9}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  othervars(${other_variable9}) ///
+  id(`id') ///
+  enumerator(`enum') ///
+  keepvars(${keep9}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 
-putexcel A22=("HFC 9") A23=("number of times other specified") B23 =("`r(nspecify)'")
+putexcel N`row'=(`r(nspecify)')
 
 	
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
-    id(`id') ///
-    enumerator(`enum') ///
-	keepvars(${keep10}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel'
+  id(`id') ///
+  enumerator(`enum') ///
+  keepvars(${keep10}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel'
 
-putexcel A24=("HFC 10") ///
-         A25=("number of missing start or end dates.") ///
-         A26=("number with unequal start/end dates.") ///
-		 A27=("number of dates before survey start.") ///
-		 A28=("number with start after current date.") ///
-		 B25=("`r(missing)'") ///
-		 B26=("`r(diff_end)'") ///
-		 B27=("`r(diff_start)'") ///
-		 B28=("`r(diff_today)'")
+putexcel O`row'=(`r(missing)' + `r(diff_end)' +  ///
+  `r(diff_start)' + `r(diff_today)')
 		 
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
 ipacheckoutliers ${variable11}, id(`id') ///
-    enumerator(`enum') ///
-    multiplier(${multiplier11}) ///
-	keepvars(${keep11}) ///
-    saving(`outfile') ///
-    sheetreplace `nolabel' `sd'
+  enumerator(`enum') ///
+  multiplier(${multiplier11}) ///
+  keepvars(${keep11}) ///
+  saving(`outfile') ///
+  sheetreplace `nolabel' `sd'
 
-putexcel A29=("HFC 11") A30=("number of potential outliers") B30 =("`r(noutliers)'")
+putexcel P`row'=(`r(noutliers)')
 
 
 /* ===============================================================
