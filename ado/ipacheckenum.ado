@@ -1,22 +1,25 @@
-/*----------------------------------------*
- |file:    ipacheckenum.ado               | 
- |project: high frequency checks          |
- |author:  christopher boyer              |
- |         matthew bombyk                 |
- |         innovations for poverty action |
- |date:    2016-02-13                     |
- *----------------------------------------*/
+*! version 1.0.0 Christopher Boyer 04may2016
 
- // this program checks survey date variables for consistency
-capture program drop ipacheckenum
 program ipacheckenum
+	/* This command constructs the enumerator dashboard, a
+	   collection of summary indicators of enumerator performance
+	   including: 
+	      * Number of interviews
+	      * Rates of don't know/refusal
+	      * Rates of missing response
+	      * Duration of interview */
+	version 13 
+	
+	#d ;
+	syntax varname using/ ,
+	    dkrfvars(varlist) 
+	    missvars(varlist) 
+	    durvars(varlist) 
+	    subdate(varname) 
+		[exclude(varlist) foteam(varlist) days(integer 7)]
+		[replace modify];
+	#d cr
 	qui {
-	
-	syntax varname using/ , ///
-	    dkrfvars(varlist) missvars(varlist) durvars(varlist) subdate(varname) ///
-		[ exclude(varlist) foteam(varlist) days(integer 7) replace modify ]
-	
-	version 13.0
 	
 	// capture enumerator variable
 	local enum `varlist'
@@ -137,27 +140,43 @@ program ipacheckenum
 
 	// restrict to specified number of days
 	local today = date(c(current_date), "DMY")
-	keep if `subdate' > `today' - `days' 
+	keep if dofc(`subdate') > `today' - `days' 
 
 	// caluculate subtotals by enumerator
-	collapse (sum) interviews row_nonmiss row_miss row_dk row_rf (mean) duration, by(`enum') cw
+	if `=_N' > 0 {
+		collapse ///
+		   (sum) interviews row_nonmiss row_miss row_dk row_rf ///
+		   (mean) duration, by(`enum') cw
 
-	// calculate rates
-	g interviews_`days'days = interviews
-	g duration_`days'days = duration
-	g missing_`days'days = row_miss / (row_miss + row_nonmiss)
-	g dontknow_`days'days = row_dk / row_nonmiss
-	g refusal_`days'days = row_rf / row_nonmiss
+		// calculate rates
+	    g interviews_`days'days = interviews
+	    g duration_`days'days = duration
+	    g missing_`days'days = row_miss / (row_miss + row_nonmiss)
+	    g dontknow_`days'days = row_dk / row_nonmiss
+	    g refusal_`days'days = row_rf / row_nonmiss
 
-	// drop row totals
-	drop row_*
+	    // drop row totals
+		drop row_*
+	}
+	else {
+		keep `enum'
+
+		// calculate rates
+	    g interviews_`days'days = 0
+	    g duration_`days'days = 0
+	    g missing_`days'days = 0
+	    g dontknow_`days'days = 0
+	    g refusal_`days'days = 0
+	}
+
+
 
 	// merge with overall totals
 	merge 1:1 `enum' using `summary', nogenerate
 
 	// order and save 
 	order `enum' interviews* missing* dontknow* refusal* duration*
-	format interviews* missing* dontknow* refusal* duration* %9.3f
+	format interviews* missing* dontknow* refusal* duration* %9.2f
 	save `summary', replace
 
 	restore
