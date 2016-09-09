@@ -27,10 +27,10 @@ program ipachecksummary, rclass
   local nmaster = _N  
 
   * confirm file exists
-  cap confirm file `using'
+  cap confirm file "`using'"
   if _rc {
     * write the headers
-    headers using `using'
+    headers using "`using'"
 
     * set the first line
     local i = 2
@@ -42,7 +42,7 @@ program ipachecksummary, rclass
       preserve
 
       * read the existing summary sheet
-      import excel using `using', sheet("0. summary") firstrow clear
+      import excel using "`using'", sheet("0. summary") firstrow clear
 
       * get the number of lines 
       local nusing = _N
@@ -70,12 +70,12 @@ program ipachecksummary, rclass
       restore
 
       * set the output
-      putexcel set `using', sheet("0. summary") modify
+      putexcel set "`using'", sheet("0. summary") modify
     }
 
     if "`replace'" != "" {
       * write the headers
-      headers using `using', replace
+      headers using "`using'", replace
 
       * set the first line
       local i = 2
@@ -106,7 +106,7 @@ program headers, rclass
     syntax using/, [replace]
 
     * set the output sheet
-    putexcel set `using', sheet("0. summary") `replace'
+    putexcel set "`using'", sheet("0. summary") `replace'
 
     * write the column headers
     putexcel A1=("Date") ///

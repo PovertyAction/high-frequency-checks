@@ -487,3 +487,28 @@ ipacheckoutliers ${variable11}, id(id) ///
     multiplier(${multiplier11}) ///
     saving("check11_test04_out.xlsx") ///
     sheetreplace sd
+	
+	
+/* =================================================
+   =================== Summary ===================== 
+   ================================================= */
+   
+cd "../summary"
+
+* Test 1
+use summary_test01, clear
+local target = 100
+local outfile "summary_test01_out.xlsx"
+ipachecksummary using "`outfile'", target(`target') modify
+
+* Test 2
+use summary_test02, clear
+local target = 100
+local outfile "summary_test02_out.xlsx"
+ipachecksummary using "`outfile'", target(`target') modify
+
+* Test 2
+use summary_test03, clear
+local target = 100
+local outfile "summary test03_out.xlsx"
+ipachecksummary using "`outfile'", target(`target') modify
