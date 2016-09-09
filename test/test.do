@@ -118,6 +118,26 @@ ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
 	keepvars(${keep_variable2}) ///
     saving("check02_test05_out.xlsx") ///
     sheetreplace
+
+* Test 6
+use check02_test06, clear
+ipacheckimport using "check02_test06_in.xlsx"
+ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
+    id(id) ///
+    enumerator(enum) ///
+	keepvars(${keep_variable2}) ///
+    saving("check02_test06_out.xlsx") ///
+    sheetreplace
+	
+* Test 7
+use check02_test07, clear
+ipacheckimport using "check02_test07_in.xlsx"
+ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
+    id(id) ///
+    enumerator(enum) ///
+	keepvars(${keep_variable2}) ///
+    saving("check02_test07_out.xlsx") ///
+    sheetreplace
 	
 	
 /* =================================================
@@ -374,25 +394,6 @@ ipacheckspecify ${specify_variable9}, ///
     id(id) ///
     enumerator(enum) ///
     saving("check09_test01_out.xlsx") ///
-    sheetreplace
-
-* Test 2
-use check09_test02, clear
-ipacheckimport using "check09_test02_in.xlsx"
-ipachecknomiss ${variable9}, ///
-    id(id) ///
-    enumerator(enum) ///
-    saving("check09_test02_out.xlsx") ///
-    sheetreplace
-	
-* Test 3
-use check09_test03, clear
-ipacheckimport using "check09_test03_in.xlsx"
-ipachecknomiss ${variable9}, ///
-    id(id) ///
-    enumerator(enum) ///
-	keepvars(${keep_variable9}) ///
-    saving("check09_test03_out.xlsx") ///
     sheetreplace
 	
 

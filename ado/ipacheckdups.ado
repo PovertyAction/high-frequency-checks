@@ -132,12 +132,12 @@ program ipacheckdups, rclass
 					saveappend using `tmp' if `dup2' != 0, ///
 						keep("`keeplist'")
 
-					drop `dup1' `dup2'
 				}
 				else {
 					* alert the user that no duplicates found for unique vars
 					nois di "  No duplicates found for ID combination `var' + `uvars'."
 				}
+				drop `dup2'
 			}
 			else {
 				
@@ -163,13 +163,13 @@ program ipacheckdups, rclass
 				saveappend using `tmp' if `dup1' != 0, ///
 					keep("`keeplist'")
 
-				drop `dup1'
 			}
 		}
 		else {
 			* alert the user
 			nois di "  No duplicates found for ID variable `var'."
 		}
+	    drop `dup1'
 	}
 
 	* import compiled list of violations
