@@ -147,7 +147,7 @@ program ipachecknomiss, rclass
 	order `keeplist' notes drop newvalue
 
 	* export compiled list to excel
-	export excel using `saving' ,  ///
+	export excel using "`saving'" ,  ///
 		sheet("4. no miss") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 

@@ -150,7 +150,7 @@ program ipacheckoutliers, rclass
 	order `keeplist' notes drop newvalue
 
 	* export compiled list to excel
-	export excel using `saving' ,  ///
+	export excel using "`saving'" ,  ///
 		sheet("11. outliers") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 

@@ -512,3 +512,13 @@ use summary_test03, clear
 local target = 100
 local outfile "summary test03_out.xlsx"
 ipachecksummary using "`outfile'", target(`target') modify
+
+
+/* =================================================
+   ==================== Master ===================== 
+   ================================================= */
+   
+cd "../master"
+
+* Test 1
+do "master_test01.do"

@@ -119,7 +119,7 @@ program ipacheckskip, rclass
 	order `keeplist' notes drop newvalue
 
 	* export compiled list to excel
-	export excel using `saving' ,  ///
+	export excel using "`saving'" ,  ///
 		sheet("6. skip") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 

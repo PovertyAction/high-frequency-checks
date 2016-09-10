@@ -65,7 +65,7 @@ program ipacheckfollowup, rclass
 	   Example: For each ID, check that the name in the baseline data matches
 	   the one in the master tracking list. */
 
-	cfout `varlist' using `master', ///
+	cfout `varlist' using "`master'", ///
 	    id(`id') ///
 	    saving(`tmp', ///
 	    	variable("variable") ///
@@ -101,7 +101,7 @@ program ipacheckfollowup, rclass
 	order `keeplist' `meta' `keepmaster' notes drop newvalue
 
 	* export compiled list to excel
-	export excel using `saving' ,  ///
+	export excel using "`saving'" ,  ///
 		sheet("5. follow up") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 

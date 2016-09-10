@@ -205,11 +205,11 @@ program ipacheckenum
 			if _N > 0 {
 				if "`name'" == "summary" {
 					// summary sheet conditions
-					export excel using `using', sheet("`name'") sheetmodify cell(A4) missing("0")
+					export excel using "`using'", sheet("`name'") sheetmodify cell(A4) missing("0")
 				} 
 				else {
 					// sub sheet conditions
-					export excel using `using', sheet("`name'") firstrow(var) sheetmodify cell(A1) missing("0")
+					export excel using "`using'", sheet("`name'") firstrow(var) sheetmodify cell(A1) missing("0")
 				}
 			}
 		}
@@ -236,14 +236,14 @@ program _updatesheet
 	
 	save `tmp', replace 
 
-	cap confirm file `using'
+	cap confirm file "`using'"
 	if _rc {
-		save `using', replace
+		save "`using'", replace
 	}
 	else {
-		use `using', clear
+		use "`using'", clear
 		merge 1:1 `by' using `tmp', nogenerate
-		save `using', replace
+		save "`using'", replace
 	}
 	restore
 	}

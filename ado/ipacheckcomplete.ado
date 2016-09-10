@@ -127,11 +127,11 @@ program ipacheckcomplete, rclass
 		    "% complete (max is " + string(`percent', "%2.0f") + "%)."
 
 		* store number of violations in local 
-		count if `nonmiss' < `percent'/100
+		count if `nonmiss' < `percent' / 100
 		local nonmissviol = `r(N)'	
 		
 		* append violation list to output file
-		saveappend using `tmp' if `nonmiss' < `percent'/100 , ///
+		saveappend using `tmp' if `nonmiss' < `percent' / 100 , ///
 		    keep("`keeplist'")
 	} 
 
@@ -151,7 +151,7 @@ program ipacheckcomplete, rclass
 	order `keeplist' notes drop newvalue
 
 	* export compiled list to excel
-	export excel using `saving' ,  ///
+	export excel using "`saving'" ,  ///
 		sheet("1. incomplete") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 

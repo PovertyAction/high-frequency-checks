@@ -113,7 +113,7 @@ program ipacheckspecify, rclass
 	order `keeplist' notes drop newvalue
 
 	* export compiled list to excel
-	export excel using `saving' ,  ///
+	export excel using "`saving'" ,  ///
 		sheet("9. specify") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 

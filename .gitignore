@@ -1,6 +1,10 @@
+~*
+
+# ignore the output file
+Example_HFC output.xlsx
 *_out.xlsx
 *_outputs.xlsx
-~*
-#ignore the output file
-Example_HFC output.xlsx
+*out.xlsx
 
+# ignore the research file
+*research.xlsx
