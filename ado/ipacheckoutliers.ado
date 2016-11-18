@@ -54,8 +54,8 @@ program ipacheckoutliers, rclass
     local lines : subinstr local lines "." "", all
 
     local unique : list uniq lines
-    local keeplist : list admin | unique
-    local keeplist : list keeplist | meta
+    local keeplist : list admin | meta
+    local keeplist : list keeplist | unique
 
     * initialize local counters
 	local noutliers = 0

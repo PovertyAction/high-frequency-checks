@@ -41,9 +41,9 @@ program ipacheckdups, rclass
 
     local uniquekeepvars : list uniq keeprows
     local uniqueidvars: list uniq uniquevars
-    local keeplist : list admin | uniquekeepvars
-    local keeplist : list keeplist | uniqueidvars
+    local keeplist : list admin | uniqueidvars
     local keeplist : list keeplist | meta
+    local keeplist : list keeplist | uniquekeepvars
 
     * define locals
 	local ndups1 = 0
