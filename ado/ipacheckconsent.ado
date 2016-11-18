@@ -16,6 +16,8 @@ program ipacheckconsent, rclass
 	    CONSENTvalue(numlist) 
 		/* output filename */
 	    saving(string) 
+	    /* condition option */
+	    [CONDition(string)]
 	    /* output options */
         id(varname) ENUMerator(varname) [KEEPvars(string)] 
 		/* other options */
@@ -68,12 +70,21 @@ program ipacheckconsent, rclass
 	* loop through varlist and capture the number of unconsented surveys 
 	foreach var in `varlist' {
 		local val : word `i' of `consentvalue'
+		gettoken cond condition : condition, p(";")
+		local condition : subinstr local condition ";" ""
+
+		if "`cond'" != "" {
+			local condstr "if `cond'"
+		}
+		else {
+			local condsrt ""
+		}
 
 		* check if there are any violations
-		cap assert `var' == `val'
+		cap assert `var' == `val' `condstr'
 		if _rc {
 			* create temp marker variable
-			replace `consent' = `var' == `val'
+			replace `consent' = `var' == `val' `condstr'
 
 			* count the unconsented
 			count if `consent' == 0
