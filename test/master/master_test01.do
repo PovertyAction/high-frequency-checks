@@ -109,6 +109,7 @@ ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
   percent(${complete_percent1}) ///
   id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars("${keep1}") ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -119,6 +120,7 @@ putexcel F`row'=(`r(nincomplete)')
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
 ipacheckdups ${variable2}, id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep2}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -130,6 +132,7 @@ putexcel G`row'=(`r(ndups1)')
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
   id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep3}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -140,6 +143,7 @@ putexcel H`row'=(`r(noconsent)')
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 ipachecknomiss ${variable4}, id(`id') /// 
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep4}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -150,6 +154,7 @@ putexcel I`row'=(`r(nmiss)')
 /* <======== HFC 5. Check that follow up record ids match original ========> */
 /*ipacheckfollowup ${variable5} using `master', id(`id') ///
     enumerator(`enum') ///
+    submit(`date') ///
     saving("`outfile'") ///
     sheetreplace
 
@@ -161,6 +166,7 @@ ipacheckskip ${variable6}, assert(${assert6}) ///
   condition(${if_condition6}) ///
   id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep6}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -182,6 +188,7 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
   smax(${soft_max8}) ///
   id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep8}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -194,6 +201,7 @@ ipacheckspecify ${specify_variable9}, ///
   othervars(${other_variable9}) ///
   id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep9}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -205,6 +213,7 @@ putexcel N`row'=(`r(nspecify)')
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
   id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   keepvars(${keep10}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
@@ -216,6 +225,7 @@ putexcel O`row'=(`r(missing)' + `r(diff_end)' +  ///
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
 ipacheckoutliers ${variable11}, id(`id') ///
   enumerator(`enum') ///
+  submit(`date') ///
   multiplier(${multiplier11}) ///
   keepvars(${keep11}) ///
   saving("`outfile'") ///
