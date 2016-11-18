@@ -1,4 +1,5 @@
 ~*
+*.zip
 
 # ignore the output file
 Example_HFC output.xlsx
