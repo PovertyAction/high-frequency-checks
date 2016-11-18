@@ -98,7 +98,7 @@ program ipacheckfollowup, rclass
 	g drop = ""
 	g newvalue = ""	
 
-	order `keeplist' `meta' `keepmaster' notes drop newvalue
+	order `meta' `keeplist' `keepmaster' notes drop newvalue
 
 	* export compiled list to excel
 	export excel using "`saving'" ,  ///
