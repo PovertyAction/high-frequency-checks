@@ -11,7 +11,8 @@ program ipacheckskip, rclass
 		/* output filename */
 	    saving(string) 
 	    /* output options */
-        id(varname) ENUMerator(varname) [KEEPvars(string)] 
+        id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
+
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
 	#d cr
@@ -33,7 +34,7 @@ program ipacheckskip, rclass
 	g `test' = .
 
 	* define default output variable list
-	unab admin : `id' `enumerator'
+	unab admin : `submitted' `id' `enumerator'
 	local meta `"variable label value message"'
 
 	* add user-specified keep vars to output list
@@ -119,6 +120,7 @@ program ipacheckskip, rclass
 	g newvalue = ""	
 
 	order `keeplist' notes drop newvalue
+    gsort -`submitted'
 
 	* export compiled list to excel
 	export excel using "`saving'" ,  ///

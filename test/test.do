@@ -23,6 +23,7 @@ ipacheckimport using "check01_test01_in.xlsx"
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check01_test01_out.xlsx") ///
     sheetreplace
 
@@ -32,6 +33,7 @@ ipacheckimport using "check01_test02_in.xlsx"
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check01_test02_out.xlsx") ///
     sheetreplace
 
@@ -41,6 +43,7 @@ ipacheckimport using "check01_test03_in.xlsx"
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(var1 var2) ///
     saving("check01_test03_out.xlsx") ///
     sheetreplace
@@ -51,6 +54,7 @@ ipacheckimport using "check01_test03_in.xlsx"
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(var1 var2) ///
     saving("check01_test03_out.xlsx") ///
     sheetreplace
@@ -61,6 +65,7 @@ ipacheckimport using "check01_test04_in.xlsx"
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
     percent(${complete_percent1}) ///
     id(id) ///
+	submit(var3) ///
     enumerator(enum) ///
 	keepvars(var1 var2) ///
     saving("check01_test04_out.xlsx") ///
@@ -79,6 +84,7 @@ ipacheckimport using "check02_test01_in.xlsx"
 ipacheckdups ${variable2}, ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check02_test01_out.xlsx") ///
     sheetreplace
 
@@ -88,6 +94,7 @@ ipacheckimport using "check02_test02_in.xlsx"
 ipacheckdups ${variable2}, ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check02_test02_out.xlsx") ///
     sheetreplace
 
@@ -97,6 +104,7 @@ ipacheckimport using "check02_test03_in.xlsx"
 ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check02_test03_out.xlsx") ///
     sheetreplace
 
@@ -106,6 +114,7 @@ ipacheckimport using "check02_test04_in.xlsx"
 ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check02_test04_out.xlsx") ///
     sheetreplace
 
@@ -115,6 +124,7 @@ ipacheckimport using "check02_test05_in.xlsx"
 ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(${keep_variable2}) ///
     saving("check02_test05_out.xlsx") ///
     sheetreplace
@@ -125,6 +135,7 @@ ipacheckimport using "check02_test06_in.xlsx"
 ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(${keep_variable2}) ///
     saving("check02_test06_out.xlsx") ///
     sheetreplace
@@ -135,6 +146,7 @@ ipacheckimport using "check02_test07_in.xlsx"
 ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(${keep_variable2}) ///
     saving("check02_test07_out.xlsx") ///
     sheetreplace
@@ -152,6 +164,7 @@ ipacheckimport using "check03_test01_in.xlsx"
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check03_test01_out.xlsx") ///
     sheetreplace
 
@@ -161,6 +174,7 @@ ipacheckimport using "check03_test02_in.xlsx"
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check03_test02_out.xlsx") ///
     sheetreplace
 
@@ -170,6 +184,7 @@ ipacheckimport using "check03_test03_in.xlsx"
 ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(var1 var2) ///
     saving("check03_test03_out.xlsx") ///
     sheetreplace
@@ -187,6 +202,7 @@ ipacheckimport using "check04_test01_in.xlsx"
 ipachecknomiss ${variable4}, ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check04_test01_out.xlsx") ///
     sheetreplace
 
@@ -196,6 +212,7 @@ ipacheckimport using "check04_test02_in.xlsx"
 ipachecknomiss ${variable4}, ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check04_test02_out.xlsx") ///
     sheetreplace
 	
@@ -205,6 +222,7 @@ ipacheckimport using "check04_test03_in.xlsx"
 ipachecknomiss ${variable4}, ///
     id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(${keep_variable4}) ///
     saving("check04_test03_out.xlsx") ///
     sheetreplace
@@ -222,6 +240,7 @@ ipacheckimport using "check05_test01_in.xlsx"
 ipacheckfollowup ${variable5} using "check05_test01_master.dta", ///
 	id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check05_test01_out.xlsx") ///
     sheetreplace
 	
@@ -231,6 +250,7 @@ ipacheckimport using "check05_test02_in.xlsx"
 ipacheckfollowup ${variable5} using "check05_test02_master.dta", ///
 	id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check05_test02_out.xlsx") ///
     sheetreplace
 
@@ -240,6 +260,7 @@ ipacheckimport using "check05_test03_in.xlsx"
 ipacheckfollowup ${variable5} using "check05_test03_master.dta", ///
 	id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
 	keepvars(${keep_variable5}) ///
     saving("check05_test03_out.xlsx") ///
     sheetreplace
@@ -250,6 +271,7 @@ ipacheckimport using "check05_test04_in.xlsx"
 ipacheckfollowup ${variable5} using "check05_test04_master.dta", ///
 	id(id) ///
     enumerator(enum) ///
+	submit(var4) ///
 	keepvars(${keep_variable5}) ///
 	keepmaster(${keep_master5}) ///
     saving("check05_test04_out.xlsx") ///
@@ -271,6 +293,7 @@ ipacheckskip ${variable6}, ///
 	keepvars(${keep_variable6}) ///
 	id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check06_test01_out.xlsx") ///
     sheetreplace
 	
@@ -283,6 +306,7 @@ ipacheckskip ${variable6}, ///
 	keepvars(${keep_variable6}) ///
 	id(id) ///
     enumerator(enum) ///
+	submit(var3) ///
     saving("check06_test02_out.xlsx") ///
     sheetreplace
 
@@ -295,6 +319,7 @@ ipacheckskip ${variable6}, ///
 	keepvars(${keep_variable6}) ///
 	id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check06_test03_out.xlsx") ///
     sheetreplace
 	
@@ -307,6 +332,7 @@ ipacheckskip ${variable6}, ///
 	keepvars(${keep_variable6}) ///
 	id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check06_test04_out.xlsx") ///
     sheetreplace*/
 	
@@ -351,6 +377,7 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
 	hmax(${hard_max8}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check08_test01_out.xlsx") ///
     sheetreplace
 
@@ -363,6 +390,7 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
 	hmax(${hard_max8}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check08_test02_out.xlsx") ///
     sheetreplace
 
@@ -375,6 +403,7 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
 	hmax(${hard_max8}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
 	keepvars("${keep_variable8}") ///
     saving("check08_test03_out.xlsx") ///
     sheetreplace
@@ -393,6 +422,7 @@ ipacheckspecify ${specify_variable9}, ///
 	othervars(${other_variable9}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(submissiondate) ///
     saving("check09_test01_out.xlsx") ///
     sheetreplace
 	
@@ -409,6 +439,7 @@ ipacheckimport using "check10_test01_in.xlsx"
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check10_test01_out.xlsx") ///
     sheetreplace
 
@@ -418,6 +449,7 @@ ipacheckimport using "check10_test02_in.xlsx"
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     saving("check10_test02_out.xlsx") ///
     sheetreplace
 
@@ -427,6 +459,7 @@ ipacheckimport using "check10_test03_in.xlsx"
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
 	enumarea(${enumarea10}) ///
 	days(${days10}) ///
     saving("check10_test03_out.xlsx") ///
@@ -438,6 +471,7 @@ ipacheckimport using "check10_test04_in.xlsx"
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
 	enumarea(${enumarea10}) ///
 	keepvars(${keep_variable10}) ///
 	days(${days10}) ///
@@ -456,6 +490,7 @@ use check11_test01, clear
 ipacheckimport using "check11_test01_in.xlsx"
 ipacheckoutliers ${variable11}, id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     multiplier(${multiplier11}) ///
     saving("check11_test01_out.xlsx") ///
     sheetreplace
@@ -465,6 +500,7 @@ use check11_test02, clear
 ipacheckimport using "check11_test02_in.xlsx"
 ipacheckoutliers ${variable11}, id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     multiplier(${multiplier11}) ///
     saving("check11_test02_out.xlsx") ///
     sheetreplace
@@ -474,6 +510,7 @@ use check11_test03, clear
 ipacheckimport using "check11_test03_in.xlsx"
 ipacheckoutliers ${variable11}, id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
     multiplier(${multiplier11}) ///
     saving("check11_test03_out.xlsx") ///
     sheetreplace sd
@@ -483,6 +520,7 @@ use check11_test04, clear
 ipacheckimport using "check11_test04_in.xlsx"
 ipacheckoutliers ${variable11}, id(id) ///
     enumerator(enum) ///
+    submit(var3) ///
 	keepvars(${keep_variable11}) ///
     multiplier(${multiplier11}) ///
     saving("check11_test04_out.xlsx") ///
