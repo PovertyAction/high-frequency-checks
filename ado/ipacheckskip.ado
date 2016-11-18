@@ -62,7 +62,9 @@ program ipacheckskip, rclass
 		gettoken cond2 condition : condition, p(";")
 		local assert : subinstr local assert ";" ""
 		local condition : subinstr local condition ";" ""
-		local i = `i' + 1
+
+		replace `test' = .
+		replace message = ""
 
 		if "`cond2'" == ";" {
 			cap assert `cond1'
