@@ -15,8 +15,8 @@ program ipacheckenum
 	    dkrfvars(varlist) 
 	    missvars(varlist) 
 	    durvars(varlist) 
-	    subdate(varname) 
-		[exclude(varlist) foteam(varlist) days(integer 7)]
+	    subdate(varname)
+		[duration(varname) exclude(varlist) foteam(varlist) days(integer 7)]
 		[replace modify];
 	#d cr
 	qui {
@@ -30,18 +30,45 @@ program ipacheckenum
 	local loopvars : list loopvars - durvars
 	
 	// define temp file
-	tempfile summary missing dontknow refusal duration
+	tempfile summary_sheet missing_sheet dontknow_sheet refusal_sheet duration_sheet
+
+	#d ;
+	tempvar interviews 
+	        missing
+	        dontknow
+	        refusal
+	        recent_interviews
+	        recent_missing
+	        recent_dontknow
+	        recent_refusal
+	        recent_duration
+	        row_nonmiss 
+	        row_miss 
+	        row_dk 
+	        row_rf
+	        col_sub_nonmiss
+	        col_sub_miss
+	        col_sub_dk
+	        col_sub_rf
+	        col_sub_dur
+	        col_sub_dkrate
+	        col_sub_rfrate
+	        col_sub_missrate;
+	#d cr
 
 	// set count variables
-	g interviews = 1
-	g row_nonmiss = 0
-	g row_miss = 0
-	g row_dk = 0
-	g row_rf = 0
+	g `interviews' = 1
+	g `row_nonmiss' = 0
+	g `row_miss' = 0
+	g `row_dk' = 0
+	g `row_rf' = 0
 	
 	// initialize duration variable
-	g duration = (endtime - starttime)/60000
-	replace duration = . if duration < 0
+	if "`duration'" == "" {
+		tempvar duration
+		g `duration' = (endtime - starttime)/60000
+	}
+	replace `duration' = . if `duration' < 0
 
 	/* loop through all variables, count number of interviews;
 	   nonmissing and missing responses; don't knows; refusals and
@@ -64,10 +91,10 @@ program ipacheckenum
 		count if `var' != miss
 		if r(N) > 0 {
 		// count the number of nonmissing, don't know, or refusal by obs
-		replace row_nonmiss = row_nonmiss + cond(`var' != miss, 1, 0)
-		replace row_miss = row_miss + cond(`var' == miss, 1, 0)
-		replace row_dk = row_dk + cond(`var' == dk, 1, 0)
-		replace row_rf = row_rf + cond(`var' == rf, 1, 0)
+		replace `row_nonmiss' = `row_nonmiss' + cond(`var' != miss, 1, 0)
+		replace `row_miss' = `row_miss' + cond(`var' == miss, 1, 0)
+		replace `row_dk' = `row_dk' + cond(`var' == dk, 1, 0)
+		replace `row_rf' = `row_rf' + cond(`var' == rf, 1, 0)
 
 		// count the number of nonmissing, don't know, or refusal per variable
 		quietly count if `var' != miss
@@ -80,33 +107,39 @@ program ipacheckenum
 		local col_rf = r(N)
 		
 		// variable subtotals by enumerator
-		bysort `enum': egen col_sub_nonmiss = total(`var' != miss)
-		bysort `enum': egen col_sub_miss = total(`var' == miss)
-		bysort `enum': egen col_sub_dk = total(`var' == dk)
-		bysort `enum': egen col_sub_rf = total(`var' == rf)
+		bysort `enum': egen `col_sub_nonmiss' = total(`var' != miss)
+		bysort `enum': egen `col_sub_miss' = total(`var' == miss)
+		bysort `enum': egen `col_sub_dk' = total(`var' == dk)
+		bysort `enum': egen `col_sub_rf' = total(`var' == rf)
 
 		// don't know and refusal rates by enumerator
-		g col_sub_dkrate = col_sub_dk / col_sub_nonmiss
-		g col_sub_rfrate = col_sub_rf / col_sub_nonmiss
-		g col_sub_missrate = col_sub_miss / (col_sub_nonmiss + col_sub_miss)
+		g `col_sub_dkrate' = `col_sub_dk' / `col_sub_nonmiss'
+		g `col_sub_rfrate' = `col_sub_rf' / `col_sub_nonmiss'
+		g `col_sub_missrate' = `col_sub_miss' / (`col_sub_nonmiss' + `col_sub_miss')
 		
 		/* if variable is in the list of important don't know 
 		   or refusal variables update respective sub sheets */
 		local inlist : list var in dkrfvars
 		if `inlist' {
-			_updatesheet col_sub_dkrate using `dontknow', by(`enum') rename(`var')
-			_updatesheet col_sub_rfrate using `refusal', by(`enum') rename(`var')
+			_updatesheet `col_sub_dkrate' using `dontknow_sheet', by(`enum') rename(`var')
+			_updatesheet `col_sub_rfrate' using `refusal_sheet', by(`enum') rename(`var')
 		}
 
 		/* if variable is in the list of important missing
 		   variables update respective sub sheets */
 		local inlist : list var in missvars
 		if `inlist' {
-			_updatesheet col_sub_missrate using `missing', by(`enum') rename(`var')
+			_updatesheet `col_sub_missrate' using `missing_sheet', by(`enum') rename(`var')
 		}
 		
 		// drop col vars
-		drop col_*
+	    drop `col_sub_nonmiss'  ///     
+	         `col_sub_miss'     ///  
+	         `col_sub_dk'       ///
+	         `col_sub_rf'       ///
+	         `col_sub_dkrate'   ///    
+	         `col_sub_rfrate'   ///    
+	         `col_sub_missrate'    
 		}
 	}
 	
@@ -114,28 +147,12 @@ program ipacheckenum
 	   and update the duration sheet */
 	foreach var of varlist `durvars' {
 		replace `var' = 0 if `var' < 0 & !mi(`var')
-		bysort `enum': egen col_sub_dur = mean(`var')
-		_updatesheet col_sub_dur using `duration', by(`enum') rename(`var')
-		drop col_sub_dur
+		bysort `enum': egen `col_sub_dur' = mean(`var')
+		_updatesheet `col_sub_dur' using `duration_sheet', by(`enum') rename(`var')
+		drop `col_sub_dur'
 	}
 	
 	// create summary sheet
-	preserve 
-	
-	// caluculate subtotals by enumerator
-	collapse (sum) interviews row_nonmiss row_miss row_dk row_rf (mean) duration, by(`enum') cw
-
-	// calculate rates
-	g missing = row_miss / (row_miss + row_nonmiss)
-	g dontknow = row_dk / row_nonmiss
-	g refusal = row_rf / row_nonmiss
-
-	// drop and save
-	drop row_*
-	save `summary', replace
-
-	restore
-
 	preserve
 
 	// restrict to specified number of days
@@ -145,44 +162,72 @@ program ipacheckenum
 	// caluculate subtotals by enumerator
 	if `=_N' > 0 {
 		collapse ///
-		   (sum) interviews row_nonmiss row_miss row_dk row_rf ///
-		   (mean) duration, by(`enum') cw
+		   (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf' ///
+		   (mean) `duration', by(`enum') cw
 
 		// calculate rates
-	    g interviews_`days'days = interviews
-	    g duration_`days'days = duration
-	    g missing_`days'days = row_miss / (row_miss + row_nonmiss)
-	    g dontknow_`days'days = row_dk / row_nonmiss
-	    g refusal_`days'days = row_rf / row_nonmiss
+	    g `recent_interviews' = `interviews'
+	    g `recent_duration' = `duration'
+	    g `recent_missing' = `row_miss' / (`row_miss' + `row_nonmiss')
+	    g `recent_dontknow' = `row_dk' / `row_nonmiss'
+	    g `recent_refusal' = `row_rf' / `row_nonmiss'
 
 	    // drop row totals
-		drop row_*
+	   drop `interviews' `row_miss' `row_nonmiss' `row_dk' `row_rf'
 	}
 	else {
 		keep `enum'
 
 		// calculate rates
-	    g interviews_`days'days = 0
-	    g duration_`days'days = 0
-	    g missing_`days'days = 0
-	    g dontknow_`days'days = 0
-	    g refusal_`days'days = 0
+	    g `recent_interviews' = 0
+	    g `recent_duration' = 0
+	    g `recent_missing' = 0
+	    g `recent_dontknow' = 0
+	    g `recent_refusal' = 0
 	}
+	
+	save `summary_sheet', replace
+	restore
 
+	preserve 
+	
+	// caluculate subtotals by enumerator
+	collapse ///
+	    (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf' ///
+	    (mean) `duration', by(`enum') cw
 
+	// calculate rates
+	g `missing' = `row_miss' / (`row_miss' + `row_nonmiss')
+	g `dontknow' = `row_dk' / `row_nonmiss'
+	g `refusal' = `row_rf' / `row_nonmiss'
+
+	// drop and save
+	drop `row_miss' `row_nonmiss' `row_dk' `row_rf'
 
 	// merge with overall totals
-	merge 1:1 `enum' using `summary', nogenerate
+	merge 1:1 `enum' using `summary_sheet', nogenerate
 
 	// order and save 
-	order `enum' interviews* missing* dontknow* refusal* duration*
-	format interviews* missing* dontknow* refusal* duration* %9.2f
-	save `summary', replace
+	order `enum'              ///         
+	      `interviews'        ///   
+	      `recent_interviews' ///          
+	      `missing'           ///
+	      `recent_missing'    ///       
+	      `dontknow'          ///
+	      `recent_dontknow'   ///       
+	      `refusal'           ///
+	      `recent_refusal'    ///      
+	      `duration'          ///
+	      `recent_duration'        
+
+    ds, has(type numeric)
+	format `r(varlist)' %9.2f
+	save `summary_sheet', replace
 
 	restore
 	
 	// drop count variables
-	drop interviews row_* duration
+	drop `interviews' `row_miss' `row_nonmiss' `row_dk' `row_rf'
 
 	preserve
 
@@ -193,7 +238,7 @@ program ipacheckenum
 	/* loop through tempfiles and export them as sheets in the
 	   excel workbook; set the filename of the workbook equal
 	   to the string in `using' */
-	foreach sheet in `summary' `missing' `dontknow' `refusal' `duration' {
+	foreach sheet in `summary_sheet' `missing_sheet' `dontknow_sheet' `refusal_sheet' `duration_sheet' {
 
 		local i = `i' + 1
 		local name : word `i' of `sheet_names'
