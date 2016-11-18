@@ -7,7 +7,7 @@ program ipacheckdups, rclass
 	version 13
 
 	#d ;
-	syntax varlist, 	
+	syntax varlist [if] [in], 	
 		/* consent options */
 	    [UNIQUEvars(varlist)]
 		/* output filename */
@@ -17,6 +17,8 @@ program ipacheckdups, rclass
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
 	#d cr
+
+	marksample touse, novarlist
 
 	di ""
 	di "HFC 2 => Checking that there are no duplicates..."
@@ -53,6 +55,9 @@ program ipacheckdups, rclass
 		g `var' = ""
 	}
 
+	* keep only subset of data relevant to command
+	keep if `touse'
+
 	* initialize temporary output file
 	touch `tmp', var(`keeplist')
 
@@ -77,7 +82,9 @@ program ipacheckdups, rclass
 			local ndups1 = `r(N)'
 
 			if "`uvars'" != "" {
-			
+				
+				sort `var' `uvars'
+				
 				/* if specified, tag any duplicates for the id and a combination
 				   of other variables that should uniquely identify the data set.
 				   Example - data set in memory has multiple interviews with 
