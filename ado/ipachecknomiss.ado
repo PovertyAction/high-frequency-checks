@@ -178,7 +178,7 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using', force
+	append using `using'
 
 	if "`sort'" != "" {
 		sort `sort'
@@ -189,4 +189,36 @@ program saveappend
 
 	restore
 end
+
+program touch
+	syntax [anything], [var(varlist)] [replace] 
+
+	* remove quotes from filename, if present
+	local file = `"`=subinstr(`"`anything'"', `"""', "", .)'"'
+
+	* test fatal conditions
+	cap assert "`file'" != "" 
+	if _rc {
+		di as err "must specify valid filename."
+		error 100
+	}
+
+	preserve 
+
+	if "`var'" != "" {
+		keep `var'
+		drop if _n > 0
+	}
+	else {
+		drop _all
+		g var = 1
+		drop var
+	}
+	* save 
+	save "`file'", emptyok `replace'
+
+	restore
+
+end
+
 
