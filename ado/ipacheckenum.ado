@@ -66,16 +66,22 @@ program ipacheckenum
 	g `row_dk' = 0
 	g `row_rf' = 0
 	
-	// initialize duration variable
+	// initialize duration variable, create local have_duration to signal existence of duration variable
 	if "`duration'" == "" {
 		cap confirm variable endtime starttime
 		if _rc == 0{
 			tempvar duration
 			g `duration' = (endtime - starttime)/60000
+			loc have_duration = 1
+		}
+		else{
+			loc have_duration = 0
 		}
 	}
-	cap confirm variable duration
-	if _rc == 0{
+	else{
+		loc have_duration = 1
+	}
+	if `have_duration' == 1{
 		replace `duration' = . if `duration' < 0
 	}
 
@@ -179,7 +185,7 @@ program ipacheckenum
 	}
 	
 	//create collapse command for calculating subtotals by enumerator
-	if "`duration'" == ""{
+	if `have_duration' == 0{
 		loc collapse_command "collapse (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf', by(`enum') cw"
 	}
 	else{
@@ -192,7 +198,7 @@ program ipacheckenum
 		
 		// calculate rates
 	    g `recent_interviews' = `interviews'
-		if "`duration'" != ""{
+		if `have_duration' == 1{
 			g `recent_duration' = `duration'
 		}
 		else{
@@ -210,7 +216,7 @@ program ipacheckenum
 
 		// calculate rates
 	    g `recent_interviews' = 0
-		if "`duration'" != ""{
+		if `have_duration' == 1{
 			g `recent_duration' = 0
 		}
 		else{
