@@ -13,12 +13,15 @@ program ipacheckenum
 	#d ;
 	syntax varname using/ ,
 	    dkrfvars(varlist) 
-	    missvars(varlist) 
-	    durvars(varlist) 
+	    missvars(varlist)  
 	    subdate(varname)
-		[duration(varname) exclude(varlist) foteam(varlist) days(integer 7)]
+		[durvars(varlist) duration(varname) exclude(varlist) foteam(varlist) days(integer 7)]
 		[replace modify];
 	#d cr
+	*loc dkrfvars gender ward
+	*loc missvars eduattain id gender
+	*loc subdate(enddate)
+	*loc enum enumid
 	qui {
 	
 	// capture enumerator variable
@@ -65,10 +68,16 @@ program ipacheckenum
 	
 	// initialize duration variable
 	if "`duration'" == "" {
-		tempvar duration
-		g `duration' = (endtime - starttime)/60000
+		cap confirm variable endtime starttime
+		if _rc == 0{
+			tempvar duration
+			g `duration' = (endtime - starttime)/60000
+		}
 	}
-	replace `duration' = . if `duration' < 0
+	cap confirm variable duration
+	if _rc == 0{
+		replace `duration' = . if `duration' < 0
+	}
 
 	/* loop through all variables, count number of interviews;
 	   nonmissing and missing responses; don't knows; refusals and
@@ -76,17 +85,17 @@ program ipacheckenum
 	foreach var of varlist `loopvars' {
 
 		cap confirm numeric variable `var' 
-		// numeric variables
-		if _rc == 0 {
-			scalar miss = .
-			scalar dk = .d
-			scalar rf = .r
-		}
 		// string variables
-		else {
+		if _rc  {
 			scalar miss = ""
 			scalar dk = "don't know"
 			scalar rf = "refusal"
+		}
+		// numeric variables
+		else {
+			scalar miss = .
+			scalar dk = .d
+			scalar rf = .r
 		}
 		count if `var' != miss
 		if r(N) > 0 {
@@ -145,11 +154,13 @@ program ipacheckenum
 	
 	/* loop through the duration variables, calculate the mean
 	   and update the duration sheet */
-	foreach var of varlist `durvars' {
-		replace `var' = 0 if `var' < 0 & !mi(`var')
-		bysort `enum': egen `col_sub_dur' = mean(`var')
-		_updatesheet `col_sub_dur' using `duration_sheet', by(`enum') rename(`var')
-		drop `col_sub_dur'
+	if "`durvars'" != ""{
+		foreach var of varlist `durvars' {
+			replace `var' = 0 if `var' < 0 & !mi(`var')
+			bysort `enum': egen `col_sub_dur' = mean(`var')
+			_updatesheet `col_sub_dur' using `duration_sheet', by(`enum') rename(`var')
+			drop `col_sub_dur'
+		}
 	}
 	
 	// create summary sheet
@@ -157,17 +168,36 @@ program ipacheckenum
 
 	// restrict to specified number of days
 	local today = date(c(current_date), "DMY")
-	keep if dofc(`subdate') > `today' - `days' 
-
+	sum `subdate'
+	//tests if the date is already in td format
+	if `r(max)' < 100000{
+		keep if `subdate' > `today' - `days'
+	}
+	//if not already in td format, uses dofc for date
+	else{
+		keep if dofc(`subdate') > `today' - `days'
+	}
+	
+	//create collapse command for calculating subtotals by enumerator
+	if "`duration'" == ""{
+		loc collapse_command "collapse (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf', by(`enum') cw"
+	}
+	else{
+		loc collapse_command "collapse (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf' (mean) `duration', by(`enum') cw"
+	}
 	// caluculate subtotals by enumerator
 	if `=_N' > 0 {
-		collapse ///
-		   (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf' ///
-		   (mean) `duration', by(`enum') cw
-
+		`collapse_command'
+		isid `enum'
+		
 		// calculate rates
 	    g `recent_interviews' = `interviews'
-	    g `recent_duration' = `duration'
+		if "`duration'" != ""{
+			g `recent_duration' = `duration'
+		}
+		else{
+			g `recent_duration' = .
+		}
 	    g `recent_missing' = `row_miss' / (`row_miss' + `row_nonmiss')
 	    g `recent_dontknow' = `row_dk' / `row_nonmiss'
 	    g `recent_refusal' = `row_rf' / `row_nonmiss'
@@ -180,7 +210,12 @@ program ipacheckenum
 
 		// calculate rates
 	    g `recent_interviews' = 0
-	    g `recent_duration' = 0
+		if "`duration'" != ""{
+			g `recent_duration' = 0
+		}
+		else{
+			g `recent_duration' = ""
+		}
 	    g `recent_missing' = 0
 	    g `recent_dontknow' = 0
 	    g `recent_refusal' = 0
@@ -192,9 +227,7 @@ program ipacheckenum
 	preserve 
 	
 	// caluculate subtotals by enumerator
-	collapse ///
-	    (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf' ///
-	    (mean) `duration', by(`enum') cw
+	`collapse_command'
 
 	// calculate rates
 	g `missing' = `row_miss' / (`row_miss' + `row_nonmiss')

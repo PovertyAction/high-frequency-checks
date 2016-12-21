@@ -14,8 +14,8 @@ set trace off
 /* =================================================
    ==================== Check 1 ==================== 
    ================================================= */
-
-cd "check01"
+/*
+cd "../check01"
 
 * Test 1
 use check01_test01, clear
@@ -550,12 +550,26 @@ use summary_test03, clear
 local target = 100
 local outfile "summary test03_out.xlsx"
 ipachecksummary using "`outfile'", target(`target') modify
+*/
 
+/* =================================================
+   =================== Enumerator ================== 
+   ================================================= */
+   
+cd "../enumerator"
+*Test 1
+use enumerator_test01, clear
+ipacheckimport using "enumerator_test01_in.xlsx"
+ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
+   dkrfvars(${dkrf_variable12}) ///
+   missvars(${missing_variable12}) ///
+   subdate(${submission_date12}) ///
+   days(2000)
 
 /* =================================================
    ==================== Master ===================== 
    ================================================= */
-   
+  
 cd "../master"
 
 * Test 1
