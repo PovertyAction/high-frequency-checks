@@ -171,33 +171,33 @@ program ipacheckenum
 	// restrict to specified number of days
 	local today = date(c(current_date), "DMY")
 	ds `subdate', has(format %tc*)
-	//tests if the date is already in td format
+	// tests if the date is already in td format
 	if "`r(varlist)'" != "" {
 		keep if `subdate' > `today' - `days'
 	}
-	//if not already in td format, uses dofc for date
-	else{
+	// if not already in td format, uses dofc for date
+	else {
 		keep if dofc(`subdate') > `today' - `days'
 	}
 	
-	//create collapse command for calculating subtotals by enumerator
-	if `have_duration' == 0 {
+	// create collapse command for calculating subtotals by enumerator
+	if !`have_duration' {
 		loc collapse_command "collapse (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf', by(`enum') cw"
 	}
-	else{
+	else {
 		loc collapse_command "collapse (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf' (mean) `duration', by(`enum') cw"
 	}
 	// caluculate subtotals by enumerator
 	if `=_N' > 0 {
-		`collapse_command'
-		isid `enum'
+	   `collapse_command'
+	   isid `enum'
 		
-		// calculate rates
+	    // calculate rates
 	    g `recent_interviews' = `interviews'
-		if `have_duration' == 1{
+		if `have_duration' == 1 {
 			g `recent_duration' = `duration'
 		}
-		else{
+		else {
 			g `recent_duration' = .
 		}
 	    g `recent_missing' = `row_miss' / (`row_miss' + `row_nonmiss')
@@ -210,12 +210,12 @@ program ipacheckenum
 	else {
 		keep `enum'
 
-		// calculate rates
+	    // calculate rates
 	    g `recent_interviews' = 0
 		if `have_duration' {
 			g `recent_duration' = 0
 		}
-		else{
+		else {
 			g `recent_duration' = ""
 		}
 	    g `recent_missing' = 0
