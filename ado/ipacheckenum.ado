@@ -194,7 +194,7 @@ program ipacheckenum
 		
 	    // calculate rates
 	    g `recent_interviews' = `interviews'
-		if `have_duration' == 1 {
+		if `have_duration' {
 			g `recent_duration' = `duration'
 		}
 		else {
