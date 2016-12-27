@@ -323,7 +323,7 @@ ipacheckskip ${variable6}, ///
     saving("check06_test03_out.xlsx") ///
     sheetreplace
 	
-/* Test 4
+	* Test 4
 use check06_test04, clear
 ipacheckimport using "check06_test04_in.xlsx"
 ipacheckskip ${variable6}, ///
@@ -553,9 +553,23 @@ ipachecksummary using "`outfile'", target(`target') modify
 
 
 /* =================================================
-   ==================== Master ===================== 
+   =================== Enumerator ================== 
    ================================================= */
    
+cd "../enumerator"
+*Test 1
+use enumerator_test01, clear
+ipacheckimport using "enumerator_test01_in.xlsx"
+ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
+   dkrfvars(${dkrf_variable12}) ///
+   missvars(${missing_variable12}) ///
+   subdate(${submission_date12}) ///
+   days(2000)
+
+/* =================================================
+   ==================== Master ===================== 
+   ================================================= */
+  
 cd "../master"
 
 * Test 1
