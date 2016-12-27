@@ -18,10 +18,6 @@ program ipacheckenum
 		[durvars(varlist) duration(varname) exclude(varlist) foteam(varlist) days(integer 7)]
 		[replace modify];
 	#d cr
-	*loc dkrfvars gender ward
-	*loc missvars eduattain id gender
-	*loc subdate(enddate)
-	*loc enum enumid
 	qui {
 	
 	// capture enumerator variable
@@ -74,14 +70,14 @@ program ipacheckenum
 			g `duration' = (endtime - starttime)/60000
 			loc have_duration = 1
 		}
-		else{
+		else {
 			loc have_duration = 0
 		}
 	}
-	else{
+	else {
 		loc have_duration = 1
 	}
-	if `have_duration' == 1{
+	if `have_duration' {
 		replace `duration' = . if `duration' < 0
 	}
 
@@ -160,7 +156,7 @@ program ipacheckenum
 	
 	/* loop through the duration variables, calculate the mean
 	   and update the duration sheet */
-	if "`durvars'" != ""{
+	if "`durvars'" != "" {
 		foreach var of varlist `durvars' {
 			replace `var' = 0 if `var' < 0 & !mi(`var')
 			bysort `enum': egen `col_sub_dur' = mean(`var')
@@ -174,9 +170,9 @@ program ipacheckenum
 
 	// restrict to specified number of days
 	local today = date(c(current_date), "DMY")
-	sum `subdate'
+	ds `subdate', has(format %tc*)
 	//tests if the date is already in td format
-	if `r(max)' < 100000{
+	if "`r(varlist)'" != "" {
 		keep if `subdate' > `today' - `days'
 	}
 	//if not already in td format, uses dofc for date
@@ -185,7 +181,7 @@ program ipacheckenum
 	}
 	
 	//create collapse command for calculating subtotals by enumerator
-	if `have_duration' == 0{
+	if `have_duration' == 0 {
 		loc collapse_command "collapse (sum) `interviews' `row_nonmiss' `row_miss' `row_dk' `row_rf', by(`enum') cw"
 	}
 	else{
@@ -216,7 +212,7 @@ program ipacheckenum
 
 		// calculate rates
 	    g `recent_interviews' = 0
-		if `have_duration' == 1{
+		if `have_duration' {
 			g `recent_duration' = 0
 		}
 		else{

@@ -14,7 +14,7 @@ set trace off
 /* =================================================
    ==================== Check 1 ==================== 
    ================================================= */
-/*
+
 cd "../check01"
 
 * Test 1
@@ -323,7 +323,7 @@ ipacheckskip ${variable6}, ///
     saving("check06_test03_out.xlsx") ///
     sheetreplace
 	
-/* Test 4
+	* Test 4
 use check06_test04, clear
 ipacheckimport using "check06_test04_in.xlsx"
 ipacheckskip ${variable6}, ///
@@ -550,7 +550,7 @@ use summary_test03, clear
 local target = 100
 local outfile "summary test03_out.xlsx"
 ipachecksummary using "`outfile'", target(`target') modify
-*/
+
 
 /* =================================================
    =================== Enumerator ================== 
