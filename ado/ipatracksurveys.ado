@@ -61,49 +61,51 @@ qui {
 		error 101
 		}
 	
+	tempvar sub 
 	//now convert `subdate' to %td format
 	ds `subdate', has(format %tc*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofc(`subdate')
+		gen `sub' = dofc(`subdate')
 		}
 		
 	ds `subdate', has(format %tC*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofC(`subdate')
+		gen `sub' = dofC(`subdate')
 		}
 		
 	ds `subdate', has(format %tb*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofb(`subdate')
+		gen `sub' = dofb(`subdate')
 		}
 	
 	ds `subdate', has(format %tw*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofw(`subdate')
+		gen `sub' = dofw(`subdate')
 		}
 		
 	ds `subdate', has(format %tm*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofm(`subdate')
+		gen `sub' = dofm(`subdate')
 		}
 
 	ds `subdate', has(format %tq*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofq(`subdate')
+		gen `sub' = dofq(`subdate')
 		}
 		
 	ds `subdate', has(format %th*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofh(`subdate')
+		gen `sub' = dofh(`subdate')
 		}
 
 	ds `subdate', has(format %ty*)
 	if !mi("`r(varlist)'") {
-		replace `subdate' = dofy(`subdate')
+		gen `sub' = dofy(`subdate')
 		}
 	
 	//format consistantly
-	format `subdate' %td		
+	format `sub' %tdCCYY/MM/DD	
+		
 	tostring `varlist', replace //make string to be consistent
 
 	//replace `varlist' with warning message if missing
@@ -112,9 +114,9 @@ qui {
 	replace `varlist' = "MISSING `varlist'" if `varlist' == ""
 	
 	tempvar survey_start survey_end survey_num_done
-	keep `varlist' `subdate' //only interested in the geo var and submissiondate 
-	bysort `varlist': egen `survey_start' = min(`subdate') //get first submissiondate per geographic unit 
-	bysort `varlist': egen `survey_end' = max(`subdate') //get last submissiondate per geographic unit 
+	keep `varlist' `sub' //only interested in the geo var and submissiondate 
+	bysort `varlist': egen `survey_start' = min(`sub') //get first submissiondate per geographic unit 
+	bysort `varlist': egen `survey_end' = max(`sub') //get last submissiondate per geographic unit 
 	gen `survey_num_done' = 1 	//in the collapse below this will get summed to become number interviews per community 
 	collapse (sum) `survey_num_done' (first) `survey_start' `survey_end', by(`varlist')	//collapse so the dataset is at the geo unit level (1 obs per geo unit)
 	sort `varlist' //sort by geographic unit var 
