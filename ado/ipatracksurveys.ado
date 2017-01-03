@@ -61,8 +61,14 @@ qui {
 		error 101
 		}
 	
+	//now convert `subdate' to %td format if needed using tempvar, sub
 	tempvar sub 
-	//now convert `subdate' to %td format
+	
+	ds `subdate', has(format %td*)
+	if !mi("`r(varlist)'") {
+		gen `sub' = `subdate'
+		}
+
 	ds `subdate', has(format %tc*)
 	if !mi("`r(varlist)'") {
 		gen `sub' = dofc(`subdate')
@@ -104,7 +110,7 @@ qui {
 		}
 	
 	//format consistantly
-	format `sub' %tdCCYY/MM/DD	
+	format `sub' %tdCCYY/NN/DD	
 		
 	tostring `varlist', replace //make string to be consistent
 
@@ -120,7 +126,7 @@ qui {
 	gen `survey_num_done' = 1 	//in the collapse below this will get summed to become number interviews per community 
 	collapse (sum) `survey_num_done' (first) `survey_start' `survey_end', by(`varlist')	//collapse so the dataset is at the geo unit level (1 obs per geo unit)
 	sort `varlist' //sort by geographic unit var 
-	format %tdnn/dd/YY `survey_start' `survey_end' //format our dates
+	format %tdCCYY/NN/DD `survey_start' `survey_end' //format our dates
 	save `dates', replace
 	restore 
 
@@ -257,20 +263,20 @@ qui {
 	
 	//get today's date for sheet's header
 	local today = date(c(current_date), "DMY")
-	local today_f : di %tdnn/dd/YY `today'
+	local today_f : di %tdCCYY/NN/DD `today'
 	label var `var1' "Survey Statuses as of `today_f'"
 
 
 	//now export our header
-	export excel using "`saving'", sheet("Survey Tracking") firstrow(varl) sheetreplace	
+	export excel using "`saving'", sheet("Survey Tracking") firstrow(varl) datestring("%tdCCYY/NN/DD")  sheetreplace	
 	restore 
 	
 
 	//now go back to data set before and export our table below the header
 	preserve
 	use `full_data', clear
-	format %td `survey_start' `survey_end'	//format our dates
-	export excel using "`saving'", sheet("Survey Tracking") firstrow(varl) cell(A2)  sheetmodify	
+	format %tdCCYY/NN/DD `survey_start' `survey_end'	//format our dates
+	export excel using "`saving'", sheet("Survey Tracking") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetmodify	
 	
 	//save some stats to display after running the program 
 	tempvar total
@@ -301,11 +307,11 @@ qui {
 	//get date range
 	sum `survey_start'
 	local first = `r(min)' 
-	local first: disp %tdMonth_dd,_CCYY `first'
+	local first: disp %tdCCYY/NN/DD `first'
 	local first = trim("`first'")
 	sum `survey_end'
 	local last = `r(max)' 
-	local last: disp %tdMonth_dd,_CCYY `last'
+	local last: disp %tdCCYY/NN/DD `last'
 	local last = trim("`last'")
 
 	restore 
