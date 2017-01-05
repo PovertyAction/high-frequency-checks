@@ -63,7 +63,12 @@ program ipacheckimport, rclass
 	    			if inlist("`var'", "keep", "assert", "if_condition") {
 	    				* add a semi-colon signifying the end of the line
 	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
-	    			}  		
+	    			}
+					*if the variable column for the skip check
+					if "`var'" == "variable" & `n' == 6 {
+	    				* add a semi-colon signifying the end of the line
+	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
+					}
 	    		}
 	    	}
 	    }

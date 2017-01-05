@@ -5,7 +5,7 @@ program ipacheckskip, rclass
 	version 13
 
 	#d ;
-	syntax varlist, 
+	syntax anything, 
 		/* soft constraint options */
 	    ASSert(string) [CONDition(string)]
 		/* output filename */
@@ -32,15 +32,32 @@ program ipacheckskip, rclass
 	* define temporary variable
 	tempvar test
 	g `test' = .
+	
+	*break down the varlist into sets of variables
+	local testnum = 0
+	local varnum = 1
+	while strpos("`anything'", ";") > 0  {
+		local ++testnum
+		gettoken varlist`testnum' anything : anything, p(";")
+		local anything : subinstr loc anything ";" ""
+		
+		*find maximum number of variables listed in a test
+		local new_words: word count `varlist`testnum''
+		if `new_words' > `varnum'{
+			local varnum = `new_words'
+		}
+	}
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value message"'
+	forval x = 1 / `varnum' {
+		local meta `meta' variable_`x' label_`x'
+	}
+	local meta `"`meta' message"'
 
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
     local lines : subinstr local lines "." "", all
-
     local unique : list uniq lines
     local keeplist : list admin | meta
     local keeplist : list keeplist | unique
@@ -58,7 +75,8 @@ program ipacheckskip, rclass
 	touch `tmp', var(`keeplist')
 
 	* loop through varlist and test assertions
-	foreach var in `varlist' {
+	forval x = 1 / `testnum' {
+		local varlist `varlist`x''
 		gettoken cond1 assert : assert, p(";")
 		gettoken cond2 condition : condition, p(";")
 		local assert : subinstr local assert ";" ""
@@ -66,6 +84,10 @@ program ipacheckskip, rclass
 
 		replace `test' = .
 		replace message = ""
+		forval a = 1 / `varnum' {
+			replace variable_`a' = ""
+			replace label_`a' = ""
+		}
 
 		if "`cond2'" == ";" {
 			cap assert `cond1'
@@ -81,24 +103,31 @@ program ipacheckskip, rclass
 				replace message = `"Assertion "`cond1' if `cond2'" is invalid "'
 			}
 		}
-
+		
 		* count the invalid assertions
 		count if `test' == 0
 		local viol = `r(N)'
 		local nviol = `nviol' + `viol'
 
 		* capture variable label
-		local varl : variable label `var'
+		local n = 1
+		foreach var in `varlist' {
+			local varl_`n' : variable label `var'
+			local ++n
+		}
 
 		* update values of meta data variables
-		replace variable = "`var'"
-		replace label = "`varl'"
-		cap confirm numeric variable `var' 
-		if !_rc {
-			replace value = string(`var')
-		}
-		else {
-			replace value = `var'
+		local n = 1
+		foreach var in `varlist' {
+			replace label_`n' = "`varl_`n''"
+			cap confirm numeric variable `var' 
+			if !_rc {
+				replace variable_`n' = "`var' = " + string(`var')
+			}
+			else {
+				replace variable_`n' = "`var' = " + `var'
+			}
+			local ++n
 		}
 
 		* append violations to the temporary data set
