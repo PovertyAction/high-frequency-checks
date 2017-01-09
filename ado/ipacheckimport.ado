@@ -1,3 +1,4 @@
+*! version 1.0.1 Kelsey Larson 08jan2017
 *! version 1.0.0 Christopher Boyer 04may2016
 
 program ipacheckimport, rclass
@@ -64,7 +65,8 @@ program ipacheckimport, rclass
 	    				* add a semi-colon signifying the end of the line
 	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
 	    			}
-					*if the variable column for the skip check
+					
+					* if the variable column for the skip check
 					if "`var'" == "variable" & `n' == 6 {
 	    				* add a semi-colon signifying the end of the line
 	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
