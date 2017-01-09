@@ -33,7 +33,7 @@ program ipacheckskip, rclass
 	tempvar test
 	g `test' = .
 	
-	*break down the varlist into sets of variables
+	* break down the varlist into sets of variables
 	local testnum = 0
 	local varnum = 1
 	while strpos("`anything'", ";") > 0  {
