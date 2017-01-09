@@ -323,7 +323,7 @@ ipacheckskip ${variable6}, ///
     saving("check06_test03_out.xlsx") ///
     sheetreplace
 	
-	* Test 4
+	/* Test 4
 use check06_test04, clear
 ipacheckimport using "check06_test04_in.xlsx"
 ipacheckskip ${variable6}, ///
@@ -336,6 +336,18 @@ ipacheckskip ${variable6}, ///
     saving("check06_test04_out.xlsx") ///
     sheetreplace*/
 	
+	* Test 5
+use check06_test05, clear
+ipacheckimport using "check06_test05_in.xlsx"
+ipacheckskip ${variable6}, ///
+	assert(`"${assert6}"') ///
+	condition(`"${if_condition6}"') ///
+	keepvars(${keep_variable6}) ///
+	id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+    saving("check06_test05_out.xlsx") ///
+    sheetreplace
 
 /* =================================================
    ==================== Check 7 ==================== 
