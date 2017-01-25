@@ -7,9 +7,9 @@ program ipacheckdups, rclass
 	version 13
 
 	#d ;
-	syntax varlist [if] [in], 	
+	syntax anything [if] [in], 	
 		/* consent options */
-	    [UNIQUEvars(varlist)]
+	    [UNIQUEvars(anything)]
 		/* output filename */
 	    saving(string) 
 	    /* output options */
@@ -31,10 +31,34 @@ program ipacheckdups, rclass
 
 	* define temporary variable
 	tempvar dup1 dup2
+	
+	*merge the variable lists in uniquevars and anything
+	loc n = 0
+	loc maxvarcount = 1
+	while strpos("`anything'", ";") > 0  {
+		local ++n
+		gettoken varlista anything : anything, p(";")
+		local anything : subinstr loc anything ";" ""
+		
+		if strpos("`uniquevars'", ";") != 1 {
+			gettoken varlistb uniquevars : uniquevars, p(";")
+		}
+		local uniquevars: subinstr loc uniquevars ";" ""
+		
+		loc varlist`n' `varlista' `varlistb'
+		
+		*calculate maximum number of variables in a check
+		loc newcount : word count "`varlist`n'"
+		if `newcount' > `maxvarcount' {
+			loc maxvarcount `newcount'
+		}
+		
+	}
+	loc checksneeded `n'
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value message"'
+	local meta `"variable value message"'
 
 	* add user-specified keep vars to output list
     local keeprows : subinstr local keepvars ";" "", all
@@ -45,7 +69,7 @@ program ipacheckdups, rclass
     local keeplist : list admin | uniqueidvars
     local keeplist : list keeplist | meta
     local keeplist : list keeplist | uniquekeepvars
-
+	
     * define locals
 	local ndups1 = 0
 	local ndups2 = 0
@@ -62,16 +86,14 @@ program ipacheckdups, rclass
 	* initialize temporary output file
 	touch `tmp', var(`keeplist')
 
-	foreach var in `varlist' {
-		local uvars: word `i' of `"`uniquevars'"'
-		local i = `i' + 1
+	forval x = 1 / `checksneeded' {
 
 		* tag duplicates of id variable 
-		duplicates tag `var', gen(`dup1')
+		duplicates tag `varlist`x'', gen(`dup1')
 
 		* sort data set
-		if "`var'" != "" {
-			sort `var'
+		if "`varlist`x''" != "" {
+			sort `varlist`x''
 		}
 		
 		* if there are any duplicates
@@ -82,93 +104,36 @@ program ipacheckdups, rclass
 			count if `dup1' != 0
 			local ndups1 = `r(N)'
 
-			if "`uvars'" != "" {
-				
-				sort `var' `uvars'
-				
-				/* if specified, tag any duplicates for the id and a combination
-				   of other variables that should uniquely identify the data set.
-				   Example - data set in memory has multiple interviews with 
-				   same subject and id + date uniquely identify data. */
-				duplicates tag `var' `uvars', gen(`dup2')
-
-				* if there are still duplicates
-				cap assert `dup2' == 0
-				if _rc {
-					* count the duplicates
-					count if `dup2' != 0
-					local ndups2 = `r(N)'
-
-					* alert the user
-					nois di "  Variable `var' has `ndups1' duplicate observations."
-					nois di "  The variable combination `var' `uniquevars' has `ndups2' duplicate observations"
-					
-					* capture variable label
-					local varl : variable label `var'
-
-					* update values of meta data variables
-					replace variable = "`var' `uvars'"
-					replace label = "`varl'"
-					cap confirm numeric variable `var' 
-					if !_rc {
-						replace value = string(`var')
-						foreach v in `uvars' {
-							cap confirm numeric variable `v'
-							if !_rc {
-								replace value = value + " " + string(`v')
-							}
-							else {
-								replace value = value + " " + `v'
-							}
-						}
-					}
-					else {
-						replace value = `var'
-						foreach v in `uvars' {
-							cap confirm numeric variable `v'
-							if !_rc {
-								replace value = value + " " + string(`v')
-							}
-							else {
-								replace value = value + " " + `v'
-							}
-						}
-					}
-			 		replace message = `"Duplicate observation for `var' + `uvars'."'
-
-					* append violations to the temporary data set
-					saveappend using `tmp' if `dup2' != 0, ///
-						keep("`keeplist'")
-
-				}
-				else {
-					* alert the user that no duplicates found for unique vars
-					nois di "  No duplicates found for ID combination `var' + `uvars'."
-				}
-				drop `dup2'
+			* alert the user
+			loc length : word count "`varlist`x'"
+			if `length' == 1 {
+				nois di "  Variable `varlist`x'' has `ndups1' duplicate observations."
 			}
 			else {
-				
-				* alert the user
-				nois di "  Variable `var' has `ndups1' duplicate observations."
-				
-				* capture variable label
+				nois di "  The variable combination `varlist`x'' has `ndups1' duplicate observations"
+			}
+			
+			* capture variable labels
+			loc n == 0
+			foreach var in `varlist`x''{
+				loc ++n
 				local varl : variable label `var'
 
-				* update values of meta data variables
-				replace variable = "`var'"
-				replace label = "`varl'"
+				* update values of meta data variables //NEED TO ADD LOOP FOR EXTRA VARS
+				replace variable`n' = "`var'"
+				replace label`n' = "`varl'"
 				cap confirm numeric variable `var' 
 				if !_rc {
-					replace value = string(`var')
+					replace value`n' = string(`var')
 				}
 				else {
-					replace value = `var'
+					replace value`n' = `var'
 				}
-		 		replace message = `"Duplicate observation for `var'."'
+			}
+			replace message = `"Duplicate observation for `varlist`x''."'
 
 				* append violations to the temporary data set
-				saveappend using `tmp' if `dup1' != 0, ///
+				saveappend using `tmp' if `dup2' != 0, ///
 					keep("`keeplist'")
 
 			}
@@ -178,7 +143,7 @@ program ipacheckdups, rclass
 			nois di "  No duplicates found for ID variable `var'."
 		}
 	    drop `dup1'
-	}
+	
 
 	* import compiled list of violations
 	use `tmp', clear
