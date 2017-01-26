@@ -1,4 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 1.0.1 Kelsey Larson 26Jan2017
 
 program ipacheckdups, rclass
 	/* This program checks that there are no duplicate interviews.
@@ -9,7 +9,7 @@ program ipacheckdups, rclass
 	#d ;
 	syntax anything [if] [in], 	
 		/* consent options */
-	    [UNIQUEvars(anything)]
+	    [UNIQUEvars(string)]
 		/* output filename */
 	    saving(string) 
 	    /* output options */
@@ -30,36 +30,30 @@ program ipacheckdups, rclass
 	save `org'
 
 	* define temporary variable
-	tempvar dup1 dup2
+	tempvar dup1
 	
 	*merge the variable lists in uniquevars and anything
 	loc n = 0
-	loc maxvarcount = 1
-	while strpos("`anything'", ";") > 0  {
+	while strpos("`anything'", ";") > 0 {
 		local ++n
-		gettoken varlista anything : anything, p(";")
+		gettoken varlista`n' anything : anything, p(";")
 		local anything : subinstr loc anything ";" ""
 		
 		if strpos("`uniquevars'", ";") != 1 {
-			gettoken varlistb uniquevars : uniquevars, p(";")
+			gettoken varlistb`n' uniquevars : uniquevars, p(";")
 		}
 		local uniquevars: subinstr loc uniquevars ";" ""
+		local varlistb`n': subinstr loc varlistb`n' ";" ""
 		
-		loc varlist`n' `varlista' `varlistb'
-		
-		*calculate maximum number of variables in a check
-		loc newcount : word count "`varlist`n'"
-		if `newcount' > `maxvarcount' {
-			loc maxvarcount `newcount'
-		}
+		loc varlist`n' `varlista`n'' `varlistb`n''
 		
 	}
 	loc checksneeded `n'
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable value message"'
-
+	local meta `"variable label value message"'
+	
 	* add user-specified keep vars to output list
     local keeprows : subinstr local keepvars ";" "", all
     local keeprows : subinstr local keeprows "." "", all
@@ -72,7 +66,6 @@ program ipacheckdups, rclass
 	
     * define locals
 	local ndups1 = 0
-	local ndups2 = 0
 	local i = 1
 
 	* initialize meta data variables
@@ -113,36 +106,36 @@ program ipacheckdups, rclass
 				nois di "  The variable combination `varlist`x'' has `ndups1' duplicate observations"
 			}
 			
-			* capture variable labels
-			loc n == 0
-			foreach var in `varlist`x''{
+			* update values of meta data variables 
+			replace value = ""
+			replace variable = "`varlist`x''"
+			
+			loc n = 0
+			foreach var in `varlist`x'' {
 				loc ++n
 				local varl : variable label `var'
-
-				* update values of meta data variables //NEED TO ADD LOOP FOR EXTRA VARS
-				replace variable`n' = "`var'"
-				replace label`n' = "`varl'"
+				replace label = "`varl'" if label == ""
 				cap confirm numeric variable `var' 
 				if !_rc {
-					replace value`n' = string(`var')
+					replace value = value + " " + string(`var')
 				}
 				else {
-					replace value`n' = `var'
+					replace value = value + " " + `var'
 				}
 			}
+			replace value = strtrim(value) //removes extra spaces
 			replace message = `"Duplicate observation for `varlist`x''."'
 
 				* append violations to the temporary data set
-				saveappend using `tmp' if `dup2' != 0, ///
+				saveappend using `tmp' if `dup1' != 0, ///
 					keep("`keeplist'")
-
-			}
 		}
 		else {
 			* alert the user
 			nois di "  No duplicates found for ID variable `var'."
 		}
-	    drop `dup1'
+		drop `dup1'
+	}
 	
 
 	* import compiled list of violations
@@ -171,7 +164,6 @@ program ipacheckdups, rclass
 	}
 	
 	return scalar ndups1 = `ndups1'
-	return scalar ndups2 = `ndups2'
 end
 
 
