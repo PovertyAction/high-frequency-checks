@@ -150,6 +150,17 @@ ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
 	keepvars(${keep_variable2}) ///
     saving("check02_test07_out.xlsx") ///
     sheetreplace
+
+* Test 8
+use check02_test08, clear
+ipacheckimport using "check02_test08_in.xlsx"
+ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
+    id(id) ///
+    enumerator(enum) ///
+	submit(var3) ///
+	keepvars(${keep_variable2}) ///
+    saving("check02_test08_out.xlsx") ///
+    sheetreplace 
 	
 	
 /* =================================================

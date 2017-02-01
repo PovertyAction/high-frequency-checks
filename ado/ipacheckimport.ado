@@ -66,8 +66,8 @@ program ipacheckimport, rclass
 	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
 	    			}
 					
-					* if the variable column for the skip check
-					if "`var'" == "variable" & `n' == 6 {
+					* if the variable column for the skip check, or variable or other_unique for duplicate check
+					if ("`var'" == "variable" & `n' == 6) | (inlist("`var'", "variable", "other_unique") & `n' == 2) {
 	    				* add a semi-colon signifying the end of the line
 	    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
 					}
