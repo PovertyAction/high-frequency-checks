@@ -32,7 +32,7 @@ program ipacheckdups, rclass
 	* define temporary variable
 	tempvar dup1
 	
-	*merge the variable lists in uniquevars and anything
+	* merge the variable lists in uniquevars and anything
 	loc n = 0
 	while strpos("`anything'", ";") > 0 {
 		local ++n
@@ -123,7 +123,7 @@ program ipacheckdups, rclass
 					replace value = value + " " + `var'
 				}
 			}
-			replace value = strtrim(value) //removes extra spaces
+			replace value = strtrim(value) // removes extra spaces
 			replace message = `"Duplicate observation for `varlist`x''."'
 
 				* append violations to the temporary data set
