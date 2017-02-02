@@ -192,7 +192,7 @@ syntax varname,  //varname is the form version variable
 	bysort `sub': egen double `max' = max(`varlist')
 	format `max' %20.0f
 	
-	gen `tag' = formdef_version!=`max' & !mi(formdef_version)
+	gen `tag' = `varlist'!=`max' & !mi(`varlist')
 	
 	//get count of number tagged surveys 
 	count if `tag' == 1
