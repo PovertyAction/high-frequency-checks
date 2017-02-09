@@ -11,7 +11,8 @@ program ipacheckskip, rclass
 		/* output filename */
 	    saving(string) 
 	    /* output options */
-        id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
+        id(varname) ENUMerator(varname) SUBMITted(varname) 
+		[KEEPvars(string) SCTOdb(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -53,6 +54,9 @@ program ipacheckskip, rclass
 	forval x = 1 / `varnum' {
 		local meta `meta' variable_`x' label_`x'
 	}
+	if !missing("`sctodb'") {
+		local meta `"`meta' scto_link"'
+	}
 	local meta `"`meta' message"'
 
 	* add user-specified keep vars to output list
@@ -69,6 +73,12 @@ program ipacheckskip, rclass
 	* initialize meta data variables
 	foreach var in `meta' {
 		g `var' = ""
+	}
+	
+	*generate scto_link variable
+	if !missing("`sctodb'") {
+		replace scto_link = subinstr(key, ":", "%3A", 1)
+		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
 	}
 
 	* initialize temporary output file
@@ -155,6 +165,23 @@ program ipacheckskip, rclass
 	export excel using "`saving'" ,  ///
 		sheet("6. skip") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
+		
+	*export scto links as links
+	if !missing("`sctodb'") {
+		putexcel set "`saving'", sheet("6. skip") modify
+		ds
+		loc allvars `r(varlist)'
+		loc linkpos: list posof "scto_link" in allvars
+		loc alphabet `c(ALPHA)'
+		local col: word `linkpos' of `alphabet'
+		count
+		forval x = 1 / `r(N)' {
+			loc row = `x' + 1
+			loc formula = scto_link[`x']
+			loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+		}
+		putexcel `putlist'
+	}
 
 	* revert to original
 	use `org', clear
