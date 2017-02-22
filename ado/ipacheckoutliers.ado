@@ -1,3 +1,4 @@
+*! version 1.1.0 Kelsey Larson 21feb2017
 *! version 1.0.0 Christopher Boyer 04may2016
 
 program ipacheckoutliers, rclass
@@ -12,8 +13,8 @@ program ipacheckoutliers, rclass
 		/* output filename */
 	    saving(string) 
 	    /* output options */
-        id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+        id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
+		[IGNore(string)]
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -26,6 +27,19 @@ program ipacheckoutliers, rclass
 		if _rc {
 			di as err "Variable `var' is not numeric."
 			error 198
+		}
+	}
+	
+	*confirm that only numbers are in the exclude list, after removing "."
+	foreach num in `ignore' {
+
+		cap confirm number `num'
+		if _rc {
+			if "`num'" == "." {
+				continue // the code isn't harmed by including a "."
+			}
+			di as err "ignore option contains non-numeric value '`num''."
+			error 109
 		}
 	}
 
@@ -42,10 +56,11 @@ program ipacheckoutliers, rclass
 	save `org'
 
 	* define temporary variable
-	tempvar outlier min max
+	tempvar outlier min max use
 	g `outlier' = .
 	g `min' = .
 	g `max' = .
+	g `use' = .
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
@@ -70,7 +85,7 @@ program ipacheckoutliers, rclass
 	foreach var in `meta' {
 		g `var' = ""
 	}
-	*generate scto_link variable
+	* generate scto_link variable
 	if !missing("`sctodb'") {
 		replace scto_link = subinstr(key, ":", "%3A", 1)
 		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
@@ -80,6 +95,11 @@ program ipacheckoutliers, rclass
 	touch `tmp', var(`keeplist')
 
 	foreach var in `varlist' {
+		* mark variables that contain error codes and should be ignored
+		replace `use' = 1
+		foreach num in `ignore' {
+			replace `use' = 0 if `var' == `num'
+		}
 		* get current value of iqr
 		local val : word `i' of `multiplier'
 		
@@ -96,9 +116,9 @@ program ipacheckoutliers, rclass
 			tempvar sigma q1 q3
 
 			* calculate iqr stats
-			egen `sigma' = iqr(`var')
-			egen `q1' = pctile(`var'), p(25)
-			egen `q3' = pctile(`var'), p(75)
+			egen `sigma' = iqr(`var') if `use' == 1
+			egen `q1' = pctile(`var') if `use' == 1, p(25)
+			egen `q3' = pctile(`var') if `use' == 1, p(75)
 			replace `max' = `q3' + `val' * `sigma'
 			replace `min' = `q1' - `val' * `sigma'
 
@@ -114,8 +134,8 @@ program ipacheckoutliers, rclass
 			tempvar sigma  mu
 
 			* calculate sd stats
-			egen `sigma' = sd(`var')
-			egen `mu' = mean(`var')
+			egen `sigma' = sd(`var') if `use' == 1
+			egen `mu' = mean(`var') if `use' == 1
 			replace `max' = `mu' + `val' * `sigma'
 			replace `min' = `mu' - `val' * `sigma'
 
@@ -128,8 +148,8 @@ program ipacheckoutliers, rclass
 		}
 
 		* identify outliers 
-		replace `outlier' = (`var' > `max' | `var' < `min') & !mi(`var')
-
+		replace `outlier' = (`var' > `max' | `var' < `min') ///
+			& !mi(`var') & `use' == 1
 
 		* count outliers
 		count if `outlier' == 1

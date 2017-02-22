@@ -549,6 +549,18 @@ ipacheckoutliers ${variable11}, id(id) ///
     saving("check11_test04_out.xlsx") ///
     sheetreplace sd
 	
+* Test 5
+use check11_test05, clear
+ipacheckimport using "check11_test05_in.xlsx"
+di "${ignore11}"
+ipacheckoutliers ${variable11}, id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+	keepvars(${keep_variable11}) ///
+    multiplier(${multiplier11}) ///
+	ignore(${ignore11}) ///
+    saving("check11_test05_out.xlsx") ///
+    sheetreplace sd
 	
 /* =================================================
    =================== Summary ===================== 
