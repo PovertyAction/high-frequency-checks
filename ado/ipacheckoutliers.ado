@@ -1,3 +1,4 @@
+*! version 1.1.0 Kelsey Larson 21feb2017
 *! version 1.0.0 Christopher Boyer 04may2016
 
 program ipacheckoutliers, rclass
