@@ -39,7 +39,7 @@ local shapefile  "shapefiles/Wards.shp"
 local date       "SubmissionDate"
 local id         "id"
 local enum       "enumid"
-local scto_database		"sctodb" // name of SurveyCTO server
+local server	 "sctodb" // name of SurveyCTO server
 
 * local options definitions (EDIT THESE)
 local target     2000
@@ -113,7 +113,7 @@ ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
   submit(`date') ///
   keepvars("${keep1}") ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 	
 putexcel F`row'=(`r(nincomplete)')
@@ -125,7 +125,7 @@ ipacheckdups ${variable2}, id(`id') ///
   submit(`date') ///
   keepvars(${keep2}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 
 putexcel G`row'=(`r(ndups1)')
@@ -138,7 +138,7 @@ ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
   submit(`date') ///
   keepvars(${keep3}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 
 putexcel H`row'=(`r(noconsent)')
@@ -150,7 +150,7 @@ ipachecknomiss ${variable4}, id(`id') ///
   submit(`date') ///
   keepvars(${keep4}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 		
 putexcel I`row'=(`r(nmiss)')
@@ -161,7 +161,7 @@ putexcel I`row'=(`r(nmiss)')
     enumerator(`enum') ///
     submit(`date') ///
     saving("`outfile'") ///
-	sctodb("`scto_database'") ///
+	sctodb("`server'") ///
     sheetreplace
 
 putexcel J`row'=(`r(discrep)') */
@@ -175,7 +175,7 @@ ipacheckskip ${variable6}, assert(${assert6}) ///
   submit(`date') ///
   keepvars(${keep6}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 	
 putexcel K`row'=(`r(nviol)')
@@ -198,7 +198,7 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
   submit(`date') ///
   keepvars(${keep8}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 
 putexcel M`row' =(`r(nsoft)' + `r(nhard)') 
@@ -212,7 +212,7 @@ ipacheckspecify ${specify_variable9}, ///
   submit(`date') ///
   keepvars(${keep9}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 
 putexcel N`row'=(`r(nspecify)')
@@ -225,7 +225,7 @@ ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
   submit(`date') ///
   keepvars(${keep10}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel'
 
 putexcel O`row'=(`r(missing)' + `r(diff_end)' +  ///
@@ -240,7 +240,7 @@ ipacheckoutliers ${variable11}, id(`id') ///
   keepvars(${keep11}) ///
   ignore(${ignore11}) ///
   saving("`outfile'") ///
-  sctodb("`scto_database'") ///
+  sctodb("`server'") ///
   sheetreplace `nolabel' `sd'
 
 putexcel P`row'=(`r(noutliers)')
