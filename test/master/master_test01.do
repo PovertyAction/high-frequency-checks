@@ -228,6 +228,7 @@ ipacheckoutliers ${variable11}, id(`id') ///
   submit(`date') ///
   multiplier(${multiplier11}) ///
   keepvars(${keep11}) ///
+  ignore(${ignore11}) ///
   saving("`outfile'") ///
   sheetreplace `nolabel' `sd'
 
