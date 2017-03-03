@@ -1,6 +1,6 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.0 Christopher Boyer/Caton Brewster 03mar2017
 
-program ipachecksummary, rclass
+program ipatracksummary, rclass
     /* Add a summary sheet to the output excel file detailing
        progress towards survey targets and the number of check 
        violations. */
@@ -42,7 +42,7 @@ program ipachecksummary, rclass
       preserve
 
       * read the existing summary sheet
-      import excel using "`using'", sheet("0. summary") firstrow clear
+      import excel using "`using'", sheet("T1. summary") firstrow clear
 
       * get the number of lines 
       local nusing = _N
@@ -70,7 +70,7 @@ program ipachecksummary, rclass
       restore
 
       * set the output
-      putexcel set "`using'", sheet("0. summary") modify
+      putexcel set "`using'", sheet("T1. summary") modify
     }
 
     if "`replace'" != "" {
@@ -106,7 +106,7 @@ program headers, rclass
     syntax using/, [replace]
 
     * set the output sheet
-    putexcel set "`using'", sheet("0. summary") `replace'
+    putexcel set "`using'", sheet("T1. summary") `replace'
 
     * write the column headers
     putexcel A1=("Date") ///
