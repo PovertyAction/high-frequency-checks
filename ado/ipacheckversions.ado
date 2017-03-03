@@ -31,7 +31,23 @@ syntax varname,  //varname is the form version variable
 
 	qui {
 	
-	//export headers
+	* test for fatal conditions 
+	foreach var of varlist `keep' {
+		cap confirm var `var'
+		if _rc {
+			di as err `"Tried to specify keeping the var "`var'" - "`var'" does not exist in the dataset"'
+			error 101
+		}
+	}
+	
+	count if `subdate' == . 
+	if `r(N)' > 0 {
+		di as err `"There are missing values of `subdate'. Either drop these observations or restrict them using an "if" statement."'
+		error 101
+	}
+
+
+	* export sheet headers 
 	preserve
 	clear 
 	set obs 1 
@@ -39,7 +55,7 @@ syntax varname,  //varname is the form version variable
 	gen `var1' = .
 	gen `var2' = . 
 	
-	//get today's date for sheet's header
+	* get today's date for sheet's header
 	lab var `var1' "Submission Date" 
 	lab var `var2' "Form Versions" 
 	
@@ -47,12 +63,6 @@ syntax varname,  //varname is the form version variable
 	restore 
 
 	
-	//make sure submission date isn't missing 	
-	count if `subdate' == . 
-	if `r(N)' > 0 {
-		di as err `"There are missing values of `subdate'. Either drop these observations or restrict them using an "if" statement."'
-		error 101
-		}
 
 	//now convert `subdate' to %td format if needed using tempvar, sub
 	tempvar sub 
@@ -153,8 +163,9 @@ syntax varname,  //varname is the form version variable
 			
 	//export values 
 	preserve 
-	svmat forms, names(formdef_versions_string)
-	keep formdef_versions_string* 
+	table `varlist', replace
+	xpose, clear promote
+	drop in 2
 	export excel using "`saving'", sheet("Form Versions Used") cell(B2) sheetmodify 
 	restore 
 	
