@@ -150,6 +150,17 @@ ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
 	keepvars(${keep_variable2}) ///
     saving("check02_test07_out.xlsx") ///
     sheetreplace
+
+* Test 8
+use check02_test08, clear
+ipacheckimport using "check02_test08_in.xlsx"
+ipacheckdups ${variable2}, uniquevars(${other_unique2}) ///
+    id(id) ///
+    enumerator(enum) ///
+	submit(var3) ///
+	keepvars(${keep_variable2}) ///
+    saving("check02_test08_out.xlsx") ///
+    sheetreplace 
 	
 	
 /* =================================================
@@ -323,7 +334,7 @@ ipacheckskip ${variable6}, ///
     saving("check06_test03_out.xlsx") ///
     sheetreplace
 	
-	* Test 4
+	/* Test 4
 use check06_test04, clear
 ipacheckimport using "check06_test04_in.xlsx"
 ipacheckskip ${variable6}, ///
@@ -336,6 +347,18 @@ ipacheckskip ${variable6}, ///
     saving("check06_test04_out.xlsx") ///
     sheetreplace*/
 	
+	* Test 5
+use check06_test05, clear
+ipacheckimport using "check06_test05_in.xlsx"
+ipacheckskip ${variable6}, ///
+	assert(`"${assert6}"') ///
+	condition(`"${if_condition6}"') ///
+	keepvars(${keep_variable6}) ///
+	id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+    saving("check06_test05_out.xlsx") ///
+    sheetreplace
 
 /* =================================================
    ==================== Check 7 ==================== 
@@ -526,6 +549,18 @@ ipacheckoutliers ${variable11}, id(id) ///
     saving("check11_test04_out.xlsx") ///
     sheetreplace sd
 	
+* Test 5
+use check11_test05, clear
+ipacheckimport using "check11_test05_in.xlsx"
+di "${ignore11}"
+ipacheckoutliers ${variable11}, id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+	keepvars(${keep_variable11}) ///
+    multiplier(${multiplier11}) ///
+	ignore(${ignore11}) ///
+    saving("check11_test05_out.xlsx") ///
+    sheetreplace sd
 	
 /* =================================================
    =================== Summary ===================== 
@@ -537,19 +572,19 @@ cd "../summary"
 use summary_test01, clear
 local target = 100
 local outfile "summary_test01_out.xlsx"
-ipachecksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", target(`target') modify
 
 * Test 2
 use summary_test02, clear
 local target = 100
 local outfile "summary_test02_out.xlsx"
-ipachecksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", target(`target') modify
 
 * Test 2
 use summary_test03, clear
 local target = 100
 local outfile "summary test03_out.xlsx"
-ipachecksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", target(`target') modify
 
 
 /* =================================================
