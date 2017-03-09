@@ -13,7 +13,7 @@ program ipatrackversions, rclass
 version 13
 
 #delimit ;
-syntax varname,  //varname is the form version variable  
+syntax varname,  //varname is the form version variable - must be num. 
 	/* specify uid for the survey, enumerator id */
     id(varname) ENUMerator(varname) 
 	/* list of other vars to keep */
@@ -32,6 +32,12 @@ syntax varname,  //varname is the form version variable
 	qui {
 	
 	* test for fatal conditions 
+	cap confirm numeric var `varlist'
+	if _rc {
+		di as err "Variable used for form version (`varlist') not numeric. Must be numeric and ordinal for the program to work correctly"
+		error 101
+	}
+		
 	if !mi("`keep'") {
 		foreach var of varlist `keep' {
 			cap confirm var `var'
@@ -50,22 +56,15 @@ syntax varname,  //varname is the form version variable
 
 	
 	* initialize tempvars  
-	tempvar header_subdate header_formversions formatted_subdate header_outdated_formversions ///
-	max_formdef_by_subdate wrong_formversion wrong_formversion_today
+	tempvar header_subdate header_fvs formatted_subdate ///
+	outdated_fvs_header max_fv_by_subdate wrong_fv wrong_fv_today 
 	
 	* export sheet headers 
-	preserve
-	clear 
-	set obs 1 
-	gen `header_subdate' = .
-	gen `header_formversions' = . 
-	
-	* get today's date for sheet's header
+	gen `header_subdate' = . 
+	gen `header_fvs' = . 
 	lab var `header_subdate' "Submission Date" 
-	lab var `header_formversions' "Form Versions" 
-	
-	export excel using "`saving'", sheet("Form Versions Used") firstrow(varl) sheetreplace	
-	restore 
+	lab var `header_fvs' "Form Versions" 	
+	export excel `header_subdate' `header_fvs'  using "`saving'" in 1, sheet("T3. form versions") firstrow(varl) sheetreplace	
 
 	* convert `subdate' to %td format if needed	
 	ds `subdate', has(format %td*)
@@ -116,7 +115,7 @@ syntax varname,  //varname is the form version variable
 	format `formatted_subdate' %tdCCYY/NN/DD
 	
 	tab `formatted_subdate' `varlist'
-	if !(`r(N)'){
+	if mi("`r(N)'") {
 		di as err `"No observations in cross-tab of `subdate' and `varlist' - check your data"'
 		error 122
 	}
@@ -126,7 +125,7 @@ syntax varname,  //varname is the form version variable
 	keep `formatted_subdate'
 	duplicates drop `formatted_subdate', force
 	sort `formatted_subdate' 
-	export excel using "`saving'", sheet("Form Versions Used") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
+	export excel using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
 	restore
 	
 	* export form def versions (column headers of table)
@@ -134,18 +133,18 @@ syntax varname,  //varname is the form version variable
 	table `varlist', replace
 	xpose, clear promote
 	drop in 2
-	export excel using "`saving'", sheet("Form Versions Used") cell(B2) sheetmodify 
+	export excel using "`saving'", sheet("T3. form versions") cell(B2) sheetmodify 
 	restore 
 
 	* export form def version counts by subdate (body of table) 
 	clear matrix
-	ta `formatted_subdate' `varlist', matcell(form_version_counts_by_subdate)
+	ta `formatted_subdate' `varlist', matcell(fvs_counts_by_subdate)
 	local num_subdates = `r(r)'
 	
 	preserve 
-	svmat form_version_counts_by_subdate, names(formdef_versions_string)
-	keep formdef_versions_string* 
-	export excel using "`saving'", sheet("Form Versions Used") cell(B3) sheetmodify 
+	svmat fvs_counts_by_subdate, names(fvs_string)
+	keep fvs_string* 
+	export excel using "`saving'", sheet("T3. form versions") cell(B3) sheetmodify 
 	restore 
 	
 	* save max submissiondate
@@ -162,35 +161,35 @@ syntax varname,  //varname is the form version variable
 	preserve
 	clear
 	set obs 1
-	gen `header_outdated_formversions' = . 
-	lab var `header_outdated_formversions' "List of entries using outdated survey form version on `frmt_max_subdate'"	
-	local row_for_error_entries_header = `num_subdates' + 5 
-	export excel using "`saving'", sheet("Form Versions Used") sheetmodify firstrow(varl) cell(A`row_for_error_entries_header')
+	gen `outdated_fvs_header' = . 
+	lab var `outdated_fvs_header' "List of entries using outdated survey form version on `frmt_max_subdate'"	
+	local row_for_outdated_fvs_header = `num_subdates' + 5 
+	export excel using "`saving'", sheet("T3. form versions") sheetmodify firstrow(varl) cell(A`row_for_outdated_fvs_header')
 	restore 
 	
 	* get total count of surveys
-	local survey_count = _N
+	local num_surveys = _N
 
 	* gen wrong today & counts 
 	sum `varlist', d
-	gen `wrong_formversion_today' = `varlist' != `r(max)' & !mi(`varlist') & `formatted_subdate' == `max_subdate'
+	gen `wrong_fv_today' = `varlist' != `r(max)' & !mi(`varlist') & `formatted_subdate' == `max_subdate'
 	
-	count if `wrong_formversion_today' == 1 
-	local num_wrong_formversions_today = `r(N)'
+	count if `wrong_fv_today' == 1 
+	local num_wrong_fvs_today = `r(N)'
 	
 	* get percent of num wrong versions on most recent sub date	
-	local perc_wrong_formversions_today: disp %12.2f `num_wrong_formversions_today)'*100/`survey_count'
-	local perc_wrong_formversions_today = trim("`perc_wrong_formversions_today'")
+	local perc_wrong_fvs_today: disp %12.2f `num_wrong_fvs_today'*100/`num_surveys'
+	local perc_wrong_fvs_today = trim("`perc_wrong_fvs_today'")
 
-	local row_for_flagging_errors= `row_for_error_entries_header' + 1
-	if `num_wrong_formversions_today' > 0 {
-		export excel `enumerator' `id' `keepvars'  using "`saving'" if `wrong_formversion_today' == 1, sheet("Form Versions Used") sheetmodify cell(A`row_for_flagging_errors') firstrow(var)
+	local row_for_outdated_fvs= `row_for_outdated_fvs_header' + 1
+	if `num_wrong_fvs_today' > 0 {
+		export excel `enumerator' `id' `keepvars'  using "`saving'" if `wrong_fv_today' == 1, sheet("T3. form versions") sheetmodify cell(A`row_for_outdated_fvs') firstrow(var)
 	}
 }
 	
 	display `"Information saved in "`saving'""'
 	display "Most recent submission date was `frmt_max_subdate'"
-	display "`num_wrong_formversions_today' (`perc_wrong_formversions_today'%) survey(s) completed with an outdated form version on `frmt_max_subdate'"
+	display "`num_wrong_fvs_today' (`perc_wrong_fvs_today'%) survey(s) completed with an outdated form version on `frmt_max_subdate'"
 	
 
 	end
