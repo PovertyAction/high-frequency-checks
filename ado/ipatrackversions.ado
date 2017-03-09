@@ -19,7 +19,7 @@ syntax varname,  //varname is the form version variable - must be num.
 	/* list of other vars to keep */
 	[KEEPvars(string)] 
 	/* specify date var, i.e. submission date var */
-	subdate(varname numeric)
+	submit(varname numeric)
 	/* output filename */
 	saving(string) 
 	;	
@@ -48,75 +48,75 @@ syntax varname,  //varname is the form version variable - must be num.
 		}
 	}
 	
-	count if `subdate' == . 
+	count if `submit' == . 
 	if `r(N)' > 0 {
-		di as err `"There are missing values of `subdate'. Either drop these observations or restrict them using an "if" statement."'
+		di as err `"There are missing values of `submit'. Either drop these observations or restrict them using an "if" statement."'
 		error 101
 	}
 
 	
 	* initialize tempvars  
-	tempvar header_subdate header_fvs formatted_subdate ///
+	tempvar header_submit header_fvs formatted_subdate ///
 	outdated_fvs_header max_fv_by_subdate wrong_fv wrong_fv_today 
 	
 	* export sheet headers 
-	gen `header_subdate' = . 
+	gen `header_submit' = . 
 	gen `header_fvs' = . 
-	lab var `header_subdate' "Submission Date" 
+	lab var `header_submit' "Submission Date" 
 	lab var `header_fvs' "Form Versions" 	
-	export excel `header_subdate' `header_fvs'  using "`saving'" in 1, sheet("T3. form versions") firstrow(varl) sheetreplace	
+	export excel `header_submit' `header_fvs'  using "`saving'" in 1, sheet("T3. form versions") firstrow(varl) sheetreplace	
 
-	* convert `subdate' to %td format if needed	
-	ds `subdate', has(format %td*)
+	* convert `header_submit' to %td format if needed	
+	ds `submit', has(format %td*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = `subdate'
+		gen `formatted_subdate' = `submit'
 		}
 
-	ds `subdate', has(format %tc*)
+	ds `submit', has(format %tc*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofc(`subdate')
+		gen `formatted_subdate' = dofc(`submit')
 		}
 		
-	ds `subdate', has(format %tC*)
+	ds `submit', has(format %tC*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofC(`subdate')
+		gen `formatted_subdate' = dofC(`submit')
 		}
 		
-	ds `subdate', has(format %tb*)
+	ds `submit', has(format %tb*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofb(`subdate')
+		gen `formatted_subdate' = dofb(`submit')
 		}
 	
-	ds `subdate', has(format %tw*)
+	ds `submit', has(format %tw*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofw(`subdate')
+		gen `formatted_subdate' = dofw(`submit')
 		}
 		
-	ds `subdate', has(format %tm*)
+	ds `submit', has(format %tm*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofm(`subdate')
+		gen `formatted_subdate' = dofm(`submit')
 		}
 
-	ds `subdate', has(format %tq*)
+	ds `submit', has(format %tq*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofq(`subdate')
+		gen `formatted_subdate' = dofq(`submit')
 		}
 		
-	ds `subdate', has(format %th*)
+	ds `submit', has(format %th*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofh(`subdate')
+		gen `formatted_subdate' = dofh(`submit')
 		}
 
-	ds `subdate', has(format %ty*)
+	ds `submit', has(format %ty*)
 	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofy(`subdate')
+		gen `formatted_subdate' = dofy(`submit')
 		}
 	
 	format `formatted_subdate' %tdCCYY/NN/DD
 	
 	tab `formatted_subdate' `varlist'
 	if mi("`r(N)'") {
-		di as err `"No observations in cross-tab of `subdate' and `varlist' - check your data"'
+		di as err `"No observations in cross-tab of `submit' and `varlist' - check your data"'
 		error 122
 	}
 	
