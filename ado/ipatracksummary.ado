@@ -114,15 +114,15 @@ program headers, rclass
       C1=("Cumulative Frequency") ///
       D1=("Percent Target") ///
       E1=("Cumulative Percent Target") ///
-      F1=("HFC 1") ///
-      G1=("HFC 2") ///
-      H1=("HFC 3") ///
-      I1=("HFC 4") ///
-      J1=("HFC 5") ///
-      K1=("HFC 6") ///
-      L1=("HFC 7") ///
-      M1=("HFC 8") ///
-      N1=("HFC 9") ///
-      O1=("HFC 10") ///
-      P1=("HFC 11") 
+      F1=("1. incomplete") ///
+      G1=("2. duplicates") ///
+      H1=("3. consent") ///
+      I1=("4. no miss") ///
+      J1=("5. follow up") ///
+      K1=("6. skip") ///
+      L1=("7. all miss") ///
+      M1=("8. constraints") ///
+      N1=("9. specify") ///
+      O1=("10. dates") ///
+      P1=("11. outliers") 
 end
