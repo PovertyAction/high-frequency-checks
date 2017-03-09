@@ -580,10 +580,10 @@ local target = 100
 local outfile "track01_test02_out.xlsx"
 ipatracksummary using "`outfile'", target(`target') modify
 
-* Test 2
+* Test 3
 use track01_test03, clear
 local target = 100
-local outfile "track03_test01_out.xlsx"
+local outfile "track01_test03_out.xlsx"
 ipatracksummary using "`outfile'", target(`target') modify
 
 
