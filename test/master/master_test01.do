@@ -91,19 +91,26 @@ readreplace using "`repfile'", ///
 	import(firstrow)
 */
 
+
 /* =============================================================== 
-   ==================== High Frequency Checks ==================== 
+   ==================== Survey Tracking ==========================
    =============================================================== */
-   
-   /* the command below creates the summary page for the HFC 
+
+ /* <============ Track 1. Summarize completed surveys by date ============> */
+
+      /* the command below creates a summary page for the HFC 
       output. the first time you run it, use the "replace" flag
 	  instead of the "modify" flag. the former will create a new 
 	  sheet where as the latter will try to update the existing 
 	  sheet with a new line */
 	  
-ipachecksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", target(`target') modify
 local row = `r(i)'
 
+/* =============================================================== 
+   ==================== High Frequency Checks ==================== 
+   =============================================================== */
+   
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
 ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
   percent(${complete_percent1}) ///
