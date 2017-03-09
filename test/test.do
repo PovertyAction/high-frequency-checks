@@ -563,27 +563,27 @@ ipacheckoutliers ${variable11}, id(id) ///
     sheetreplace sd
 	
 /* =================================================
-   =================== Summary ===================== 
+   ============== Track 1 - Summary ================
    ================================================= */
    
-cd "../summary"
+cd "../track01"
 
 * Test 1
-use summary_test01, clear
+use track01_test01, clear
 local target = 100
-local outfile "summary_test01_out.xlsx"
+local outfile "track01_test01_out.xlsx"
 ipatracksummary using "`outfile'", target(`target') modify
 
 * Test 2
-use summary_test02, clear
+use track01_test02, clear
 local target = 100
-local outfile "summary_test02_out.xlsx"
+local outfile "track01_test02_out.xlsx"
 ipatracksummary using "`outfile'", target(`target') modify
 
 * Test 2
-use summary_test03, clear
+use track01_test03, clear
 local target = 100
-local outfile "summary test03_out.xlsx"
+local outfile "track03_test01_out.xlsx"
 ipatracksummary using "`outfile'", target(`target') modify
 
 

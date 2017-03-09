@@ -96,7 +96,7 @@ readreplace using "`repfile'", ///
    ==================== Survey Tracking ==========================
    =============================================================== */
 
- /* <=========== Track 1. Summarize completed surveys by date ===========> */
+ /* <============ Track 1. Summarize completed surveys by date ============> */
 
       /* the command below creates a summary page for the HFC 
       output. the first time you run it, use the "replace" flag
