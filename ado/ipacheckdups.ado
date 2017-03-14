@@ -171,19 +171,21 @@ program ipacheckdups, rclass
 		
 	*export scto links as links
 	if !missing("`sctodb'") {
-		putexcel set "`saving'", sheet("2. duplicates") modify
-		ds
-		loc allvars `r(varlist)'
-		loc linkpos: list posof "scto_link" in allvars
-		loc alphabet `c(ALPHA)'
-		local col: word `linkpos' of `alphabet'
-		count
-		forval x = 1 / `r(N)' {
-			loc row = `x' + 1
-			loc formula = scto_link[`x']
-			loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'	
+		if !missing(scto_link[1]) {
+			putexcel set "`saving'", sheet("2. duplicates") modify
+			ds
+			loc allvars `r(varlist)'
+			loc linkpos: list posof "scto_link" in allvars
+			loc alphabet `c(ALPHA)'
+			local col: word `linkpos' of `alphabet'
+			count
+			forval x = 1 / `r(N)' {
+				loc row = `x' + 1
+				loc formula = scto_link[`x']
+				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'	
+			}
+			putexcel `putlist'
 		}
-		putexcel `putlist'
 	}
 	* revert to original
 	use `org', clear
