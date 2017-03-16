@@ -34,7 +34,9 @@ syntax varname,  //varname is the form version variable - must be num.
 	* test for fatal conditions 
 	cap confirm numeric var `varlist'
 	if _rc {
-		di as err "Variable used for form version (`varlist') not numeric. Must be numeric and ordinal for the program to work correctly"
+		di as err "Variable used for form version (`varlist') not numeric."
+		di as err "Must be numeric and ordinal for the program to work correctly."
+		di as err "Check that you imported 
 		error 101
 	}
 		
@@ -50,7 +52,7 @@ syntax varname,  //varname is the form version variable - must be num.
 	
 	count if `submit' == . 
 	if `r(N)' > 0 {
-		di as err `"There are missing values of `submit'. Either drop these observations or restrict them using an "if" statement."'
+		di as err `"There are missing values of `submit'. Drop these observations before continuing."'
 		error 101
 	}
 
