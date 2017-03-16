@@ -122,8 +122,8 @@ program ipacheckfollowup, rclass
 			ds
 			loc allvars `r(varlist)'
 			loc linkpos: list posof "scto_link" in allvars
-			loc alphabet `c(ALPHA)'
-			local col: word `linkpos' of `alphabet'
+			alphacol `linkpos'
+			loc col = r(alphacol)
 			count
 			forval x = 1 / `r(N)' {
 				loc row = `x' + 1
@@ -174,4 +174,18 @@ program touch
 
 	restore
 
+end
+
+program alphacol, rclass
+	syntax anything(name = num id = "number")
+
+	local col = ""
+
+	while `num' > 0 {
+		local let = mod(`num'-1, 26)
+		local col = char(`let' + 65) + "`col'"
+		local num = floor((`num' - `let') / 26)
+	}
+
+	return local alphacol = "`col'"
 end
