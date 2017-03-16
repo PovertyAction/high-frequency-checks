@@ -201,7 +201,7 @@ program ipacheckconstraints, rclass
 		firstrow(variables) `nolabel'
 	
 	*export scto links as links
-	if !missing("`sctodb'") {
+	if !missing("`sctodb'") & c(version) >= 14 {
 		if !missing(scto_link[1]) {
 			putexcel set "`saving'", sheet("8. constraints") modify
 			ds
