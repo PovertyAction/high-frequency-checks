@@ -69,50 +69,13 @@ syntax varname,  //varname is the form version variable - must be num.
 	export excel `header_submit' `header_fvs'  using "`saving'" in 1, sheet("T3. form versions") firstrow(varl) sheetreplace	
 
 	* convert `header_submit' to %td format if needed	
-	ds `submit', has(format %td*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = `submit'
-		}
-
-	ds `submit', has(format %tc*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofc(`submit')
-		}
-		
-	ds `submit', has(format %tC*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofC(`submit')
-		}
-		
-	ds `submit', has(format %tb*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofb(`submit')
-		}
 	
-	ds `submit', has(format %tw*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofw(`submit')
+	foreach letter in d c C b w m q h y {
+		ds `submit', has(format %t`letter'*)
+		if !mi("`r(varlist)'") {
+			gen `formatted_subdate' = dof`letter'(`submit')
 		}
-		
-	ds `submit', has(format %tm*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofm(`submit')
-		}
-
-	ds `submit', has(format %tq*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofq(`submit')
-		}
-		
-	ds `submit', has(format %th*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofh(`submit')
-		}
-
-	ds `submit', has(format %ty*)
-	if !mi("`r(varlist)'") {
-		gen `formatted_subdate' = dofy(`submit')
-		}
+	}
 	
 	format `formatted_subdate' %tdCCYY/NN/DD
 	
