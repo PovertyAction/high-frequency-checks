@@ -15,7 +15,7 @@ syntax varname [if],  //varname is the geographic unit that will be used (e.g. c
 	/* specify uid for the survey */
 	id(varname) 
 	/* specify date var, i.e. submission date var */
-	subdate(varname numeric)
+	submit(varname numeric)
 	/* output filename */
 	saving(string) 
 	/* sample/respondents list file name */
@@ -55,62 +55,25 @@ qui {
 	
 		
 	//flag if there are missing values of submissiondate
-	count if `subdate' == . 
+	count if `submit' == . 
 	if `r(N)' > 0 {
-		di as err `"There are missing values of `subdate'. Either drop these observations or restrict them using an "if" statement."'
+		di as err `"There are missing values of `submit'. Either drop these observations or restrict them using an "if" statement."'
 		error 101
 		}
 	
-	//now convert `subdate' to %td format if needed using tempvar, sub
+	//now convert `submit' to %td format if needed using tempvar, sub
 	tempvar sub 
 	
-	ds `subdate', has(format %td*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = `subdate'
+	* convert `header_submit' to %td format if needed	
+	foreach letter in d c C b w m q h y {
+		ds `submit', has(format %t`letter'*)
+		if !mi("`r(varlist)'") {
+			gen `formatted_submit' = dof`letter'(`submit')
 		}
-
-	ds `subdate', has(format %tc*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofc(`subdate')
-		}
-		
-	ds `subdate', has(format %tC*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofC(`subdate')
-		}
-		
-	ds `subdate', has(format %tb*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofb(`subdate')
-		}
-	
-	ds `subdate', has(format %tw*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofw(`subdate')
-		}
-		
-	ds `subdate', has(format %tm*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofm(`subdate')
-		}
-
-	ds `subdate', has(format %tq*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofq(`subdate')
-		}
-		
-	ds `subdate', has(format %th*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofh(`subdate')
-		}
-
-	ds `subdate', has(format %ty*)
-	if !mi("`r(varlist)'") {
-		gen `sub' = dofy(`subdate')
-		}
+	}
 	
 	//format consistantly
-	format `sub' %tdCCYY/NN/DD	
+	format `formatted_submit' %tdCCYY/NN/DD	
 		
 	tostring `varlist', replace //make string to be consistent
 
@@ -120,9 +83,9 @@ qui {
 	replace `varlist' = "MISSING `varlist'" if `varlist' == ""
 	
 	tempvar survey_start survey_end survey_num_done
-	keep `varlist' `sub' //only interested in the geo var and submissiondate 
-	bysort `varlist': egen `survey_start' = min(`sub') //get first submissiondate per geographic unit 
-	bysort `varlist': egen `survey_end' = max(`sub') //get last submissiondate per geographic unit 
+	keep `varlist' `formatted_submit' //only interested in the geo var and submissiondate 
+	bysort `varlist': egen `survey_start' = min(`formatted_submit') //get first submissiondate per geographic unit 
+	bysort `varlist': egen `survey_end' = max(`formatted_submit') //get last submissiondate per geographic unit 
 	gen `survey_num_done' = 1 	//in the collapse below this will get summed to become number interviews per community 
 	collapse (sum) `survey_num_done' (first) `survey_start' `survey_end', by(`varlist')	//collapse so the dataset is at the geo unit level (1 obs per geo unit)
 	sort `varlist' //sort by geographic unit var 
