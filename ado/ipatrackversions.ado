@@ -62,14 +62,11 @@ syntax varname,  //varname is the form version variable - must be num.
 	outdated_fvs_header max_fv_by_subdate wrong_fv wrong_fv_today 
 	
 	* export sheet headers 
-	gen `header_submit' = . 
-	gen `header_fvs' = . 
-	lab var `header_submit' "Submission Date" 
-	lab var `header_fvs' "Form Versions" 	
-	export excel `header_submit' `header_fvs'  using "`saving'" in 1, sheet("T3. form versions") firstrow(varl) sheetreplace	
-
-	* convert `header_submit' to %td format if needed	
+	putexcel set "`saving'", sheet("T3. form versions", replace)
+	putexcel A1 = "Submissiondate Date" 
+	putexcel A2 = "Form Versions" 
 	
+	* convert `header_submit' to %td format if needed	
 	foreach letter in d c C b w m q h y {
 		ds `submit', has(format %t`letter'*)
 		if !mi("`r(varlist)'") {
@@ -123,14 +120,8 @@ syntax varname,  //varname is the form version variable - must be num.
 	* export list of obs that didn't use most recent survey version on most recent submission date 
 
 	* export header 
-	preserve
-	clear
-	set obs 1
-	gen `outdated_fvs_header' = . 
-	lab var `outdated_fvs_header' "List of entries using outdated survey form version on `frmt_max_subdate'"	
 	local row_for_outdated_fvs_header = `num_subdates' + 5 
-	export excel using "`saving'", sheet("T3. form versions") sheetmodify firstrow(varl) cell(A`row_for_outdated_fvs_header')
-	restore 
+	putexcel A`row_for_outdated_fvs_header' = "List of entries using outdated survey form version on `frmt_max_subdate'"	
 	
 	* get total count of surveys
 	local num_surveys = _N
