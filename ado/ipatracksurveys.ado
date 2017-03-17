@@ -38,7 +38,6 @@ qui {
 	
 	//first save number of interviews completed and first and last submission for each geographic unit
 	tempfile dates
-	preserve
 		
 	tempvar tagdupids
 	//flag if there are duplicates
