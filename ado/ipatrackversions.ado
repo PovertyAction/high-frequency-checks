@@ -84,9 +84,9 @@ syntax varname,  //varname is the form version variable - must be num.
 	
 	* format and export submission dates (left hand column of table)
 	preserve
-	keep `formatted_subdate'
-	duplicates drop `formatted_subdate', force
-	sort `formatted_subdate' 
+	keep `formatted_submit'
+	duplicates drop `formatted_submit', force
+	sort `formatted_submit' 
 	export excel using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
 	restore
 	
