@@ -11,7 +11,7 @@ program ipatracksurveys, rclass
 version 13
 
 #delimit ;
-syntax varname [if],  //varname is the geographic unit that will be used (e.g. community) 
+syntax varname,  //varname is the geographic unit that will be used (e.g. community) 
 	/* specify uid for the survey */
 	id(varname) 
 	/* specify date var, i.e. submission date var */
@@ -30,19 +30,15 @@ syntax varname [if],  //varname is the geographic unit that will be used (e.g. c
 	di "Generating status of surveys..."
 
 qui {
-	//clean up file path in "saving" file name
+
+	* format outfile 
 	if !(regexm("`saving'", ".xlsx") | regexm("`saving'", ".xls")) {
 		local saving = "`saving'.xlsx"
-		}
+	}
 	
-//first save number of interviews completed and first and last submission for each geographic unit
+	//first save number of interviews completed and first and last submission for each geographic unit
 	tempfile dates
 	preserve
-
-	//keep conditional on if statement
-	if !mi("`if'") {
-		keep `if'
-		}
 		
 	tempvar tagdupids
 	//flag if there are duplicates
@@ -91,7 +87,6 @@ qui {
 	sort `varlist' //sort by geographic unit var 
 	format %tdCCYY/NN/DD `survey_start' `survey_end' //format our dates
 	save `dates', replace
-	restore 
 
 //now prep sample data - want to use this form/data to compare all completed surveys against full list of expected surveys 
 	preserve
