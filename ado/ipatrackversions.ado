@@ -57,9 +57,9 @@ syntax varname,  //varname is the form version variable - must be num.
 
 	
 	* initialize tempvars  
-	tempvar header_submit header_fvs formatted_submit ///
-	outdated_fvs_header max_fv_by_subdate wrong_fv wrong_fv_today ///
-	rdcd_formatted_submit
+	tempvar header_submit header_fvs formatted_submit outdated_fvs_header ///
+	max_fv_by_subdate wrong_fv wrong_fv_today 
+	 
 	
 	* convert `header_submit' to %td format if needed	
 	foreach letter in d c C b w m q h y {
@@ -78,13 +78,17 @@ syntax varname,  //varname is the form version variable - must be num.
 	}
 	
 	* export sheet headers 
-	putexcel set "`saving'", sheet("T3. form versions", replace)  
+	putexcel set "`saving'", sheet("T3. form versions", replace) modify 
 	putexcel A1 = ("Submissiondate Date")
-	putexcel A2 = ("Form Versions")
+	putexcel B1 = ("Form Versions")
 	
 	* format and export submission dates (left hand column of table)
-	egen `rdcd_formatted_submit' = tag(`formatted_submit')
-	export excel `rdcd_formatted_submit' using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
+	preserve
+	keep `formatted_subdate'
+	duplicates drop `formatted_subdate', force
+	sort `formatted_subdate' 
+	export excel using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
+	restore
 	
 	* export form def versions (column headers of table)
 	preserve 
