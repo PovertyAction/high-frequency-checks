@@ -58,37 +58,34 @@ syntax varname,  //varname is the form version variable - must be num.
 
 	
 	* initialize tempvars  
-	tempvar header_submit header_fvs formatted_subdate ///
-	outdated_fvs_header max_fv_by_subdate wrong_fv wrong_fv_today 
+	tempvar header_submit header_fvs formatted_submit ///
+	outdated_fvs_header max_fv_by_subdate wrong_fv wrong_fv_today ///
+	rdcd_formatted_submit
+	
+	* convert `header_submit' to %td format if needed	
+	foreach letter in d c C b w m q h y {
+		ds `submit', has(format %t`letter'*)
+		if !mi("`r(varlist)'") {
+			gen `formatted_submit' = dof`letter'(`submit')
+		}
+	}
+	
+	format `formatted_submit' %tdCCYY/NN/DD
+	
+	tab `formatted_submit' `varlist'
+	if mi("`r(N)'") {
+		di as err `"No observations in cross-tab of `submit' and `varlist' - check your data"'
+		error 122
+	}
 	
 	* export sheet headers 
 	putexcel set "`saving'", sheet("T3. form versions", replace)
 	putexcel A1 = "Submissiondate Date" 
 	putexcel A2 = "Form Versions" 
 	
-	* convert `header_submit' to %td format if needed	
-	foreach letter in d c C b w m q h y {
-		ds `submit', has(format %t`letter'*)
-		if !mi("`r(varlist)'") {
-			gen `formatted_subdate' = dof`letter'(`submit')
-		}
-	}
-	
-	format `formatted_subdate' %tdCCYY/NN/DD
-	
-	tab `formatted_subdate' `varlist'
-	if mi("`r(N)'") {
-		di as err `"No observations in cross-tab of `submit' and `varlist' - check your data"'
-		error 122
-	}
-	
 	* format and export submission dates (left hand column of table)
-	preserve 
-	keep `formatted_subdate'
-	duplicates drop `formatted_subdate', force
-	sort `formatted_subdate' 
-	export excel using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
-	restore
+	egen `rdcd_formatted_submit' = tag(`formatted_submit')
+	export excel `rdcd_formatted_submit' using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
 	
 	* export form def versions (column headers of table)
 	preserve 
@@ -100,17 +97,14 @@ syntax varname,  //varname is the form version variable - must be num.
 
 	* export form def version counts by subdate (body of table) 
 	clear matrix
-	ta `formatted_subdate' `varlist', matcell(fvs_counts_by_subdate)
-	local num_subdates = `r(r)'
-	
-	preserve 
+	ta `formatted_submit' `varlist', matcell(fvs_counts_by_subdate)
+	local num_subdates = `r(r)'	
 	svmat fvs_counts_by_subdate, names(fvs_string)
-	keep fvs_string* 
-	export excel using "`saving'", sheet("T3. form versions") cell(B3) sheetmodify 
-	restore 
+	export excel fvs_string*  using "`saving'", sheet("T3. form versions") cell(B3) sheetmodify 
+	drop fvs_string*
 	
 	* save max submissiondate
-	sum `formatted_subdate'
+	sum `formatted_submit'
 	local max_subdate = `r(max)'
 	
 	local frmt_max_subdate: disp %tdCCYY/NN/DD `max_subdate'
@@ -128,7 +122,7 @@ syntax varname,  //varname is the form version variable - must be num.
 
 	* gen wrong today & counts 
 	sum `varlist', d
-	gen `wrong_fv_today' = `varlist' != `r(max)' & !mi(`varlist') & `formatted_subdate' == `max_subdate'
+	gen `wrong_fv_today' = `varlist' != `r(max)' & !mi(`varlist') & `formatted_submit' == `max_subdate'
 	
 	count if `wrong_fv_today' == 1 
 	local num_wrong_fvs_today = `r(N)'
@@ -141,6 +135,8 @@ syntax varname,  //varname is the form version variable - must be num.
 	if `num_wrong_fvs_today' > 0 {
 		export excel `enumerator' `id' `keepvars'  using "`saving'" if `wrong_fv_today' == 1, sheet("T3. form versions") sheetmodify cell(A`row_for_outdated_fvs') firstrow(var)
 	}
+	
+	clear matrix
 }
 	
 	display `"Information saved in "`saving'""'
