@@ -9,7 +9,7 @@
 * this line adds standard boilerplate headings
 ipadoheader, version(13.0)
 set trace off
-
+/*
 
 /* =================================================
    ==================== Check 1 ==================== 
@@ -585,12 +585,12 @@ use track01_test03, clear
 local target = 100
 local outfile "track03_test01_out.xlsx"
 ipatracksummary using "`outfile'", target(`target') modify
-
+*/
 /* =================================================
    =========== Track 3 - Form Versions =============
    ================================================= */
    
-cd "../track03"
+*cd "../track03"
 global form_version form_version
 global sub_date submissiondate 
 
@@ -599,7 +599,7 @@ use track03_test01, clear
 local outfile "track03_test01_out.xlsx"
 ipatrackversions ${form_version}, id(id) ///
 	enumerator(enum) ///
-	subdate($sub_date) ///
+	submit(${sub_date}) ///
     saving("`outfile'") 
 
 * Test 2 (sub date missing)
@@ -607,7 +607,7 @@ use track03_test02, clear
 local outfile "track03_test02_out.xlsx"
 rcof ipatrackversions ${form_version}, id(id) ///
 	enumerator(enum) ///
-	subdate($sub_date) ///
+	submit(${sub_date}) ///
     saving("`outfile'") == 101 
 
 * Test 3
@@ -615,7 +615,7 @@ use track03_test03, clear
 local outfile "track03_test03_out.xlsx"
 rcof ipatrackversions ${form_version}, id(id) ///
 	enumerator(enum) ///
-	subdate($sub_date) ///
+	submit(${sub_date}) ///
     saving("`outfile'") == 122
 
 * Test 4
@@ -623,7 +623,7 @@ use track03_test04, clear
 local outfile "track03_test04_out.xlsx"
 rcof ipatrackversions ${form_version}, id(id) ///
 	enumerator(enum) ///
-	subdate($sub_date) ///
+	submit(${sub_date}) ///
     saving("`outfile'") == 101 
 
 /* =================================================
