@@ -36,7 +36,6 @@ syntax varname,  //varname is the form version variable - must be num.
 	if _rc {
 		di as err "Variable used for form version (`varlist') not numeric."
 		di as err "Must be numeric and ordinal for the program to work correctly."
-		di as err "Check that you imported 
 		error 101
 	}
 		
@@ -79,9 +78,9 @@ syntax varname,  //varname is the form version variable - must be num.
 	}
 	
 	* export sheet headers 
-	putexcel set "`saving'", sheet("T3. form versions", replace)
-	putexcel A1 = "Submissiondate Date" 
-	putexcel A2 = "Form Versions" 
+	putexcel set "`saving'", sheet("T3. form versions", replace)  
+	putexcel A1 = ("Submissiondate Date")
+	putexcel A2 = ("Form Versions")
 	
 	* format and export submission dates (left hand column of table)
 	egen `rdcd_formatted_submit' = tag(`formatted_submit')
@@ -115,7 +114,7 @@ syntax varname,  //varname is the form version variable - must be num.
 
 	* export header 
 	local row_for_outdated_fvs_header = `num_subdates' + 5 
-	putexcel A`row_for_outdated_fvs_header' = "List of entries using outdated survey form version on `frmt_max_subdate'"	
+	putexcel A`row_for_outdated_fvs_header' = ("List of entries using outdated survey form version on `frmt_max_subdate'")	
 	
 	* get total count of surveys
 	local num_surveys = _N
