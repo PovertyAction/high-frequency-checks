@@ -19,7 +19,8 @@ program ipachecknomiss, rclass
 		/* output filename */
 	    saving(string) 
 	    /* output options */
-        id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
+        id(varname) ENUMerator(varname) SUBMITted(varname) 
+		[KEEPvars(string) SCTOdb(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -46,6 +47,9 @@ program ipachecknomiss, rclass
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
 	local meta `"variable label value message"'
+	if !missing("`sctodb'") {
+		local meta `"`meta' scto_link"'
+	}
 
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
@@ -62,6 +66,12 @@ program ipachecknomiss, rclass
 	* initialize meta data variables
 	foreach var in `meta' {
 		g `var' = ""
+	}
+	
+	*generate scto_link variable
+	if !missing("`sctodb'") {
+		replace scto_link = subinstr(key, ":", "%3A", 1)
+		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
 	}
 
 	* initialize temporary output file
@@ -153,6 +163,25 @@ program ipachecknomiss, rclass
 		sheet("4. no miss") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 
+	*export scto links as links
+	if !missing("`sctodb'") & c(version) >= 14 {
+		if !missing(scto_link[1]) {
+			putexcel set "`saving'", sheet("4. no miss") modify
+			ds
+			loc allvars `r(varlist)'
+			loc linkpos: list posof "scto_link" in allvars
+			alphacol `linkpos'
+			loc col = r(alphacol)
+			count
+			forval x = 1 / `r(N)' {
+				loc row = `x' + 1
+				loc formula = scto_link[`x']
+				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+			}
+			putexcel `putlist'
+		}
+	}
+	
 	* revert to original
 	use `org', clear
 
@@ -221,4 +250,17 @@ program touch
 
 end
 
+program alphacol, rclass
+	syntax anything(name = num id = "number")
+
+	local col = ""
+
+	while `num' > 0 {
+		local let = mod(`num'-1, 26)
+		local col = char(`let' + 65) + "`col'"
+		local num = floor((`num' - `let') / 26)
+	}
+
+	return local alphacol = "`col'"
+end
 

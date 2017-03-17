@@ -38,7 +38,7 @@ program ipacheckallmiss, rclass
 	* define default output variable list
 	unab admin : `id' `enumerator'
 	local meta `"variable label value message"'
-
+	
 	* add user-specified keep vars to output list
     local keeplist : list admin | meta
 
@@ -128,7 +128,7 @@ program ipacheckallmiss, rclass
 	export excel using "`saving'" ,  ///
 		sheet("7. all missing") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
-
+	
 	* revert to original
 	use `org', clear
 

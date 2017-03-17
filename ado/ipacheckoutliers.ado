@@ -1,3 +1,4 @@
+*! version 1.1.0 Kelsey Larson 21feb2017
 *! version 1.0.0 Christopher Boyer 04may2016
 
 program ipacheckoutliers, rclass
@@ -13,6 +14,7 @@ program ipacheckoutliers, rclass
 	    saving(string) 
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
+		[IGNore(string) SCTOdb(string)]
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -25,6 +27,19 @@ program ipacheckoutliers, rclass
 		if _rc {
 			di as err "Variable `var' is not numeric."
 			error 198
+		}
+	}
+	
+	*confirm that only numbers are in the exclude list, after removing "."
+	foreach num in `ignore' {
+
+		cap confirm number `num'
+		if _rc {
+			if "`num'" == "." {
+				continue // the code isn't harmed by including a "."
+			}
+			di as err "ignore option contains non-numeric value '`num''."
+			error 109
 		}
 	}
 
@@ -41,14 +56,18 @@ program ipacheckoutliers, rclass
 	save `org'
 
 	* define temporary variable
-	tempvar outlier min max
+	tempvar outlier min max use
 	g `outlier' = .
 	g `min' = .
 	g `max' = .
+	g `use' = .
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
 	local meta `"variable label value message"'
+	if !missing("`sctodb'") {
+		local meta `"`meta' scto_link"'
+	}
 
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
@@ -66,11 +85,21 @@ program ipacheckoutliers, rclass
 	foreach var in `meta' {
 		g `var' = ""
 	}
+	* generate scto_link variable
+	if !missing("`sctodb'") {
+		replace scto_link = subinstr(key, ":", "%3A", 1)
+		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
+	}
 
 	* initialize temporary output file
 	touch `tmp', var(`keeplist')
 
 	foreach var in `varlist' {
+		* mark variables that contain error codes and should be ignored
+		replace `use' = 1
+		foreach num in `ignore' {
+			replace `use' = 0 if `var' == `num'
+		}
 		* get current value of iqr
 		local val : word `i' of `multiplier'
 		
@@ -87,9 +116,9 @@ program ipacheckoutliers, rclass
 			tempvar sigma q1 q3
 
 			* calculate iqr stats
-			egen `sigma' = iqr(`var')
-			egen `q1' = pctile(`var'), p(25)
-			egen `q3' = pctile(`var'), p(75)
+			egen `sigma' = iqr(`var') if `use' == 1
+			egen `q1' = pctile(`var') if `use' == 1, p(25)
+			egen `q3' = pctile(`var') if `use' == 1, p(75)
 			replace `max' = `q3' + `val' * `sigma'
 			replace `min' = `q1' - `val' * `sigma'
 
@@ -105,8 +134,8 @@ program ipacheckoutliers, rclass
 			tempvar sigma  mu
 
 			* calculate sd stats
-			egen `sigma' = sd(`var')
-			egen `mu' = mean(`var')
+			egen `sigma' = sd(`var') if `use' == 1
+			egen `mu' = mean(`var') if `use' == 1
 			replace `max' = `mu' + `val' * `sigma'
 			replace `min' = `mu' - `val' * `sigma'
 
@@ -119,8 +148,8 @@ program ipacheckoutliers, rclass
 		}
 
 		* identify outliers 
-		replace `outlier' = (`var' > `max' | `var' < `min') & !mi(`var')
-
+		replace `outlier' = (`var' > `max' | `var' < `min') ///
+			& !mi(`var') & `use' == 1
 
 		* count outliers
 		count if `outlier' == 1
@@ -155,6 +184,25 @@ program ipacheckoutliers, rclass
 	export excel using "`saving'" ,  ///
 		sheet("11. outliers") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
+	
+	*export scto links as links
+	if !missing("`sctodb'") & c(version) >= 14 {
+		if !missing(scto_link[1]) {
+			putexcel set "`saving'", sheet("11. outliers") modify
+			ds
+			loc allvars `r(varlist)'
+			loc linkpos: list posof "scto_link" in allvars
+			alphacol `linkpos'
+			loc col = r(alphacol)
+			count
+			forval x = 1 / `r(N)' {
+				loc row = `x' + 1
+				loc formula = scto_link[`x']
+				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+			}
+			putexcel `putlist'
+		}
+	}
 
 	* revert to original
 	use `org', clear
@@ -220,4 +268,18 @@ program touch
 
 	restore
 
+end
+
+program alphacol, rclass
+	syntax anything(name = num id = "number")
+
+	local col = ""
+
+	while `num' > 0 {
+		local let = mod(`num'-1, 26)
+		local col = char(`let' + 65) + "`col'"
+		local num = floor((`num' - `let') / 26)
+	}
+
+	return local alphacol = "`col'"
 end
