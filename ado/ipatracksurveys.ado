@@ -12,13 +12,11 @@ version 13
 
 #delimit ;
 	/* varname is the unit that will be used (e.g. community) */
-syntax varname,  
+syntax varname using/,  
 	/* specify uid for the survey */
 	id(varname) 
 	/* specify date var, i.e. submission date var */
 	submit(varname numeric)
-	/* output filename */
-	saving(string) 
 	/* sample/respondents list file name */
 	sample(string)
 	/* specify unit and uid in sample/respondent list data if they are named differently */
@@ -32,8 +30,8 @@ syntax varname,
 qui {
 
 	* format outfile 
-	if !(regexm("`saving'", ".xlsx") | regexm("`saving'", ".xls")) {
-		local saving = "`saving'.xlsx"
+	if !(regexm("`using'", ".xlsx") | regexm("`using'", ".xls")) {
+		local using = "`using'.xlsx"
 	}
 	
 	* tempvars and tempfiles 
@@ -275,29 +273,29 @@ qui {
 	lab var `unit_string' "Unit Variable: `varlist'"
 	
 	format %tdCCYY/NN/DD `survey_start_date' `survey_end_date' 
-	export excel using "`saving'", sheet("T2. track surveys") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetreplace	
+	export excel using "`using'", sheet("T2. track surveys") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetreplace	
 	
 	* export header 
 	local today = date(c(current_date), "DMY")
 	local today_f : di %tdCCYY/NN/DD `today'
-	putexcel set "`saving'", sheet("T2. track surveys") modify  
+	putexcel set "`using'", sheet("T2. track surveys") modify  
 	putexcel A1 = ("Survey Statuses as of `today_f'")
 
 	use `master', replace 
 }
 
-	display `"Saved tracking information on `total' surveys in "`saving'""'
+	display `"Saved tracking information on `total' surveys in "`using'""'
 	display "`done' survey(s) complete (`perc_done'%)"
 	display "`left' survey(s) remain (`perc_left'%)"
 	display "First survey completed on `first'"
 	display "Last survey completed on `last'"
 	if `num_mi_unit_var' > 0 {
-		noisily disp in r `"WARNING: `num_mi_unit_var' observations are missing `varlist' in your data. Listed as "MISSING `varlist'" in "`saving'"."'
+		noisily disp in r `"WARNING: `num_mi_unit_var' observations are missing `varlist' in your data. Listed as "MISSING `varlist'" in "`using'"."'
 	}
 	if `num_surveyed_not_in_sample' > 0 {
 		disp in r "WARNING: For `num_surveyed_not_in_sample' value(s) of `varlist', the number of surveys completed exceeds the number of scheduled surveys from your sample() data." 	
 		disp in r "This suggests there are missing values of id() in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
-		disp in r `"These observations are flagged in "`saving'"."'
+		disp in r `"These observations are flagged in "`using'"."'
 	}
 		
 	end
