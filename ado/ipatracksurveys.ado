@@ -41,7 +41,7 @@ qui {
 	#delimit ;
 	tempvar 
 	tagdupids 
-	submit 
+	formatted_submit
 	unit_string 
 	id_string
 	survey_start_date 
@@ -50,6 +50,7 @@ qui {
 	tagdupids_sample
 	num_surveys_planned 
 	num_surveys_left 
+	num_surveys_left_s
 	total_surveys_done 
 	total_surveys_left 
 	;	
@@ -93,7 +94,7 @@ qui {
 	else {
 		gen `unit_string' = `varlist' 
 	}
-	
+
 	count if `unit_string' == ""
 	local num_mi_unit_var = `r(N)'
 	replace `unit_string' = "MISSING `varlist'" if `unit_string' == ""
@@ -147,7 +148,7 @@ qui {
 			local main_var `id'
 			local new_main_var `id_string'
 		}
-		if !mi("`sample_var'") {
+		if !mi("``sample_var''") {
 			cap confirm var ``sample_var''
 			if _rc {
 				noisily di as err `"The var "``sample_var''" does not exist in your sample data, , "`sample'"."' 
@@ -156,31 +157,31 @@ qui {
 			else {
 				cap confirm string var ``sample_var'' 
 				if _rc {
-					tostring ``sample_var'', gen(``new_main_var'')
+					tostring ``sample_var'', gen(`new_main_var')
 				}
 				else {
-					gen ``new_main_var'' = ``sample_var''
+					gen `new_main_var' = ``sample_var''
 				}
 			}
 		}
 		else {
-			cap confirm var ``main_var''
+			cap confirm var `main_var'
 			if _rc {
-				noisily di as err `"ERROR: Your var "``main_var''" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_unit()"."'
+				noisily di as err `"ERROR: Your var "`main_var'" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_unit()"."'
 				error 111 
 			}
 			else {
-				cap confirm string var ``main_var'' 
+				cap confirm string var `main_var'
 				if _rc {
-					tostring ``main_var'', gen(`new_main_var')
+					tostring `main_var', gen(`new_main_var')
 				}
 				else {
-					gen `new_main_var' = ``main_var''
+					gen `new_main_var' = `main_var'
 				}
 			}
 		}
 	}
-	
+
 	* check duplicates (sample)
 	duplicates tag `id_string', gen(`tagdupids_sample')
 	count if `tagdupids_sample' > 0 
@@ -200,52 +201,34 @@ qui {
 	collapse (sum) `num_surveys_planned', by(`unit_string')		
 	
 	* merge in dates data
-	merge 1:1 `unit_string' using `dates'	
-	count if _merge == 2 
-	local num_surveyed_not_in_sample = `r(N)' 
-	drop _merge
+	merge 1:1 `unit_string' using `dates', nogen	
 	
 	* if missing, means incomplete
 	replace `num_surveys_done' = 0 if `num_surveys_done' == . 	
 	
-	* gen num surveys left 
-	gen `num_surveys_left' = `num_surveys_planned' - `num_surveys_done' 
-	count if `survey_num_left' < 0 
-	if `r(N)' > 0 {
-		replace `num_surveys_left' = -99 if `num_surveys_left' < 0
-		tostring `num_surveys_left', replace
-		replace `num_surveys_left' = "num surveys completed > num surveys planned" if `num_surveys_left' == "-99"
-	}
-	
 	* num_surveys_planned = 0 if missing `varlist' 
 	replace `num_surveys_planned' = 0 if `unit_string' == "MISSING `varlist'"
-	
-	* export 
-	keep `varlist' `to_do' `survey_num_done' `survey_num_left' `survey_start' `survey_end' 
-	order `varlist' `to_do' `survey_num_done' `survey_num_left' `survey_start' `survey_end' 
-	gsort- `num_surveys_done'
 
-	lab var `num_surveys_done' "Num Surveys Complete"
-	lab var `num_surveys_left' "Num Surveys Remaining"
-	lab var `num_surveys_planned' "Num Surveys Planned (based on sample data)"
-	lab var `survey_start_date' "First date Survey Submitted"
-	lab var `survey_end_date' "Last date Survey Submitted"
+	* gen num surveys left 
+	gen `num_surveys_left' = `num_surveys_planned' - `num_surveys_done' 
+	replace `num_surveys_left' = 0 if `unit_string' == "MISSING `varlist'"
 	
-	format %tdCCYY/NN/DD `survey_start_date' `survey_end_date' 
-	export excel using "`saving'", sheet("Survey Tracking") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetmodify	
-	
-	* export header 
-	local today = date(c(current_date), "DMY")
-	local today_f : di %tdCCYY/NN/DD `today'
-	putexcel set "`saving'", sheet("Survey Tracking", replace) modify  
-	putexcel A1 = ("Survey Statuses as of `today_f'")
+	count if `num_surveys_left' < 0 
+	local num_surveyed_not_in_sample = `r(N)' 
+	if `num_surveyed_not_in_sample' > 0 {
+		gen `num_surveys_left_s' = `num_surveys_left'
+		replace `num_surveys_left_s' = -99 if `num_surveys_left_s' < 0
+		tostring `num_surveys_left_s', replace
+		replace `num_surveys_left_s' = "num surveys completed > num surveys planned" if `num_surveys_left_s' == "-99"
+		replace `num_surveys_left' = 0 if `num_surveys_left' < 0 
+	}
 
 	* calc some overview stats 
 	egen `total_surveys_done' = total(`num_surveys_done')
 	sum `total_surveys_done'
 	local done = `r(max)'
 	
-	egen `total_surveys_left'  = total(`survey_num_left')
+	egen `total_surveys_left'  = total(`num_surveys_left')
 	sum `total_surveys_left'  
 	local left = `r(max)' 
 
@@ -263,7 +246,6 @@ qui {
 	local total: disp %9.0gc `total'
 	local total = trim("`total'")
 
-	//get date range
 	sum `survey_start_date'
 	local first = `r(min)' 
 	local first: disp %tdCCYY/NN/DD `first'
@@ -272,6 +254,34 @@ qui {
 	local last = `r(max)' 
 	local last: disp %tdCCYY/NN/DD `last'
 	local last = trim("`last'")
+	
+	* keep the appropriate version of num_surveys_left*
+	cap confirm var `num_surveys_left_s'
+	if !_rc {
+		drop `num_surveys_left'
+		rename `num_surveys_left_s' `num_surveys_left'
+	}
+
+	* export 
+	keep `unit_string' `num_surveys_planned' `num_surveys_done' `num_surveys_left' `survey_start_date' `survey_end_date' 
+	order `unit_string' `num_surveys_planned' `num_surveys_done' `num_surveys_left' `survey_start_date' `survey_end_date' 
+	gsort- `num_surveys_done'
+
+	lab var `num_surveys_done' "Num Surveys Complete"
+	lab var `num_surveys_left' "Num Surveys Remaining"
+	lab var `num_surveys_planned' "Num Surveys Planned (based on sample data)"
+	lab var `survey_start_date' "First date Survey Submitted"
+	lab var `survey_end_date' "Last date Survey Submitted"
+	lab var `unit_string' "Unit Variable: `varlist'"
+	
+	format %tdCCYY/NN/DD `survey_start_date' `survey_end_date' 
+	export excel using "`saving'", sheet("T2. track surveys") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetreplace	
+	
+	* export header 
+	local today = date(c(current_date), "DMY")
+	local today_f : di %tdCCYY/NN/DD `today'
+	putexcel set "`saving'", sheet("T2. track surveys") modify  
+	putexcel A1 = ("Survey Statuses as of `today_f'")
 
 	use `master', replace 
 }
@@ -286,7 +296,7 @@ qui {
 	}
 	if `num_surveyed_not_in_sample' > 0 {
 		disp in r "WARNING: For `num_surveyed_not_in_sample' value(s) of `varlist', the number of surveys completed exceeds the number of scheduled surveys from your sample() data." 	
-		disp in r "This suggests there are missing IDs (`id') in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
+		disp in r "This suggests there are missing values of id() in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
 		disp in r `"These observations are flagged in "`saving'"."'
 	}
 		
