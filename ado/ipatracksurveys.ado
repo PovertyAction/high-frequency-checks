@@ -138,68 +138,45 @@ qui {
 	}
 		
 	* test fatal conditions (sample)
-	if !mi("`s_unit'") {
-		cap confirm var `s_unit' 
-		if _rc {
-			noisily di as err `"The var "`s_unit'" does not exist in your sample data, , "`sample'"."' 
-			error 111
+	foreach sample_var in s_unit s_id {
+		if "`sample_var'" == "s_unit" {
+			local main_var `varlist'
+			local new_main_var `unit_string'
 		}
 		else {
-			cap confirm string var `s_unit' 
+			local main_var `id'
+			local new_main_var `id_string'
+		}
+		if !mi("`sample_var'") {
+			cap confirm var ``sample_var''
 			if _rc {
-				tostring `s_unit', gen(`unit_string')
+				noisily di as err `"The var "``sample_var''" does not exist in your sample data, , "`sample'"."' 
+				error 111
 			}
 			else {
-				gen `unit_string' = `s_unit' 
+				cap confirm string var ``sample_var'' 
+				if _rc {
+					tostring ``sample_var'', gen(``new_main_var'')
+				}
+				else {
+					gen ``new_main_var'' = ``sample_var''
+				}
 			}
-		}
-	}
-	else {
-		cap confirm var `varlist'
-		if _rc {
-			noisily di as err `"ERROR: Your var "`varlist'" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_unit()"."'
-			error 111 
 		}
 		else {
-			cap confirm string var `varlist' 
+			cap confirm var ``main_var''
 			if _rc {
-				tostring `varlist', gen(`unit_string')
+				noisily di as err `"ERROR: Your var "``main_var''" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_unit()"."'
+				error 111 
 			}
 			else {
-				gen `unit_string' = `varlist' 
-			}
-		}
-	}
-
-	if !mi("`s_id'") {
-		cap confirm var `s_id' 
-		if _rc {
-			noisily di as err `"The var "`s_id'" does not exsit in your sample data, , "`sample'"."' 
-			error 111
-		}
-		else {
-			cap confirm string var `s_id'
-			if _rc {
-				tostring `s_id', gen(`id_string')
-			}
-			else {
-				gen `id_string' = `s_id' 
-			}
-		}
-	}
-	else {
-		cap confirm var `id'
-		if _rc {
-			noisily di as err `"ERROR: Your id var "`id'" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_id()"."'
-			error 111 
-		}
-		else {
-			cap confirm string var `id'
-			if _rc {
-				tostring `id', gen(`id_string')
-			}
-			else {
-				gen `id_string' = `id' 
+				cap confirm string var ``main_var'' 
+				if _rc {
+					tostring ``main_var'', gen(`new_main_var')
+				}
+				else {
+					gen `new_main_var' = ``main_var''
+				}
 			}
 		}
 	}
