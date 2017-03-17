@@ -9,7 +9,7 @@
 * this line adds standard boilerplate headings
 ipadoheader, version(13.0)
 set trace off
-/*
+
 
 /* =================================================
    ==================== Check 1 ==================== 
@@ -590,7 +590,7 @@ ipatracksummary using "`outfile'", target(`target') modify
    =========== Track 3 - Form Versions =============
    ================================================= */
    
-*cd "../track03"
+cd "../track03"
 global form_version form_version
 global sub_date submissiondate 
 
