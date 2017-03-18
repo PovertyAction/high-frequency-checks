@@ -1,128 +1,94 @@
-*! version 2.0.0 Christopher Boyer/Caton Brewster 03mar2017
+*! version 2.0.0 Christopher Boyer/Caton Brewster 18mar2017
 
 program ipatracksummary, rclass
     /* Add a summary sheet to the output excel file detailing
-       progress towards survey targets and the number of check 
-       violations. */
+       progress towards survey targets.
+	   
+	   Version 2 update: now looks at stats by submission date
+	   instead of by date the HFCs are run. No longer does 
+	   number of check violations.
+	  */
   version 13
 
   #d ;
   syntax using/, 
     /* target number of surveys */ 
     TARGet(integer) 
-    /* other options */ 
-    [MODify REPlace]; 
+    /* submission date */ 
+	submit(varname numeric) 
+	;
   #d cr
 
-  * test for fatal conditions
-  if "`modify'" != "" & "`replace'" != "" {
-    di as err "May specify either {op: modify} or {op: replace}, not both."
-  }
+qui {
 
-  * get the current date
-  local today = date(c(current_date), "DMY")
-  local today_f : di %tdnn/dd/YY `today'
-  
-  * get total number of interviews
-  local nmaster = _N  
+	* test for fatal conditions
+	count if `submit' == . 
+	if `r(N)' > 0 {
+		di as err `"Missing values of `submit' are not allowed. Please correct this before running ipatracksurveys."'
+		error 101
+		}
 
-  * confirm file exists
-  cap confirm file "`using'"
-  if _rc {
-    * write the headers
+	* tempvars
+	tempvar formatted_submit cum_freq perc_targ cum_perc_targ
+	
+	* convert submit to %td format if needed	
+	foreach letter in d c C b w m q h y {
+		ds `submit', has(format %t`letter'*)
+		if !mi("`r(varlist)'") {
+			gen `formatted_submit' = dof`letter'(`submit')
+		}
+	}
+	cap confirm var `formatted_submit' 
+	if _rc {
+		di as err "The submission date variable, `submit', is not in an acceptable format. 
+		di as err "Must be %td, %tc, %tC, %tb, %tw, %tm, %tq, %th, or %ty."
+		error 101
+	}
+	format `formatted_submit' %tdCCYY/NN/DD	
+
+	* generate output
+	preserve
+	
+	table `formatted_submit', replace
+	rename table1 freq 
+	
+	gen `cum_freq' = sum(freq)
+	gen `perc_targ' = 100 * (freq / `target')
+	format `perc_targ' %9.2f 
+	gen `cum_perc_targ' = sum(`perc_targ') 
+	format `cum_perc_targ' %9.2f 
+
+	export excel using "`using'", sheet("T1. summary") datestring("%tdCCYY/NN/DD") sheetreplace cell(A3) 
+		
+	restore
+	
+	* write the headers
     headers using "`using'"
 
-    * set the first line
-    local i = 2
-    local nlast = 0
-  }
-  else {
-    * if modify option was specified
-    if "`modify'" != "" {
-      preserve
-
-      * read the existing summary sheet
-      import excel using "`using'", sheet("T1. summary") firstrow clear
-
-      * get the number of lines 
-      local nusing = _N
-
-      /* Note: often users will run HFCs multiple times
-         per day to debug errors or to update as additional 
-         survey submissions arrive. However, allocating a 
-         summary line for each of these runs is undesirable. 
-         Therefore, if the last entry is for the same date, 
-         we'll simply overwrite it. */
-      if Date[`nusing'] == "`today_f'" {
-        local i = `nusing' + 1
-        if `nusing' > 1 {
-          local nlast = CumulativeFrequency[`nusing' - 1]
-        } 
-        else {
-          local nlast = 0
-        }
-      }
-      else {
-        local i = `nusing' + 2
-        local nlast = CumulativeFrequency[`nusing']
-      }
-
-      restore
-
-      * set the output
-      putexcel set "`using'", sheet("T1. summary") modify
-    }
-
-    if "`replace'" != "" {
-      * write the headers
-      headers using "`using'", replace
-
-      * set the first line
-      local i = 2
-      local nlast = 0
-    }
-  }
-
-  * calculate stats
-  local freq = `nmaster' - `nlast'
-  local ptarget : di %9.2f 100 * `freq' / `target'
-  local cptarget : di %9.2f 100 * `nmaster' / `target'
-
-  * output statistics
-  putexcel ///
-      A`i'=("`today_f'") ///
-  	  B`i'=(`freq')    ///
-      C`i'=(`nmaster') ///
-      D`i'=(`ptarget') ///
-      E`i'=(`cptarget') 
-
-    return scalar i = `i'
+}
+  
 end
 
 program headers, rclass
     /* this program writes the column headers
        to the output worksheet. */
 
-    syntax using/, [replace]
+    syntax using/, 
 
     * set the output sheet
-    putexcel set "`using'", sheet("T1. summary") `replace'
+    putexcel set "`using'", sheet("T1. summary") modify
 
+	* today's date
+	local today = date(c(current_date), "DMY")
+	local today_f : di %tdCCYY/NN/DD `today'
+	
+	* date header
+	putexcel A1 = ("Summary as of `today_f'")
+	
     * write the column headers
-    putexcel A1=("Date") ///
-      B1=("Frequency") ///
-      C1=("Cumulative Frequency") ///
-      D1=("Percent Target") ///
-      E1=("Cumulative Percent Target") ///
-      F1=("1. incomplete") ///
-      G1=("2. duplicates") ///
-      H1=("3. consent") ///
-      I1=("4. no miss") ///
-      J1=("5. follow up") ///
-      K1=("6. skip") ///
-      L1=("7. all miss") ///
-      M1=("8. constraints") ///
-      N1=("9. specify") ///
-      O1=("10. dates") ///
-      P1=("11. outliers") 
+    putexcel A2=("Submission Date") ///
+      B2=("Frequency") ///
+      C2=("Cumulative Frequency") ///
+      D2=("Percent Target") ///
+      E2=("Cumulative Percent Target") ///
 end
