@@ -65,9 +65,16 @@ qui {
 		
 	count if `submit' == . 
 	if `r(N)' > 0 {
-		di as err `"There are missing values of `submit'. Please correct this before running ipatracksurveys."'
+		di as err `"Missing values of `submit' are not allowed. Please correct this before running ipatracksurveys."'
 		error 101
 		}
+		
+	count if `id' == . 
+	if `r(N)' > 0 {
+		di as err `"Missing values of `id' are not allowed. Please correct this before running ipatracksurveys."'
+		error 101
+		}
+
 	
 	* convert submit to %td format if needed	
 	foreach letter in d c C b w m q h y {
@@ -177,6 +184,30 @@ qui {
 					gen `new_main_var' = `main_var'
 				}
 			}
+		}
+	}
+
+	count if `id_string' == . 
+	if `r(N)' > 0{
+		if !mi("`s_id'") {
+			di as err `"Missing IDs (`s_id') in your sample data ("`sample'") are not allowed."'
+			error 101
+		}
+		else {
+			di as err `"Missing IDs (`id') in your sample data ("`sample'") are not allowed."'
+			error 101
+		}
+	}
+
+	count if `unit_string' == . 
+	if `r(N)' > 0{
+		if !mi("`s_unit'") {
+			di as err `"Missing values of the unit variable (`s_unit') in your sample data ("`sample'") are not allowed."'
+			error 101
+		}
+		else {
+			di as err `"Missing values of the unit variable (`varlist') in your sample data ("`sample'") are not allowed."'
+			error 101
 		}
 	}
 
