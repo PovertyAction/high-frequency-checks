@@ -99,16 +99,11 @@ readreplace using "`repfile'", ///
  /* <============ Track 1. Summarize completed surveys by date ============> */
 
       /* the command below creates a summary page for the HFC 
-      output. the first time you run it, use the "replace" flag
-	  instead of the "modify" flag. the former will create a new 
-	  sheet where as the latter will try to update the existing 
-	  sheet with a new line */
+      output showing stats on survey completion by submission 
+	  date */
 	  
-ipatracksummary using "`outfile'", target(`target') modify
-local row = `r(i)'
+ipatracksummary using "`outfile'", submit(`date') target(`target') 
 
-   
-   
    
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
@@ -126,8 +121,6 @@ ipacheckcomplete ${variable1}, complete(${complete_value1}) ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
 	
-putexcel F`row'=(`r(nincomplete)')
-
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
 ipacheckdups ${variable2}, id(`id') ///
@@ -137,8 +130,6 @@ ipacheckdups ${variable2}, id(`id') ///
   saving("`outfile'") ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
-
-putexcel G`row'=(`r(ndups1)')
 	
 	
 /* <============== HFC 3. Check that all surveys have consent =============> */
@@ -151,8 +142,6 @@ ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
 
-putexcel H`row'=(`r(noconsent)')
-
 
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 ipachecknomiss ${variable4}, id(`id') /// 
@@ -162,8 +151,6 @@ ipachecknomiss ${variable4}, id(`id') ///
   saving("`outfile'") ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
-		
-putexcel I`row'=(`r(nmiss)')
 	
 	
 /* <======== HFC 5. Check that follow up record ids match original ========> */
@@ -173,8 +160,7 @@ putexcel I`row'=(`r(nmiss)')
     saving("`outfile'") ///
 	sctodb("`scto_database'") ///
     sheetreplace
-
-putexcel J`row'=(`r(discrep)') */
+ */
 
 
 /* <============= HFC 6. Check skip patterns and survey logic =============> */
@@ -187,8 +173,6 @@ ipacheckskip ${variable6}, assert(${assert6}) ///
   saving("`outfile'") ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
-	
-putexcel K`row'=(`r(nviol)')
 		 
 		 
 /* <======== HFC 7. Check that no variable has all missing values =========> */
@@ -196,8 +180,6 @@ ipacheckallmiss ${variable7}, id(`id') ///
   enumerator(`enum') ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
-
-putexcel L`row'=(`r(nallmiss)')
 
 
 /* <=============== HFC 8. Check for hard/soft constraints ================> */
@@ -210,8 +192,6 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
   saving("`outfile'") ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
-
-putexcel M`row' =(`r(nsoft)' + `r(nhard)') 
 		 
 
 /* <================== HFC 9. Check specify other values ==================> */
@@ -225,8 +205,6 @@ ipacheckspecify ${specify_variable9}, ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
 
-putexcel N`row'=(`r(nspecify)')
-
 	
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
@@ -237,9 +215,6 @@ ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
   saving("`outfile'") ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel'
-
-putexcel O`row'=(`r(missing)' + `r(diff_end)' +  ///
-  `r(diff_start)' + `r(diff_today)')
 		 
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
@@ -252,8 +227,6 @@ ipacheckoutliers ${variable11}, id(`id') ///
   saving("`outfile'") ///
   sctodb("`scto_database'") ///
   sheetreplace `nolabel' `sd'
-
-putexcel P`row'=(`r(noutliers)')
 
 
 /* ===============================================================
