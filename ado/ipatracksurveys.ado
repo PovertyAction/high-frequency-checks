@@ -69,11 +69,21 @@ qui {
 		error 101
 		}
 		
-	count if `id' == . 
-	if `r(N)' > 0 {
-		di as err `"Missing values of `id' are not allowed. Please correct this before running ipatracksurveys."'
-		error 101
+	cap confirm string var `id'
+	if _rc {
+		count if `id' == . 
+		if `r(N)' > 0 {
+			di as err `"Missing values of `id' are not allowed. Please correct this before running ipatracksurveys."'
+			error 101
 		}
+	}
+	else {
+		count if `id' == "" 
+		if `r(N)' > 0 {
+			di as err `"Missing values of `id' are not allowed. Please correct this before running ipatracksurveys."'
+			error 101
+		}
+	}
 
 	
 	* convert submit to %td format if needed	
@@ -187,7 +197,7 @@ qui {
 		}
 	}
 
-	count if `id_string' == . 
+	count if `id_string' == ""
 	if `r(N)' > 0{
 		if !mi("`s_id'") {
 			di as err `"Missing IDs (`s_id') in your sample data ("`sample'") are not allowed."'
@@ -199,7 +209,7 @@ qui {
 		}
 	}
 
-	count if `unit_string' == . 
+	count if `unit_string' == "" 
 	if `r(N)' > 0{
 		if !mi("`s_unit'") {
 			di as err `"Missing values of the unit variable (`s_unit') in your sample data ("`sample'") are not allowed."'
@@ -230,20 +240,20 @@ qui {
 	collapse (sum) `num_surveys_planned', by(`unit_string')		
 	
 	* merge in dates data
-	merge 1:1 `unit_string' using `dates', nogen	
+	merge 1:1 `unit_string' using `dates'	
 	
 	* if missing, means incomplete
 	replace `num_surveys_done' = 0 if `num_surveys_done' == . 	
 	
 	* num_surveys_planned = 0 if missing `varlist' 
-	replace `num_surveys_planned' = 0 if `unit_string' == "MISSING `varlist'"
+	replace `num_surveys_planned' = 0 if _merge == 2
 
 	* gen num surveys left 
 	gen `num_surveys_left' = `num_surveys_planned' - `num_surveys_done' 
-	replace `num_surveys_left' = 0 if `unit_string' == "MISSING `varlist'"
 	
 	count if `num_surveys_left' < 0 
 	local num_surveyed_not_in_sample = `r(N)' 
+	
 	if `num_surveyed_not_in_sample' > 0 {
 		gen `num_surveys_left_s' = `num_surveys_left'
 		replace `num_surveys_left_s' = -99 if `num_surveys_left_s' < 0
@@ -325,7 +335,7 @@ qui {
 	}
 	if `num_surveyed_not_in_sample' > 0 {
 		disp in r "WARNING: For `num_surveyed_not_in_sample' value(s) of `varlist', the number of surveys completed exceeds the number of scheduled surveys from your sample() data." 	
-		disp in r "This suggests there are missing values of id() in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
+		disp in r "This suggests there are missing values of id() or the unit varible in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
 		disp in r `"These observations are flagged in "`using'"."'
 	}
 		
