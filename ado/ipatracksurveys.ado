@@ -11,8 +11,9 @@ program ipatracksurveys, rclass
 version 13
 
 #delimit ;
-	/* varname is the unit that will be used (e.g. community) */
-syntax varname using/,  
+syntax using/,  
+	/* unit that will be used (e.g. community) */
+	unit(varname)
 	/* specify uid for the survey */
 	id(varname) 
 	/* specify date var, i.e. submission date var */
@@ -102,17 +103,17 @@ qui {
 	format `formatted_submit' %tdCCYY/NN/DD	
 	
 	* prep unit and id variables
-	cap confirm string var `varlist' 
+	cap confirm string var `unit' 
 	if _rc {
-		tostring `varlist', gen(`unit_string')
+		tostring `unit', gen(`unit_string')
 	}
 	else {
-		gen `unit_string' = `varlist' 
+		gen `unit_string' = `unit' 
 	}
 
 	count if `unit_string' == ""
 	local num_mi_unit_var = `r(N)'
-	replace `unit_string' = "MISSING `varlist'" if `unit_string' == ""
+	replace `unit_string' = "MISSING `unit'" if `unit_string' == ""
 	
 	cap confirm string var `id' 
 	if _rc {
@@ -156,7 +157,7 @@ qui {
 	* test fatal conditions (sample)
 	foreach sample_var in s_unit s_id {
 		if "`sample_var'" == "s_unit" {
-			local main_var `varlist'
+			local main_var `unit'
 			local new_main_var `unit_string'
 		}
 		else {
@@ -216,7 +217,7 @@ qui {
 			error 101
 		}
 		else {
-			di as err `"Missing values of the unit variable (`varlist') in your sample data ("`sample'") are not allowed."'
+			di as err `"Missing values of the unit variable (`unit') in your sample data ("`sample'") are not allowed."'
 			error 101
 		}
 	}
@@ -245,7 +246,7 @@ qui {
 	* if missing, means incomplete
 	replace `num_surveys_done' = 0 if `num_surveys_done' == . 	
 	
-	* num_surveys_planned = 0 if missing `varlist' 
+	* num_surveys_planned = 0 if missing `unit' 
 	replace `num_surveys_planned' = 0 if _merge == 2
 
 	* gen num surveys left 
@@ -311,7 +312,7 @@ qui {
 	lab var `num_surveys_planned' "Num Surveys Planned (based on sample data)"
 	lab var `survey_start_date' "First date Survey Submitted"
 	lab var `survey_end_date' "Last date Survey Submitted"
-	lab var `unit_string' "Unit Variable: `varlist'"
+	lab var `unit_string' "Unit Variable: `unit'"
 	
 	format %tdCCYY/NN/DD `survey_start_date' `survey_end_date' 
 	export excel using "`using'", sheet("T2. track surveys") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetreplace	
@@ -331,10 +332,10 @@ qui {
 	display "First survey completed on `first'"
 	display "Last survey completed on `last'"
 	if `num_mi_unit_var' > 0 {
-		noisily disp in r `"WARNING: `num_mi_unit_var' observations are missing `varlist' in your data. Listed as "MISSING `varlist'" in "`using'"."'
+		noisily disp in r `"WARNING: `num_mi_unit_var' observations are missing `unit' in your data. Listed as "MISSING `unit'" in "`using'"."'
 	}
 	if `num_surveyed_not_in_sample' > 0 {
-		disp in r "WARNING: For `num_surveyed_not_in_sample' value(s) of `varlist', the number of surveys completed exceeds the number of scheduled surveys from your sample() data." 	
+		disp in r "WARNING: For `num_surveyed_not_in_sample' value(s) of `unit', the number of surveys completed exceeds the number of scheduled surveys from your sample() data." 	
 		disp in r "This suggests there are missing values of id() or the unit varible in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
 		disp in r `"These observations are flagged in "`using'"."'
 	}

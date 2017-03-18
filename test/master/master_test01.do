@@ -118,9 +118,8 @@ local row = `r(i)'
 	  survey completed in that unit and the date of the last
 	  */
 	  
-ipatracksurveys $geo_unit using "`outfile'", id(`id') ///
-	submit(`date') ///
-	sample("$sample") 
+ipatracksurveys using "`outfile'", unit($geo_unit) ///
+	id(`id') submit(`date') sample("$sample") 
 	
 
 /* =============================================================== 
