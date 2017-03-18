@@ -68,8 +68,13 @@ syntax varname,  //varname is the form version variable - must be num.
 			gen `formatted_submit' = dof`letter'(`submit')
 		}
 	}
-	
-	format `formatted_submit' %tdCCYY/NN/DD
+	cap confirm var `formatted_submit'
+    if _rc {
+        di as err "The submission date variable, `submit', is not in an acceptable format.
+        di as err "Must be %td, %tc, %tC, %tb, %tw, %tm, %tq, %th, or %ty."
+        error 101
+    }
+    format `formatted_submit' %tdCCYY/NN/DD   
 	
 	tab `formatted_submit' `varlist'
 	if mi("`r(N)'") {
