@@ -602,6 +602,22 @@ ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
    days(2000)
 
 /* =================================================
+   ================== Readreplace ================== 
+   ================================================= */
+
+cd "../readreplace"
+*Test 1
+use readreplace_test01, clear
+ipacheckreadreplace using "readreplace_test01_corr.xlsx", ///
+	id(id) ///
+	variable(variable) ///
+	value(value) ///
+	oldvalue(oldvalue) ///
+	selectmultiple(selectmultiple) ///
+	excel ///
+	import(firstrow)
+   
+/* =================================================
    ==================== Master ===================== 
    ================================================= */
   
