@@ -47,6 +47,7 @@ local sd     	 "sd"
 local nolabel    "nolabel"
 local replace    ""
 local geo_unit    "ward"
+local form_version "formdef_version"
 
 /* =============================================================== 
    ================== Pre-process Import Data  =================== 
@@ -109,7 +110,6 @@ readreplace using "`repfile'", ///
 ipatracksummary using "`outfile'", target(`target') modify
 local row = `r(i)'
 
-
  /* <========== Track 2. Track surveys completed against planned ==========> */
 
       /* the command below creates a table showing the num of 
@@ -122,6 +122,20 @@ local row = `r(i)'
 /*ipatracksurveys using "`outfile'", unit(`geo_unit') ///
 	id(`id') submit(`date') sample("$sample") 
 */
+
+/* <======== Track 3. Track form versions used by submission date ========> */
+
+      /* the command below creates a table showing the num of 
+	  each form version used on each submission date. For the 
+	  most recent submission date, if any entries didn't use the
+	  latest form version, the id and enumerator is listed below
+	  the table */
+	  
+/*ipatrackversions `form_version', id(`id') 
+	enumerator(`enum') ///
+	submit(`date') ///
+    saving("`outfile'")*/
+   
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
