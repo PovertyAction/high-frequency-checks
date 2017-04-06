@@ -701,6 +701,95 @@ submit(submissiondate) target(`target')
 
 
 /* =================================================
+   =========== Track 3 - Form Versions =============
+   ================================================= */
+   
+cd "../track03"
+
+* Test 1 (normal)
+use track03_test01, clear
+local outfile "track03_test01_out.xlsx"
+ipatrackversions form_version, id(id) ///
+	enumerator(enum) ///
+	submit(submissiondate) ///
+    saving("`outfile'") 
+
+* Test 2 (sub date missing)
+use track03_test02, clear
+local outfile "track03_test02_out.xlsx"
+rcof ipatrackversions form_version, id(id) ///
+	enumerator(enum) ///
+	submit(submissiondate) ///
+    saving("`outfile'") == 101 
+
+* Test 3
+use track03_test03, clear
+local outfile "track03_test03_out.xlsx"
+rcof ipatrackversions form_version, id(id) ///
+	enumerator(enum) ///
+	submit(submissiondate) ///
+    saving("`outfile'") == 122
+
+* Test 4
+use track03_test04, clear
+local outfile "track03_test04_out.xlsx"
+rcof ipatrackversions form_version, id(id) ///
+	enumerator(enum) ///
+	submit(submissiondate) ///
+    saving("`outfile'") == 101 
+
+/* =================================================
+   =========== Track 2 - Track Surveys =============
+   ================================================= */
+   
+cd "../track02"
+
+* Test 1
+use track02_test01, clear
+local outfile "track02_test01_out.xlsx"
+ipatracksurveys using "`outfile'", unit(region) ///
+	id(id) submit(submissiondate) ///
+	sample("track02_test01_sample.xlsx")
+
+* Test 2
+use track02_test02, clear
+local outfile "track02_test02_out.xlsx" 
+ipatracksurveys using "`outfile'", unit(region) ///
+	id(id) submit(submissiondate) ///
+	s_id(sample_id) s_unit(sample_region) ///
+	sample("track02_test02_sample.xlsx")
+
+* Test 3
+use track02_test03, clear
+local outfile "track02_test03_out.xlsx"
+ipatracksurveys using "`outfile'", unit(region) ///
+	id(id) submit(submissiondate) ///
+	sample("track02_test03_sample.xlsx")
+
+* Test 4
+use track02_test04, clear
+local outfile "track02_test04_out.xlsx"
+ipatracksurveys using "`outfile'", unit(region) ///
+	id(id) submit(submissiondate) ///
+	sample("track02_test04_sample.xlsx") 
+
+* Test 5 
+use track02_test05, clear
+local outfile "track02_test05_out.xlsx"
+rcof ipatracksurveys using "`outfile'", unit(region) ///
+	id(id) submit(submissiondate) ///
+	s_id(fake_id) ///	
+	sample("track02_test05_sample.xlsx") == 111
+
+* Test 6
+use track02_test06, clear
+local outfile "track02_test06_out.xlsx"
+ipatracksurveys using "`outfile'", unit(region) ///
+	id(id) submit(submissiondate) ///
+	sample("track02_test06_sample.xlsx")
+
+
+/* =================================================
    =================== Enumerator ================== 
    ================================================= */
    

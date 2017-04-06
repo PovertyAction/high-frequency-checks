@@ -1,0 +1,155 @@
+*! version 1.0.0 Caton brewster 10nov2016
+
+program ipatrackversions, rclass
+	/* Create a sheet that shows the survey versions used for each day of surveying. 
+	For the most recent day of surveying, if there are surveys that have been submitted
+	using the wrong version, list the enumerator ID, respondent ID, etc. for those observations
+	to facilitate finding that enumerator and ensuring they upload the latest version of the 
+	survey */
+	
+	
+
+//define inputs
+version 13
+
+#delimit ;
+syntax varname,  //varname is the form version variable - must be num. 
+	/* specify uid for the survey, enumerator id */
+    id(varname) ENUMerator(varname) 
+	/* list of other vars to keep */
+	[KEEPvars(string)] 
+	/* specify date var, i.e. submission date var */
+	submit(varname numeric)
+	/* output filename */
+	saving(string) 
+	;	
+#delimit cr
+
+	
+	di ""
+	di "Compiling information on survey form versions by submission date..."
+
+	qui {
+	
+	* test for fatal conditions 
+	cap confirm numeric var `varlist'
+	if _rc {
+		di as err "Variable used for form version (`varlist') not numeric."
+		di as err "Must be numeric and ordinal for the program to work correctly."
+		error 101
+	}
+		
+	if !mi("`keep'") {
+		foreach var of varlist `keep' {
+			cap confirm var `var'
+			if _rc {
+				di as err `"Tried to specify keeping the var "`var'" - "`var'" does not exist in the dataset"'
+				error 101
+			}
+		}
+	}
+	
+	count if `submit' == . 
+	if `r(N)' > 0 {
+		di as err `"There are missing values of `submit'. Drop these observations before continuing."'
+		error 101
+	}
+
+	
+	* initialize tempvars  
+	tempvar header_submit header_fvs formatted_submit outdated_fvs_header ///
+	max_fv_by_subdate wrong_fv wrong_fv_today 
+	 
+	
+	* convert `header_submit' to %td format if needed	
+	foreach letter in d c C b w m q h y {
+		ds `submit', has(format %t`letter'*)
+		if !mi("`r(varlist)'") {
+			gen `formatted_submit' = dof`letter'(`submit')
+		}
+	}
+	cap confirm var `formatted_submit'
+    if _rc {
+        di as err "The submission date variable, `submit', is not in an acceptable format.
+        di as err "Must be %td, %tc, %tC, %tb, %tw, %tm, %tq, %th, or %ty."
+        error 101
+    }
+    format `formatted_submit' %tdCCYY/NN/DD   
+	
+	tab `formatted_submit' `varlist'
+	if mi("`r(N)'") {
+		di as err `"No observations in cross-tab of `submit' and `varlist' - check your data"'
+		error 122
+	}
+	
+	* export sheet headers 
+	putexcel set "`saving'", sheet("T3. form versions", replace) modify 
+	putexcel A1 = ("Submissiondate Date")
+	putexcel B1 = ("Form Versions")
+	
+	* format and export submission dates (left hand column of table)
+	preserve
+	keep `formatted_submit'
+	duplicates drop `formatted_submit', force
+	sort `formatted_submit' 
+	export excel using "`saving'", sheet("T3. form versions") cell(A3) sheetmodify  datestring("%tdCCYY/NN/DD") 
+	restore
+	
+	* export form def versions (column headers of table)
+	preserve 
+	table `varlist', replace
+	xpose, clear promote
+	drop in 2
+	export excel using "`saving'", sheet("T3. form versions") cell(B2) sheetmodify 
+	restore 
+
+	* export form def version counts by subdate (body of table) 
+	clear matrix
+	ta `formatted_submit' `varlist', matcell(fvs_counts_by_subdate)
+	local num_subdates = `r(r)'	
+	svmat fvs_counts_by_subdate, names(fvs_string)
+	export excel fvs_string*  using "`saving'", sheet("T3. form versions") cell(B3) sheetmodify 
+	drop fvs_string*
+	
+	* save max submissiondate
+	sum `formatted_submit'
+	local max_subdate = `r(max)'
+	
+	local frmt_max_subdate: disp %tdCCYY/NN/DD `max_subdate'
+	local frmt_max_subdate = trim("`frmt_max_subdate'")
+
+	
+	* export list of obs that didn't use most recent survey version on most recent submission date 
+
+	* export header 
+	local row_for_outdated_fvs_header = `num_subdates' + 5 
+	putexcel A`row_for_outdated_fvs_header' = ("List of entries using outdated survey form version on `frmt_max_subdate'")	
+	
+	* get total count of surveys
+	local num_surveys = _N
+
+	* gen wrong today & counts 
+	sum `varlist', d
+	gen `wrong_fv_today' = `varlist' != `r(max)' & !mi(`varlist') & `formatted_submit' == `max_subdate'
+	
+	count if `wrong_fv_today' == 1 
+	local num_wrong_fvs_today = `r(N)'
+	
+	* get percent of num wrong versions on most recent sub date	
+	local perc_wrong_fvs_today: disp %12.2f `num_wrong_fvs_today'*100/`num_surveys'
+	local perc_wrong_fvs_today = trim("`perc_wrong_fvs_today'")
+
+	local row_for_outdated_fvs= `row_for_outdated_fvs_header' + 1
+	if `num_wrong_fvs_today' > 0 {
+		export excel `enumerator' `id' `keepvars'  using "`saving'" if `wrong_fv_today' == 1, sheet("T3. form versions") sheetmodify cell(A`row_for_outdated_fvs') firstrow(var)
+	}
+	
+	clear matrix
+}
+	
+	display `"Information saved in "`saving'""'
+	display "Most recent submission date was `frmt_max_subdate'"
+	display "`num_wrong_fvs_today' (`perc_wrong_fvs_today'%) survey(s) completed with an outdated form version on `frmt_max_subdate'"
+	
+
+	end
