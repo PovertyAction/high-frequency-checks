@@ -46,6 +46,7 @@ local target     2000
 local sd     	 "sd"
 local nolabel    "nolabel"
 local replace    ""
+local geo_unit    "ward"
 
 /* =============================================================== 
    ================== Pre-process Import Data  =================== 
@@ -107,6 +108,20 @@ readreplace using "`repfile'", ///
 	  
 ipatracksummary using "`outfile'", target(`target') modify
 local row = `r(i)'
+
+
+ /* <========== Track 2. Track surveys completed against planned ==========> */
+
+      /* the command below creates a table showing the num of 
+	  surveys completed, num of surveys planned, and num of 
+	  surveys remaining in each given unit (e.g. by region, 
+	  district, etc.). It also shows the date of the first
+	  survey completed in that unit and the date of the last
+	  */
+	  
+/*ipatracksurveys using "`outfile'", unit(`geo_unit') ///
+	id(`id') submit(`date') sample("$sample") 
+*/
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
