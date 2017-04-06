@@ -682,19 +682,22 @@ cd "../track01"
 use track01_test01, clear
 local target = 100
 local outfile "track01_test01_out.xlsx"
-ipatracksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", ///
+submit(submissiondate) target(`target') 
 
 * Test 2
 use track01_test02, clear
 local target = 100
 local outfile "track01_test02_out.xlsx"
-ipatracksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", ///
+submit(submissiondate) target(`target') 
 
 * Test 3
 use track01_test03, clear
 local target = 100
 local outfile "track01_test03_out.xlsx"
-ipatracksummary using "`outfile'", target(`target') modify
+ipatracksummary using "`outfile'", ///
+submit(submissiondate) target(`target') 
 
 
 /* =================================================
