@@ -46,6 +46,7 @@ local target     2000
 local sd     	 "sd"
 local nolabel    "nolabel"
 local replace    ""
+local geo_unit    "ward"
 
 /* =============================================================== 
    ================== Pre-process Import Data  =================== 
@@ -118,9 +119,9 @@ local row = `r(i)'
 	  survey completed in that unit and the date of the last
 	  */
 	  
-ipatracksurveys using "`outfile'", unit($geo_unit) ///
+/*ipatracksurveys using "`outfile'", unit(`geo_unit') ///
 	id(`id') submit(`date') sample("$sample") 
-	
+*/
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
