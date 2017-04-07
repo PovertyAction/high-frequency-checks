@@ -90,6 +90,6 @@ program headers, rclass
       B2=("Frequency") ///
       C2=("Cumulative Frequency") ///
       D2=("Percent Target") ///
-      E2=("Cumulative Percent Target") ///
+      E2=("Cumulative Percent Target")
 end
 
