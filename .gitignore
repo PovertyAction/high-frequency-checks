@@ -9,3 +9,6 @@ Example_HFC output.xlsx
 
 # ignore the research file
 *research.xlsx
+
+# ignore the exercise folder
+exercise/
