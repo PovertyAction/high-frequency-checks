@@ -40,7 +40,7 @@ qui {
 	}
 	cap confirm var `formatted_submit' 
 	if _rc {
-		di as err "The submission date variable, `submit', is not in an acceptable format. 
+		di as err "The submission date variable, `submit', is not in an acceptable format."
 		di as err "Must be %td, %tc, %tC, %tb, %tw, %tm, %tq, %th, or %ty."
 		error 101
 	}
