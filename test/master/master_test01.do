@@ -188,7 +188,7 @@ ipachecknomiss ${variable4}, id(`id') ///
     saving("`outfile'") ///
     sheetreplace
 
-putexcel J`row'=(`r(discrep)') */
+*/
 
 
 /* <============= HFC 6. Check skip patterns and survey logic =============> */
@@ -208,9 +208,7 @@ ipacheckallmiss ${variable7}, id(`id') ///
   enumerator(`enum') ///
   saving("`outfile'") ///
   sheetreplace `nolabel'
-
-putexcel L`row'=(`r(nallmiss)')
-
+  
 
 /* <=============== HFC 8. Check for hard/soft constraints ================> */
 ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
