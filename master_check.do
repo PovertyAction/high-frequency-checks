@@ -86,7 +86,7 @@ ipatracksurveys using "${outfile}", unit(${geounit}) ///
 	  latest form version, the id and enumerator is listed below
 	  the table */
 	  
-ipatrackversions ${formversion}, id(${id}) 
+ipatrackversions ${formversion}, id(${id}) ///
 	enumerator(${enum}) ///
 	submit(${date}) ///
     saving("${outfile}") 
