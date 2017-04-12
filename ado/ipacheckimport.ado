@@ -18,6 +18,7 @@ program ipacheckimport, rclass
 		preserve
 	
 		tempvar tmp
+		tempfile tmpsheet
 
 		local sheets =              ///
 			`""0. setup""' +        ///
@@ -29,8 +30,8 @@ program ipacheckimport, rclass
 			`""6. skip""' +         ///
 			`""7. all miss""'  +    ///
 			`""8. constraints""' +  ///
-			`""9. specify""' +     ///
-			`""10. dates""' +      ///
+			`""9. specify""' +      ///
+			`""10. dates""' +       ///
 			`""11. outliers""'  +   ///
 			`""enumdb""'  +         ///
 			`""researchdb""' 
@@ -65,29 +66,33 @@ program ipacheckimport, rclass
 	    	* count number of rows
 			local rows = _N
 
+			* add a temporary variable to check for matching boxes
+			g `tmp' = _n
+			save `tmpsheet', replace
+
 			* the set up sheet is different from all others
 			if `"`sheet'"' == "0. setup" {
 				* define lists of entry boxes and matching globals to be defined
 				*<!> TO ADD => replacements file, master tracking list, tracking globals
-				local boxes =                   ///
-					`""Stata Dataset""' +       ///
-					`""HFC Input File""' +      ///
-					`""HFC Output File""' +     ///
-					`""HFC Enumerator File""' + ///
-					`""HFC Research File""' +   ///
-					`""Replacements File \(opt\.\)""' + ///
+				local boxes =                                 ///
+					`""Stata Dataset""' +                     ///
+					`""HFC Input File""' +                    ///
+					`""HFC Output File""' +                   ///
+					`""HFC Enumerator File""' +               ///
+					`""HFC Research File""' +                 ///
+					`""Replacements File \(opt\.\)""' +       ///
 					`""Master Tracking Dataset \(opt\.\)""' + ///
-					`""Submission Date""' +     ///
-					`""Survey ID""' +           ///
-					`""Enumerator ID""' +       ///
-					`""Form Version""' +        ///
-					`""Geographic Cluster""' +  ///
-					`""Target Sample Size""' +  ///
-					`""SurveyCTO Server""' +    ///
-					`""Missing Value \(\.d\)""' +  ///
-					`""Missing Value \(\.r\)""' +  ///
-					`""Missing Value \(\.n\)""' +  ///
-					`""Use SD for Outliers""' + ///
+					`""Submission Date""' +                   ///
+					`""Survey ID""' +                         ///
+					`""Enumerator ID""' +                     ///
+					`""Form Version""' +                      ///
+					`""Geographic Cluster""' +                ///
+					`""Target Sample Size""' +                ///
+					`""SurveyCTO Server""' +                  ///
+					`""Missing Value \(\.d\)""' +             ///
+					`""Missing Value \(\.r\)""' +             ///
+					`""Missing Value \(\.n\)""' +             ///
+					`""Use SD for Outliers""' +               ///
 					`""Use label for Factors""' 
 
 				local globals   ///
@@ -110,9 +115,6 @@ program ipacheckimport, rclass
 					mv3         ///
 					sd          ///
 					nolabel
-				
-				* add a temporary variable to check for matching boxes
-				g `tmp' = _n
 
 				* count the number of entry boxes
 				local nboxes : word count `boxes'
@@ -129,25 +131,50 @@ program ipacheckimport, rclass
 			}
 			else {
 				* loop through columns
-		    	foreach var of local colnames {
+		    	foreach col in `colnames' {
+
+		    		if inlist("`col'", "variable") & inlist(`n', 1, 3, 8, 11) & `rows' > 0 {
+		    			mata: rv = st_sdata(., "variable")
+		    			mata: nrv = ""
+		    			mata: copies = .
+		    			use "${dataset}", clear
+		    			forval i = 1/`rows' {
+		    				mata: st_local("vlist", rv[`i'])
+							unab vlist : `vlist'
+							loc length : list sizeof vlist
+							loc j = `i'
+							foreach inner in `vlist' {
+								mata: nrv = (`j' == 1 ? "`inner'" : nrv \ "`inner'")
+								loc `++j'
+							}
+							mata: copies = (`i' == 1 ? `length' : copies \ `length')
+		    			}
+		    			use `tmpsheet', clear
+		    			mata: st_store(., st_addvar("float", "copies"), copies)
+		    			expand copies
+		    			sort `tmp'
+		    			mata: st_sstore(., "variable", nrv)
+		    			local rows = _N
+		    		}
+
 		    		* initialize Stata global
-					mata: st_global("`var'`n'", "")
+					mata: st_global("`col'`n'", "")
 
 					* loop through rows
 		    		forval i = 1/`rows' {
 	    				* append entries to global list
-	    				mata: st_global("`var'`n'", `"${`var'`n'} `=`var'[`i']'"')
+	    				mata: st_global("`col'`n'", `"${`col'`n'} `=`col'[`i']'"')
 
 		    			* if the keep_variable column
-		    			if inlist("`var'", "keep", "assert", "if_condition") {
+		    			if inlist("`col'", "keep", "assert", "if_condition") {
 		    				* add a semi-colon signifying the end of the line
-		    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
+		    				mata: st_global("`col'`n'", `"${`col'`n'}; "')
 		    			}
 						
 						* if the variable column for the skip check, or variable or other_unique for duplicate check
-						if ("`var'" == "variable" & `n' == 6) | (inlist("`var'", "variable", "other_unique") & `n' == 2) {
+						if ("`col'" == "variable" & `n' == 6) | (inlist("`col'", "variable", "other_unique") & `n' == 2) {
 		    				* add a semi-colon signifying the end of the line
-		    				mata: st_global("`var'`n'", `"${`var'`n'}; "')
+		    				mata: st_global("`col'`n'", `"${`col'`n'}; "')
 						}
 		    		}
 		    	}
