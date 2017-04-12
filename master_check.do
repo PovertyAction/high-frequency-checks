@@ -183,8 +183,8 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
 		 
 
 /* <================== HFC 9. Check specify other values ==================> */
-ipacheckspecify ${specify_variable9}, ///
-  othervars(${other_variable9}) ///
+ipacheckspecify ${parent9}, ///
+  othervars(${child9}) ///
   id(${id}) ///
   enumerator(${enum}) ///
   submit(${date}) ///
