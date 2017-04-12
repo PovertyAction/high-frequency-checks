@@ -158,7 +158,7 @@ program ipacheckimport, rclass
 		    	}
 
 		    	* create variable string for research summary command
-				if inlist(`"`sheet'"', "research oneway", "research twoway") {
+				if inlist(`"`sheet'"', "research oneway", "research twoway") & `rows' > 0 {
 					g variablestr = variable + " " + type + " \ "
 					replace variablestr = variable + " " + type if _n == _N
 					local colnames `"`colnames' "variablestr""'
