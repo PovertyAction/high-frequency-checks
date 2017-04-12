@@ -230,7 +230,19 @@ ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
     saving("check03_test04_out.xlsx") ///
     sheetreplace ///
 	sctodb("test")
+	
+* Test 5
+use check03_test05, clear
+ipacheckimport using "check03_test05_in.xlsx"
+ipacheckconsent ${variable3}, consentvalue(${consent_value3}) ///
+    id(id) ///
+    enumerator(enum) ///
+	submit(var3) ///
+    saving("check03_test05_out.xlsx") ///
+    sheetreplace ///
+	sctodb("test")
 
+	
 /* =================================================
    ==================== Check 4 ==================== 
    ================================================= */
@@ -509,6 +521,20 @@ ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
     sheetreplace ///
 	sctodb("test")
 	
+* Test 5
+use check08_test05, clear
+ipacheckimport using "check08_test05_in.xlsx"
+ipacheckconstraints ${variable8}, smin(${soft_min8}) ///
+    smax(${soft_max8}) ///
+	hmin(${hard_min8}) ///
+	hmax(${hard_max8}) ///
+    id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+    saving("check08_test05_out.xlsx") ///
+    sheetreplace ///
+	sctodb("test")
+	
 /* =================================================
    ==================== Check 9 ==================== 
    ================================================= */
@@ -526,7 +552,7 @@ ipacheckspecify ${specify_variable9}, ///
     saving("check09_test01_out.xlsx") ///
     sheetreplace
 
-	* Test 1
+* Test 2
 use check09_test02, clear
 ipacheckimport using "check09_test02_in.xlsx"
 ipacheckspecify ${specify_variable9}, ///
@@ -537,7 +563,18 @@ ipacheckspecify ${specify_variable9}, ///
     saving("check09_test02_out.xlsx") ///
     sheetreplace ///
 	sctodb("test")
-	
+
+* Test 3
+use check09_test03, clear
+ipacheckimport using "check09_test03_in.xlsx"
+ipacheckspecify ${specify_variable9}, ///
+	othervars(${other_variable9}) ///
+    id(id) ///
+    enumerator(enum) ///
+    submit(submissiondate) ///
+    saving("check09_test03_out.xlsx") ///
+    sheetreplace ///
+	sctodb("test")
 
 /* =================================================
    =================== Check 10 ==================== 
@@ -671,6 +708,20 @@ ipacheckoutliers ${variable11}, id(id) ///
     saving("check11_test06_out.xlsx") ///
     sheetreplace ///
 	sctodb("test")
+	
+* Test 7
+use check11_test07, clear
+ipacheckimport using "check11_test07_in.xlsx"
+di "${ignore11}"
+ipacheckoutliers ${variable11}, id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+	keepvars(${keep_variable11}) ///
+    multiplier(${multiplier11}) ///
+	ignore(${ignore11}) ///
+    saving("check11_test07_out.xlsx") ///
+    sheetreplace sd
+	
 	
 /* =================================================
    ============== Track 1 - Summary ================
