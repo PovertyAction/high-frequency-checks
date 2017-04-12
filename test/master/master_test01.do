@@ -232,28 +232,13 @@ ipacheckenum ${enum} using "${enumdb}", ///
 /* ===============================================================
    ================== Create Research Dashboard ==================
    =============================================================== */
-
-   /* in this section we'll use the -table1- command to 
-      build one and two way summaries of key variables.
-	  this can be useful for communicating data summaries
-	  with PIs. 
 	  
-	  NOTE: -ssc install table1- if not installed. */
-	  
-#d ;
-table1,  
-    saving("${researchdb}", replace)
-	plusminus
-	test
-	format(%4.2f)
-    vars(gender cat \
-	     age contn \ 
-		 edustatus cat \
-		 eduattain cat \
-		 employmt cat \
-         relationship cat \
-         childnum contn );
-#d cr
+* tabulate one-way summaries of important research variables
+ipacheckresearch using "${researchdb}", ///
+   variables(${variablestr13})
 
+* tabulate two-way summaries of important research variables
+ipacheckresearch using "${researchdb}", ///
+   variables(${variablestr14}) by(${by14}) 
 
 
