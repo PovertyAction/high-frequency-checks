@@ -638,6 +638,18 @@ ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
     sheetreplace ///
 	sctodb("test")
 	
+* Test 6
+use check10_test06, clear
+ipacheckimport using "check10_test06_in.xlsx"
+ipacheckdates ${startdate10} ${enddate10}, surveystart(${surveystart10}) ///
+    id(id) ///
+    enumerator(enum) ///
+    submit(var3) ///
+    saving("check10_test06_out.xlsx") ///
+    sheetreplace ///
+	sctodb("test")
+	
+	
 /* =================================================
    =================== Check 11 ==================== 
    ================================================= */
