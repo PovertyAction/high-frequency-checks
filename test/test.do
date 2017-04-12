@@ -3,7 +3,7 @@
  |project: high frequency checks          |
  |author:  christopher boyer              |
  |         innovations for poverty action |
- |date:    2016-05-31                     |
+ |date:    2017-04-12                     |
  *----------------------------------------*/
 
 * this line adds standard boilerplate headings
@@ -845,7 +845,7 @@ ipatracksurveys using "`outfile'", unit(region) ///
    ================================================= */
    
 cd "../enumerator"
-*Test 1
+* Test 1
 use enumerator_test01, clear
 ipacheckimport using "enumerator_test01_in.xlsx"
 ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
@@ -854,6 +854,25 @@ ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
    subdate(${submission_date12}) ///
    days(2000)
 
+   
+/* =================================================
+   ==================== Research =================== 
+   ================================================= */
+   
+cd "../research"
+
+* Test 1
+use survey_data, clear
+ipacheckimport using "research_inputs.xlsx"
+ipacheckresearch using "research_test01_out.xlsx", ///
+   variables(${variablestr13})
+   
+* Test 2
+use survey_data, clear
+ipacheckimport using "research_inputs.xlsx"
+ipacheckresearch using "research_test02_out.xlsx", ///
+   variables(${variablestr14}) by(${by14})
+   
 /* =================================================
    ==================== Master ===================== 
    ================================================= */
