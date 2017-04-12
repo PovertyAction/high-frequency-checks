@@ -34,7 +34,8 @@ program ipacheckimport, rclass
 			`""10. dates""' +       ///
 			`""11. outliers""'  +   ///
 			`""enumdb""'  +         ///
-			`""researchdb""' 
+			`""research oneway""' + ///
+			`""research twoway""'
 		
 		* store number of sheets
 		local wc: word count `sheets'
@@ -130,32 +131,41 @@ program ipacheckimport, rclass
 				}
 			}
 			else {
+
+				* expand wild cards in variable list
+				if inlist(`n', 1, 3, 8, 11, 13, 14) & `rows' > 0 {
+	    			mata: rv = st_sdata(., "variable")
+	    			mata: nrv = ""
+	    			mata: copies = .
+	    			use "${dataset}", clear
+	    			forval i = 1/`rows' {
+	    				mata: st_local("vlist", rv[`i'])
+						unab vlist : `vlist'
+						loc length : list sizeof vlist
+						loc j = `i'
+						foreach inner in `vlist' {
+							mata: nrv = (`j' == 1 ? "`inner'" : nrv \ "`inner'")
+							loc `++j'
+						}
+						mata: copies = (`i' == 1 ? `length' : copies \ `length')
+	    			}
+	    			use `tmpsheet', clear
+	    			mata: st_store(., st_addvar("float", "copies"), copies)
+	    			expand copies
+	    			sort `tmp'
+	    			mata: st_sstore(., "variable", nrv)
+	    			local rows = _N
+		    	}
+
+		    	* create variable string for research summary command
+				if inlist(`"`sheet'"', "research oneway", "research twoway") {
+					g variablestr = variable + " " + type + " \ "
+					replace variablestr = variable + " " + type if _n == _N
+					local colnames `"`colnames' "variablestr""'
+				}
+
 				* loop through columns
 		    	foreach col in `colnames' {
-
-		    		if inlist("`col'", "variable") & inlist(`n', 1, 3, 8, 11) & `rows' > 0 {
-		    			mata: rv = st_sdata(., "variable")
-		    			mata: nrv = ""
-		    			mata: copies = .
-		    			use "${dataset}", clear
-		    			forval i = 1/`rows' {
-		    				mata: st_local("vlist", rv[`i'])
-							unab vlist : `vlist'
-							loc length : list sizeof vlist
-							loc j = `i'
-							foreach inner in `vlist' {
-								mata: nrv = (`j' == 1 ? "`inner'" : nrv \ "`inner'")
-								loc `++j'
-							}
-							mata: copies = (`i' == 1 ? `length' : copies \ `length')
-		    			}
-		    			use `tmpsheet', clear
-		    			mata: st_store(., st_addvar("float", "copies"), copies)
-		    			expand copies
-		    			sort `tmp'
-		    			mata: st_sstore(., "variable", nrv)
-		    			local rows = _N
-		    		}
 
 		    		* initialize Stata global
 					mata: st_global("`col'`n'", "")
