@@ -201,20 +201,22 @@ program ipacheckconstraints, rclass
 		firstrow(variables) `nolabel'
 	
 	*export scto links as links
-	if !missing("`sctodb'") {
-		putexcel set "`saving'", sheet("8. constraints") modify
-		ds
-		loc allvars `r(varlist)'
-		loc linkpos: list posof "scto_link" in allvars
-		loc alphabet `c(ALPHA)'
-		local col: word `linkpos' of `alphabet'
-		count
-		forval x = 1 / `r(N)' {
-			loc row = `x' + 1
-			loc formula = scto_link[`x']
-			loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+	if !missing("`sctodb'") & c(version) >= 14 {
+		if !missing(scto_link[1]) {
+			putexcel set "`saving'", sheet("8. constraints") modify
+			ds
+			loc allvars `r(varlist)'
+			loc linkpos: list posof "scto_link" in allvars
+			alphacol `linkpos'
+			loc col = r(alphacol)
+			count
+			forval x = 1 / `r(N)' {
+				loc row = `x' + 1
+				loc formula = scto_link[`x']
+				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+			}
+			putexcel `putlist'
 		}
-		putexcel `putlist'
 	}
 	
 	* revert to original
@@ -285,3 +287,16 @@ program touch
 
 end
 
+program alphacol, rclass
+	syntax anything(name = num id = "number")
+
+	local col = ""
+
+	while `num' > 0 {
+		local let = mod(`num'-1, 26)
+		local col = char(`let' + 65) + "`col'"
+		local num = floor((`num' - `let') / 26)
+	}
+
+	return local alphacol = "`col'"
+end

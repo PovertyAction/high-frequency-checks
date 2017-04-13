@@ -28,15 +28,40 @@ program ipacheckdates, rclass
 	#d cr
 
 	* set start and end date variables
-	gettoken startdate rest : varlist
-	gettoken enddate : rest
+	gettoken start end : varlist
+	gettoken end : end
 
-	* test for fatal conditions
-	/*cap assert `enddate' >= `startdate' 
+	foreach date in `start' `end' {
+		local fmt_`date' : format `date'
+		cap assert regexm("`fmt_`date''", "%t[cCd]")
+		if _rc {
+			di as err "invalid syntax: variable `date' is not a date or date time variable."
+			error 198
+		}
+	}
+	nois di "`start' `end'"
+	cap assert lower("`fmt_`start''") == lower("`fmt_`end''")
 	if _rc {
-		di as err "end date is before start date"
+		di as err "invalid syntax: `start' and `end' are different date types."
 		error 198
-	}*/
+	}
+
+	local fmt "`fmt_`start''"
+
+	tempvar startdate enddate
+
+	if regexm("`fmt'", "%tc") {
+		g `startdate' = dofc(`start')
+		g `enddate' = dofc(`end')
+	}
+	else if regexm("`fmt'", "%tC") {
+		g `startdate' = dofC(`start')
+		g `enddate' = dofC(`end')
+	}
+	else {
+		g `startdate' = `start'
+		g `enddate' = `end'
+	}
 
 	di ""
 	di "HFC 10 => Checking date variables for common issues..."
@@ -57,7 +82,7 @@ program ipacheckdates, rclass
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
-	local meta `"`startdate' `enddate' message"'
+	local meta `"`start' `end' message"'
 	if !missing("`sctodb'") {
 		local meta `"`meta' scto_link"'
 	}
@@ -211,20 +236,22 @@ program ipacheckdates, rclass
 		firstrow(variables) `nolabel'
 		
 	*export scto links as links
-	if !missing("`sctodb'") {
-		putexcel set "`saving'", sheet("10. dates") modify
-		ds
-		loc allvars `r(varlist)'
-		loc linkpos: list posof "scto_link" in allvars
-		loc alphabet `c(ALPHA)'
-		local col: word `linkpos' of `alphabet'
-		count
-		forval x = 1 / `r(N)' {
-			loc row = `x' + 1
-			loc formula = scto_link[`x']
-			loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+	if !missing("`sctodb'") & c(version) >= 14 {
+		if !missing(scto_link[1]) {
+			putexcel set "`saving'", sheet("10. dates") modify
+			ds
+			loc allvars `r(varlist)'
+			loc linkpos: list posof "scto_link" in allvars
+			alphacol `linkpos'
+			loc col = r(alphacol)
+			count
+			forval x = 1 / `r(N)' {
+				loc row = `x' + 1
+				loc formula = scto_link[`x']
+				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+			}
+			putexcel `putlist'
 		}
-		putexcel `putlist'
 	}
 	
 	* revert to original
@@ -308,3 +335,16 @@ program touch
 
 end
 
+program alphacol, rclass
+	syntax anything(name = num id = "number")
+
+	local col = ""
+
+	while `num' > 0 {
+		local let = mod(`num'-1, 26)
+		local col = char(`let' + 65) + "`col'"
+		local num = floor((`num' - `let') / 26)
+	}
+
+	return local alphacol = "`col'"
+end

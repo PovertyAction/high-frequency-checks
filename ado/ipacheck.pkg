@@ -10,10 +10,11 @@ d KW: data entry
 d
 d Requires: Stata version 13.0
 d
-d Distribution-Date: 20160601
+d Distribution-Date: 20170407
 d
-d Author: Christopher Boyer, Innovations for Poverty Action
+d Authors: Christopher Boyer, Innovations for Poverty Action
 d Support: researchsupport@poverty-action.org
+f ipacheck.ado
 f ipadoheader.ado
 f ipacheckimport.ado
 f ipacheckcomplete.ado
@@ -29,5 +30,11 @@ f ipacheckdates.ado
 f ipacheckoutliers.ado
 f ipacheckenum.ado
 f ipacheckresearch.ado
-f ipachecksummary.ado
 f ipacheckreadreplace.ado
+f ipatracksummary.ado
+f ipatracksurveys.ado
+f ipatrackversions.ado
+f ../xlsx/hfc_enumerators.xlsx
+f ../xlsx/hfc_inputs.xlsx
+f ../xlsx/hfc_replacements.xlsx
+f ../master_check.do
