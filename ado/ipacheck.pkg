@@ -1,13 +1,13 @@
 v 3
 d 'IPACHECK': IPA Stata high-frequency check commands
-d These commands perform common data quality checks useful 
-d during the data collection and cleaning phases of field 
+d These commands perform common data quality checks useful
+d during the data collection and cleaning phases of field
 d research.
-d 
+d
 d KW: data management
 d KW: data quality
 d KW: data entry
-d 
+d
 d Requires: Stata version 13.0
 d
 d Distribution-Date: 20170407
@@ -27,9 +27,10 @@ f ipacheckallmiss.ado
 f ipacheckconstraints.ado
 f ipacheckspecify.ado
 f ipacheckdates.ado
-f ipacheckoutliers.ado 
+f ipacheckoutliers.ado
 f ipacheckenum.ado
 f ipacheckresearch.ado
+f ipacheckreadreplace.ado
 f ipatracksummary.ado
 f ipatracksurveys.ado
 f ipatrackversions.ado

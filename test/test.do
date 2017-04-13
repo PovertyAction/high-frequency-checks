@@ -886,6 +886,22 @@ ipacheckresearch using "research_test02_out.xlsx", ///
    variables(${variablestr14}) by(${by14})
    
 /* =================================================
+   ================== Readreplace ================== 
+   ================================================= */
+
+cd "../readreplace"
+*Test 1
+use readreplace_test01, clear
+ipacheckreadreplace using "readreplace_test01_corr.xlsx", ///
+	id(id) ///
+	variable(variable) ///
+	value(value) ///
+	oldvalue(oldvalue) ///
+	selectmultiple(selectmultiple) ///
+	excel ///
+	import(firstrow)
+   
+/* =================================================
    ==================== Master ===================== 
    ================================================= */
   
