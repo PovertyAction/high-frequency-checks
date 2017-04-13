@@ -14,6 +14,7 @@ d Distribution-Date: 20170407
 d
 d Authors: Christopher Boyer, Innovations for Poverty Action
 d Support: researchsupport@poverty-action.org
+f ipacheck.ado
 f ipadoheader.ado
 f ipacheckimport.ado
 f ipacheckcomplete.ado
