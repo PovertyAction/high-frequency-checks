@@ -45,10 +45,11 @@ if !mi("${mv2}") recode `numeric' (${mv2} = .r)
 if !mi("${mv3}") recode `numeric' (${mv3} = .n)
 	
 if !mi("${repfile}") {
-	readreplace using "${repfile}", ///
-	  id("id") ///
+	ipacheckreadreplace using "${repfile}", ///
+	    id("id") ///
 		variable("variable") ///
 		value("newvalue") ///
+        selectmultiple(selectmultiple) ///
 		excel ///
 		import(firstrow)
 }
