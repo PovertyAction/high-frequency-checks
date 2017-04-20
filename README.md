@@ -1,34 +1,41 @@
-# high-frequency-checks
-A Stata template for high frequency checks of field data at Innovations for Poverty Action
+# ipacheck
 
-## Daily Checks
+## Overview
+ipacheck is a Stata package for running high-frequency checks on research data at Innovations for Poverty Action, including:
 
- - [x] 1. Check that all interviews were completed
- - [x] 2. Check that there are no duplicate observations
- - [x] 3. Check that all surveys have consent
- - [x] 4. Check that certain critical variables have no missing values
- - [x] 5. Check that follow up record ids match original
- - [x] 6. Check skip patterns and constraints
- - [x] 7. Check that no variable has all missing values
- - [x] 8. Check hard/soft constraints
- - [x] 9. Check specify other vars for items that can be included
- - [x] 10. Check that date values fall within survey range
- - [x] 11. Check that there are no outliers for unconstrained vars
+ - `ipacheckcomplete` - verifies that all surveys are completed.
+ - `ipacheckdups` - identifies possible duplicate observations.
+ - `ipacheckconsent` - verifies that all surveys have consent.
+ - `ipachecknomiss` - verifies that certain variables have no missing values.
+ - `ipacheckfollowup` - verifies consistency of data between rounds of data collection (e.g. baseline and follow up).
+ - `ipacheckskip` - asserts that skip patterns are followed.
+ - `ipacheckallmiss` - identifies variables who contain only missing values.
+ - `ipacheckconstraints` - asserts that hard and soft constraints are followed.
+ - `ipacheckspecify` - lists all values specified for variables with an 'other' category for possible recoding.
+ - `ipacheckdates` - verifies consistency of date variables.
+ - `ipacheckoutliers` - identifies possible outliers in numeric variables.
+ - `ipatracksummary` - lists number of surveys completed by date. 
+ - `ipatracksurveys` - lists surveys completed (optionally by region) against sample/tracking list.
+ - `ipatrackversions`- lists number of surveys by date and version.
+ - `ipacheckenum` - aggregates data by enumerator to assess performance.
+ - `ipacheckresearch` - produces one- and two-way summaries of research variables.
+ 
+ipacheck comes with bundled with a master do-file and Excel-based inputs sheets. Results of checks can be exported as nicely formatted Excel spreadsheets for distribution among field teams.
 
-## Enumerator Dashboards
 
- - [x] 1. Check the percentage of “don’t know” and “refusal” values for each variable by enumerator
- - [x] 2. Check the percentage giving each answer for key filter questions by enumerator
- - [ ] 3. Check the percentage of survey refusals by enumerator
- - [x] 4. Check the number of surveys per day by enumerator
- - [x] 5. Check average interview duration by enumerator
- - [x] 6. Check the duration of consent by enumerator
- - [x] 7. Check the duration of other (anthropometrics, games, etc)
+## Installation
 
-## Research Dashboards
+```Stata
+* ipacheck may be installed directly from GitHub
+net install ipacheck, replace from("url")
 
- - [ ] 1. Survey progress towards recruitment goals.
- - [ ] 2. Summary of key research variables.
- - [ ] 3. Two way summaries of survey variables by demographic/geographic characteristics.
- - [ ] 4. Refusal/not found rates by treatment status.
- - [ ] 5. Maps/GIS
+* after initial installation ipacheck can be updated at any time via
+ipacheck update
+
+* fresh copies of the supplementary do-files, Excel inputs, etc. are available via
+ipacheck new
+
+* to verify you have the latest versions of the commands
+ipacheck version
+```
+If you encounter a clear bug, please file a minimal reproducible example on [github](https://github.com/PovertyAction/high-frequency-checks/issues). For questions and other discussion, please email us at [researchsupport@poverty-action.org](mailto:researchsupport@poverty-action.org).
