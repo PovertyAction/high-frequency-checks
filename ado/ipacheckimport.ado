@@ -153,6 +153,7 @@ program ipacheckimport, rclass
 	    			mata: st_store(., st_addvar("float", "copies"), copies)
 	    			expand copies
 	    			sort `tmp'
+	    			recast strL variable
 	    			mata: st_sstore(., "variable", nrv)
 	    			local rows = _N
 		    	}
