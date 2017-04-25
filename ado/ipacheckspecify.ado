@@ -37,7 +37,7 @@ program ipacheckspecify, rclass
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator' 
-	local meta `"variable label value choices message"'
+	local meta `"parent parent_label parent_value child child_label child_value choices message"'
 	if !missing("`sctodb'") {
 		local meta `"`meta' scto_link"'
 	}
@@ -86,18 +86,26 @@ program ipacheckspecify, rclass
 			local nother = `nother' + `n'
 
 			* capture variable label
-			local varl : variable label `var'
+			local pvarl : variable label `other'
+			local cvarl : variable label `var'
 
 			* capture choices 
 			getlabel `other'
 			local vall = "`r(label)'"
 
 			* update values of meta data variables
-			replace variable = "`var'"
-			replace label = "`varl'"
-			replace value = `var'
+			replace parent = "`other'"
+			replace parent_label = "`pvarl'"
+			replace child = "`var'"
+			replace child_label = "`cvarl'"
+			replace child_value = `var'
 			replace choices = "`vall'"
-	 		replace message = "Other value specified for `var'. Check for recodes."
+	 		replace message = "Other value specified for `var'. Check for possible recodes."
+
+	 		cap confirm numeric variable `other'
+	 		if !_rc {
+	 			replace parent_value = string(`other')
+	 		}
 
 			* append violations to the temporary data set
 			saveappend using `tmp' if `specified' == 1, ///
