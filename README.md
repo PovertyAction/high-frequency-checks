@@ -27,8 +27,9 @@ ipacheck comes with bundled with a master do-file and Excel-based inputs sheets.
 
 ```Stata
 * ipacheck may be installed directly from GitHub
-local url "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/ado"
-net install ipacheck, replace from(`url')
+net install ipacheck, ///
+    from("https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/ado") ///
+    replace 
 
 * after initial installation ipacheck can be updated at any time via
 ipacheck update
