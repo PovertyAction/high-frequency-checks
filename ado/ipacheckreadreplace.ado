@@ -48,13 +48,13 @@ qui {
 	preserve
 	if missing("`use'") & missing("`excel'") {
 		local insheet insheet
-		import delimited using `using', `import' clear
+		import delimited using "`using'", `import' clear
 	}
 	else if !missing("`excel'") {
-		import excel using `using', `import' firstrow clear
+		import excel using "`using'", `import' firstrow clear
 	}
 	else if !missing("`use'") {
-		use `using', `import' clear
+		use "`using'", `import' clear
 	}
 	foreach var in `id' `variable' `value' {
 		confirm variable `var'
