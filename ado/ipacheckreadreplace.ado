@@ -56,16 +56,16 @@ qui {
 	else if !missing("`use'") {
 		use "`using'", `import' clear
 	}
+	if _N == 0 {
+		di "no replacements"
+		exit
+	}
 	foreach var in `id' `variable' `value' {
 		confirm variable `var'
 		cap assert !missing(`var')
 	}
 	foreach var in `selectmultiple' `oldvalue' `drop' {
 		confirm variable `var'
-	}
-	if _N == 0 {
-		di "no replacements"
-		exit
 	}
 	keep `id' `variable' `value' `selectmultiple' `oldvalue' `drop'
 	* check to make sure that the "selectmultiple" box is chosen iff there is 
