@@ -60,9 +60,20 @@ qui {
 		di "no replacements"
 		exit
 	}
+	
+	cap assert !missing(`id')
+	if _rc {
+		count if !missing(`id')
+		di as error "missing id variable `id' for `r(N)' observations"
+		error 416
+	}
+	
 	foreach var in `id' `variable' `value' {
 		confirm variable `var'
-		cap assert !missing(`var')
+		cap confirm string variable `var'
+		if !_rc {
+			replace `var' = strtrim(`var')
+		}
 	}
 	foreach var in `selectmultiple' `oldvalue' `drop' {
 		confirm variable `var'
@@ -82,6 +93,7 @@ qui {
 		di as error "selectmultiple specified for `r(N)' corrections entries without oldvalue"
 		error 498
 	}
+	
 	***************** remove entries that should be dropped ********************
 	tempfile selectmult allcorrections droplist
 	save `allcorrections'
