@@ -1,16 +1,8 @@
-/*----------------------------------------*
- |file:    ipadoheader.ado                | 
- |project: high frequency checks          |
- |author:  christopher boyer              |
- |         innovations for poverty action |
- |date:    2016-02-13                     |
- *----------------------------------------*/
+*! version 1.0.1 Christopher Boyer 27jun2017
 
- // note this file is adapted from Kristoffer Bjärkefur's fantastic ieboilstart program
-
-capture program drop ipadoheader
 program ipadoheader , rclass
-	
+	 * note this file is adapted from Kristoffer Bjärkefur's fantastic ieboilstart program
+
 	di ""
 	qui {
 
@@ -29,7 +21,7 @@ program ipadoheader , rclass
 		error 198
 	}
 			
-	local stata_versions "10.0 10.1 11.0 11.1 11.2 12.0 12.1 13.0 13.1 14.0 14.1"
+	local stata_versions "10.0 10.1 11.0 11.1 11.2 12.0 12.1 13.0 13.1 14.0 14.1 14.2 15.0"
 	
 	if `:list version in stata_versions' == 0 {
 
