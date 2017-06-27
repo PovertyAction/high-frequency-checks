@@ -545,7 +545,7 @@ cd "../check09"
 use check09_test01, clear
 ipacheckimport using "check09_test01_in.xlsx"
 ipacheckspecify ${child9}, ///
-	othervars(${parent9}) ///
+	parentvars(${parent9}) ///
     id(id) ///
     enumerator(enum) ///
     submit(submissiondate) ///
@@ -556,7 +556,7 @@ ipacheckspecify ${child9}, ///
 use check09_test02, clear
 ipacheckimport using "check09_test02_in.xlsx"
 ipacheckspecify ${child9}, ///
-	othervars(${parent9}) ///
+	parentvars(${parent9}) ///
     id(id) ///
     enumerator(enum) ///
     submit(submissiondate) ///
@@ -568,7 +568,7 @@ ipacheckspecify ${child9}, ///
 use check09_test03, clear
 ipacheckimport using "check09_test03_in.xlsx"
 ipacheckspecify ${child9}, ///
-	othervars(${parent9}) ///
+	parentvars(${parent9}) ///
     id(id) ///
     enumerator(enum) ///
     submit(submissiondate) ///

@@ -7,8 +7,8 @@ program ipacheckspecify, rclass
 
 	#d ;
 	syntax varlist, 
-		/* other variables */
-		OTHERvars(varlist)
+		/* parent variables */
+		PARENTvars(varlist)
 		/* output filename */
 	    saving(string) 
 	    /* output options */
@@ -74,7 +74,7 @@ program ipacheckspecify, rclass
 	* loop through other specify variables in varlist and find nonmissing values
 	foreach var in `varlist' {
 		* get current other variable
-		local other : word `i' of `othervars'
+		local parent : word `i' of `parentvars'
 
 		cap confirm string variable `var'
 		if !_rc {
@@ -86,15 +86,15 @@ program ipacheckspecify, rclass
 			local nother = `nother' + `n'
 
 			* capture variable label
-			local pvarl : variable label `other'
+			local pvarl : variable label `parent'
 			local cvarl : variable label `var'
 
 			* capture choices 
-			getlabel `other'
+			getlabel `parent'
 			local vall = "`r(label)'"
 
 			* update values of meta data variables
-			replace parent = "`other'"
+			replace parent = "`parent'"
 			replace parent_label = "`pvarl'"
 			replace child = "`var'"
 			replace child_label = "`cvarl'"
@@ -102,9 +102,9 @@ program ipacheckspecify, rclass
 			replace choices = "`vall'"
 	 		replace message = "Other value specified for `var'. Check for possible recodes."
 
-	 		cap confirm numeric variable `other'
+	 		cap confirm numeric variable `parent'
 	 		if !_rc {
-	 			replace parent_value = string(`other')
+	 			replace parent_value = string(`parent')
 	 		}
 
 			* append violations to the temporary data set
