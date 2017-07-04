@@ -1,4 +1,4 @@
-*! Version 1.0.0 Kelsey Larson March 16
+*! Version 1.0.1 Kelsey Larson March 16
 prog ipacheckreadreplace, rclass
 	/* This program makes corrections to a database from a second database of 
 		corrections. The corrections sheet should have five columns:
@@ -98,13 +98,15 @@ qui {
 	tempfile selectmult allcorrections droplist
 	save `allcorrections'
 	if !missing("`drop'") {
-		cap tostring `drop', replace
+		cap confirm string variable `drop'
+		if _rc {
+			tostring `drop', replace
+		}
 		replace `drop' = lower(strtrim(`drop'))
 		save `allcorrections', replace
 		keep if `drop' == "drop"
 		keep `drop' `id'
-		count
-		if `r(N)' > 0 {
+		if _N > 0 {
 			save `droplist'
 			restore 
 			tempvar drop_merge
@@ -119,8 +121,7 @@ qui {
 	}
 	******************* split selectmultiples and other corrections ************
 	keep if !missing(`selectmultiple')
-	count 
-	if `r(N)' > 0 {
+	if _N > 0 {
 		tostring `value', replace
 		tostring `oldvalue', replace
 		bysort `id': gen j = _n
@@ -148,7 +149,7 @@ qui {
 		drop `mult_merge'
 
 		tempvar concat
-		foreach var in `"`correction_vars'"' {
+		foreach var in `correction_vars' {
 			tostring `var', replace
 			split `var', generate(__`var')
 			local stublist `r(varlist)'
