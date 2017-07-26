@@ -1,4 +1,4 @@
-*! version 1.0.1 Kelsey Larson 26Jan2017
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckdups, rclass
 	/* This program checks that there are no duplicate interviews.
@@ -87,7 +87,7 @@ program ipacheckdups, rclass
 	keep if `touse'
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 
 	forval x = 1 / `checksneeded' {
 
@@ -222,6 +222,7 @@ program saveappend
 end
 
 program touch
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present

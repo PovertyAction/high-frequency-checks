@@ -1,8 +1,8 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckallmiss, rclass
 	/* Check that no variables have only missing values, where missing indicates
-	   a skip. This could mean that the routing of the CAI survey program was
+	   a skip. This could mean that the routing of the survey program was
 	   incorrectly programmed. */
 	version 13
 
@@ -51,7 +51,7 @@ program ipacheckallmiss, rclass
 	}
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 	
 	/* Due to the way Stata handles missing values, 
 	   we check numeric and string variables separately. */
@@ -165,6 +165,7 @@ program saveappend
 end
 
 program touch
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present

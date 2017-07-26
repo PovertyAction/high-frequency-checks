@@ -1,4 +1,4 @@
-*! version 1.0.1 Christopher Boyer 04may2016
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckcomplete, rclass
 	/* Check that all interviews were completed. 
@@ -87,7 +87,7 @@ program ipacheckcomplete, rclass
 	}
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 
 	* loop through varlist and capture the number of incomplete surveys 
 	foreach var in `varlist' {
@@ -221,6 +221,7 @@ program saveappend
 end
 
 program touch
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present

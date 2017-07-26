@@ -1,4 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckdates, rclass
 	/* This program checks for common issues with date
@@ -114,7 +114,7 @@ program ipacheckdates, rclass
 	}
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 
 	/* =====================
 	    PERFORM DATE CHECKS
@@ -305,6 +305,7 @@ program saveappend
 end
 
 program touch
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present
