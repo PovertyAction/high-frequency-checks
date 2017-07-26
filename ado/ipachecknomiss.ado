@@ -219,7 +219,7 @@ program saveappend
 	restore
 end
 
-program touch
+
 program poke
 	syntax [anything], [var(varlist)] [replace] 
 

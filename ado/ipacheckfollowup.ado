@@ -145,7 +145,7 @@ program ipacheckfollowup, rclass
 	di "  Found `nonlyu' ids only in the master tracking sheet."
 end
 
-program touch
+
 program poke
 	syntax [anything], [var(varlist)] [replace] 
 
