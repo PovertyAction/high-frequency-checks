@@ -1,4 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckconstraints, rclass
 	/* Check that certain numeric variables fall within
@@ -81,7 +81,7 @@ program ipacheckconstraints, rclass
 	}
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 
 	/* loop through varlist and check that values
 	   fall within hard and soft constraints */
@@ -256,7 +256,7 @@ program saveappend
 	restore
 end
 
-program touch
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present

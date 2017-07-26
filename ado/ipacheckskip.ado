@@ -1,4 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckskip, rclass
 	/* This program checks skip patterns and logical constraints */
@@ -82,7 +82,7 @@ program ipacheckskip, rclass
 	}
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 
 	* loop through varlist and test assertions
 	forval x = 1 / `testnum' {
@@ -220,7 +220,7 @@ program saveappend
 	restore
 end
 
-program touch
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present

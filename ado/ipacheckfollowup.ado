@@ -1,4 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckfollowup, rclass
 	/*  This program checks the values of id variables in memory against 
@@ -68,7 +68,7 @@ program ipacheckfollowup, rclass
 	}
 
 	* initialize temporary output file
-	touch `tmp', var(`keeplist')
+	poke `tmp', var(`keeplist')
 
     /* Check that a survey matches other records for its unique ID.
 	   Example: For each ID, check that the name in the baseline data matches
@@ -145,7 +145,8 @@ program ipacheckfollowup, rclass
 	di "  Found `nonlyu' ids only in the master tracking sheet."
 end
 
-program touch
+
+program poke
 	syntax [anything], [var(varlist)] [replace] 
 
 	* remove quotes from filename, if present
