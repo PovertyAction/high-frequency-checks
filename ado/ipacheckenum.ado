@@ -1,4 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 2.0.1 William Ratcliffe 26jul2017
 
 program ipacheckenum
 	/* This command constructs the enumerator dashboard, a
@@ -170,7 +170,7 @@ program ipacheckenum
 
 	// restrict to specified number of days
 	local today = date(c(current_date), "DMY")
-	ds `subdate', has(format %tc*)
+	ds `subdate', has(format %td*)
 	// tests if the date is already in td format
 	if "`r(varlist)'" != "" {
 		keep if `subdate' > `today' - `days'
