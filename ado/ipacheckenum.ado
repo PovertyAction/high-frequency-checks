@@ -243,17 +243,17 @@ program ipacheckenum
 	merge 1:1 `enum' using `summary_sheet', nogenerate
 
 	// order and save 
-	order `enum'              ///         
-	      `interviews'        ///   
+	order `enum'              ///
 	      `recent_interviews' ///          
-	      `missing'           ///
+	      `interviews'        ///   
 	      `recent_missing'    ///       
-	      `dontknow'          ///
+	      `missing'           ///
 	      `recent_dontknow'   ///       
-	      `refusal'           ///
+	      `dontknow'          ///
 	      `recent_refusal'    ///      
-	      `duration'          ///
-	      `recent_duration'        
+	      `refusal'           ///
+	      `recent_duration'   ///     
+	      `duration'          
 
     ds, has(type numeric)
 	format `r(varlist)' %9.2f
