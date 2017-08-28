@@ -1,4 +1,4 @@
-*! version 2.0.1 William Ratcliffe 26jul2017
+*! version 2.0.2 William Ratcliffe 10aug2017
 
 program ipacheckenum
 	/* This command constructs the enumerator dashboard, a
@@ -64,14 +64,22 @@ program ipacheckenum
 	
 	// initialize duration variable, create local have_duration to signal existence of duration variable
 	if "`duration'" == "" {
-		cap confirm variable endtime starttime
-		if _rc == 0{
+		cap confirm variable duration
+		if _rc == 0 {
 			tempvar duration
-			g `duration' = (endtime - starttime)/60000
+			g `duration' = duration
 			loc have_duration = 1
 		}
 		else {
-			loc have_duration = 0
+			cap confirm variable endtime starttime
+			if _rc == 0 {
+				tempvar duration
+				g `duration' = (endtime - starttime)/60000
+				loc have_duration = 1
+			}
+			else {
+				loc have_duration = 0
+			}
 		}
 	}
 	else {
@@ -243,17 +251,17 @@ program ipacheckenum
 	merge 1:1 `enum' using `summary_sheet', nogenerate
 
 	// order and save 
-	order `enum'              ///         
-	      `interviews'        ///   
+	order `enum'              ///
 	      `recent_interviews' ///          
-	      `missing'           ///
+	      `interviews'        ///   
 	      `recent_missing'    ///       
-	      `dontknow'          ///
+	      `missing'           ///
 	      `recent_dontknow'   ///       
-	      `refusal'           ///
+	      `dontknow'          ///
 	      `recent_refusal'    ///      
-	      `duration'          ///
-	      `recent_duration'        
+	      `refusal'           ///
+	      `recent_duration'   ///     
+	      `duration'          
 
     ds, has(type numeric)
 	format `r(varlist)' %9.2f
