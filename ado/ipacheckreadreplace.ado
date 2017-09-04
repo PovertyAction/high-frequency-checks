@@ -1,4 +1,4 @@
-*! Version 1.0.0 Kelsey Larson March 16
+*! Version 1.0.1 Kelsey Larson March 16
 prog ipacheckreadreplace, rclass
 	/* This program makes corrections to a database from a second database of 
 		corrections. The corrections sheet should have five columns:
@@ -16,15 +16,15 @@ prog ipacheckreadreplace, rclass
 			    Fill out only for selectmultiples.
 		*/
 
-	syntax using, id(varlist) variable(name) ///
+	syntax using/, id(varlist) variable(name) ///
 					value(name) selectmultiple(name) oldvalue(name) ///
-					[insheet use excel import(string)]
+					[drop(name) insheet use excel import(string)]
 	version 13
 	
 	di "Starting readreplace..."
 
 qui {
-	* check for fatal errors 
+	************************** check for fatal errors **************************
 	cap isid `id'
 	if _rc {
 		di as error "variables `id' do not uniquely identify entries in the master."
@@ -44,31 +44,41 @@ qui {
 			error 110
 		}
 	}
-	* import corrections dataset
+	****** import corrections dataset and check for fatal errors ***************
 	preserve
 	if missing("`use'") & missing("`excel'") {
 		local insheet insheet
-		import delimited `using', `import' clear
+		import delimited using "`using'", `import' clear
 	}
 	else if !missing("`excel'") {
-		import excel `using', `import' clear
+		import excel using "`using'", `import' firstrow clear
 	}
 	else if !missing("`use'") {
-		local using subinstr("`using'", "using", "", 1)
-		use `using', `import' clear
-	}
-	foreach var in `id' `variable' `value' {
-		confirm variable `var'
-		cap assert !missing(`var')
-	}
-	foreach var in `selectmultiple' `oldvalue' {
-		confirm variable `var'
+		use "`using'", `import' clear
 	}
 	if _N == 0 {
 		di "no replacements"
 		exit
 	}
-	keep `id' `variable' `value' `selectmultiple' `oldvalue'
+	
+	cap assert !missing(`id')
+	if _rc {
+		count if !missing(`id')
+		di as error "missing id variable `id' for `r(N)' observations"
+		error 416
+	}
+	
+	foreach var in `id' `variable' `value' {
+		confirm variable `var'
+		cap confirm string variable `var'
+		if !_rc {
+			replace `var' = strtrim(`var')
+		}
+	}
+	foreach var in `selectmultiple' `oldvalue' `drop' {
+		confirm variable `var'
+	}
+	keep `id' `variable' `value' `selectmultiple' `oldvalue' `drop'
 	* check to make sure that the "selectmultiple" box is chosen iff there is 
 	* also a value in the oldvalue column
 	tostring `selectmultiple', replace
@@ -83,19 +93,35 @@ qui {
 		di as error "selectmultiple specified for `r(N)' corrections entries without oldvalue"
 		error 498
 	}
-	cap assert missing(`oldvalue') if missing(`selectmultiple')
-	if _rc {
-		count if !missing(`oldvalue') & missing(`selectmultiple')
-		di as error "oldvalue specified for `r(N)' corrections entries without selectmultiple"
-		error 498
-	}
 	
-	tempfile selectmult allcorrections
+	***************** remove entries that should be dropped ********************
+	tempfile selectmult allcorrections droplist
 	save `allcorrections'
-
+	if !missing("`drop'") {
+		cap confirm string variable `drop'
+		if _rc {
+			tostring `drop', replace
+		}
+		replace `drop' = lower(strtrim(`drop'))
+		save `allcorrections', replace
+		keep if `drop' == "drop"
+		keep `drop' `id'
+		if _N > 0 {
+			save `droplist'
+			restore 
+			tempvar drop_merge
+			merge 1:1 `id' using "`droplist'", gen(`drop_merge')
+			drop if `drop_merge' != 1
+			drop `drop_merge' `drop'
+			preserve
+		}
+		use `allcorrections', clear
+		drop if `drop' == "drop"
+		save `allcorrections', replace
+	}
+	******************* split selectmultiples and other corrections ************
 	keep if !missing(`selectmultiple')
-	count 
-	if `r(N)' > 0 {
+	if _N > 0 {
 		tostring `value', replace
 		tostring `oldvalue', replace
 		bysort `id': gen j = _n
@@ -110,10 +136,10 @@ qui {
 		drop if !missing(`selectmultiple')
 		save `allcorrections', replace
 		
+		******************* replace the selectmultiples ***********************
 		restore
-		* merge in the selectmultiples
 		tempvar mult_merge
-		merge 1:1 `id' using `selectmult', gen(`mult_merge')
+		merge 1:1 `id' using "`selectmult'", gen(`mult_merge')
 		count if `mult_merge' == 2
 		if `r(N)' > 0 {
 			noi di in red "`r(N)' corrections failed to merge"
@@ -121,8 +147,7 @@ qui {
 		}
 		drop if `mult_merge' == 2
 		drop `mult_merge'
-		
-		* replace the selectmultiples
+
 		tempvar concat
 		foreach var in `correction_vars' {
 			tostring `var', replace
@@ -136,7 +161,7 @@ qui {
 			}
 			egen `concat' = concat(`stublist'), punct(" ")
 			forval n = 1 / `numloops' {
-				replace `var' = `concat' if `variable' == "`var'"
+				replace `var' = `concat' if `variable'`n' == "`var'"
 			}
 			drop `concat' `stublist'
 		}
@@ -148,10 +173,18 @@ qui {
 	else {
 		restore // if there were no selectmultiple variables
 	}
-	* the selectmultiple phase is complete! Now to add in the other corrections:
-	readreplace using `allcorrections', ///
+	******************** add in the other corrections **************************
+	preserve
+	use `allcorrections', clear
+	count 
+	if `r(N)' > 0 {
+		restore
+		readreplace using `allcorrections', ///
 			id(`id') variable(`variable') value(`value') use
-	
+	}
+	else {
+		restore
+	}
 	}
 	noi di "Replacements complete."
 	
