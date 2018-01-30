@@ -21,7 +21,7 @@ program ipadoheader , rclass
 		error 198
 	}
 			
-	local stata_versions "10.0 10.1 11.0 11.1 11.2 12.0 12.1 13.0 13.1 14.0 14.1 14.2 15.0"
+	local stata_versions "10.0 10.1 11.0 11.1 11.2 12.0 12.1 13.0 13.1 14.0 14.1 14.2 15.0 15.1"
 	
 	if `:list version in stata_versions' == 0 {
 
