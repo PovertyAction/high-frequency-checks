@@ -1,3 +1,4 @@
+*! version 1.2.0 Ishmail Azindoo Baako 07jan2018
 *! version 1.1.0 Christopher Boyer 22feb2017
 *! version 1.0.1 Kelsey Larson 08jan2017
 *! version 1.0.0 Christopher Boyer 04may2016
@@ -6,9 +7,15 @@ program ipacheckimport, rclass
 	/* This program imports high frequency check inputs
 	   as Stata globals from an excel spreadsheet. The 
 	   checks are based on IPA's minimum checks for 
-	   data quality assurance */
-	version 13
+	   data quality assurance 
+	   
+		version 1.2.0
+			- inludes globals textauditdb and textaudit 
+			- removes version setting since it will already be done by ipacheckheaders
+	*/
 
+	* version 15.1
+	
 	syntax using/
 	
 	di ""
@@ -20,22 +27,23 @@ program ipacheckimport, rclass
 		tempvar tmp
 		tempfile tmpsheet
 
-		local sheets =              ///
-			`""0. setup""' +        ///
-			`""1. incomplete""' +   ///
-			`""2. duplicates""' +   ///
-			`""3. consent""' +      ///
-			`""4. no miss""' +      ///
-			`""5. follow up""' +    ///
-			`""6. skip""' +         ///
-			`""7. all miss""'  +    ///
-			`""8. constraints""' +  ///
-			`""9. specify""' +      ///
-			`""10. dates""' +       ///
-			`""11. outliers""'  +   ///
-			`""enumdb""'  +         ///
-			`""research oneway""' + ///
-			`""research twoway""'
+		local sheets 				=   ///
+			`""0. setup""' 			+   ///
+			`""1. incomplete""' 	+   ///
+			`""2. duplicates""' 	+   ///
+			`""3. consent""' 		+   ///
+			`""4. no miss""' 		+   ///
+			`""5. follow up""' 		+   ///
+			`""6. skip""' 			+   ///
+			`""7. all miss""'  		+   ///
+			`""8. constraints""' 	+   ///
+			`""9. specify""' 		+   ///
+			`""10. dates""' 		+   ///
+			`""11. outliers""'  	+   ///
+			`""enumdb""'  			+   ///
+			`""research oneway""' 	+   ///
+			`""research twoway""' 	+   ///
+			`""text audit""'
 		
 		* store number of sheets
 		local wc: word count `sheets'
@@ -75,46 +83,52 @@ program ipacheckimport, rclass
 			if `"`sheet'"' == "0. setup" {
 				* define lists of entry boxes and matching globals to be defined
 				*<!> TO ADD => replacements file, master tracking list, tracking globals
-				local boxes =                                 ///
-					`""Stata Dataset""' +                     ///
-					`""HFC Input File""' +                    ///
-					`""HFC Output File""' +                   ///
-					`""HFC Enumerator File""' +               ///
-					`""HFC Research File""' +                 ///
-					`""Replacements File \(opt\.\)""' +       ///
-					`""Master Tracking Dataset \(opt\.\)""' + ///
-					`""Submission Date""' +                   ///
-					`""Survey ID""' +                         ///
-					`""Enumerator ID""' +                     ///
-					`""Form Version""' +                      ///
-					`""Geographic Cluster""' +                ///
-					`""Target Sample Size""' +                ///
-					`""SurveyCTO Server""' +                  ///
-					`""Missing Value \(\.d\)""' +             ///
-					`""Missing Value \(\.r\)""' +             ///
-					`""Missing Value \(\.n\)""' +             ///
-					`""Use SD for Outliers""' +               ///
+				local boxes 								=	///
+					`""Stata Dataset""' 					+   ///
+					`""HFC Input File""' 					+	///
+					`""HFC Output File""' 					+	///
+					`""HFC Enumerator File""' 				+   ///
+					`""HFC Research File""' 				+   ///
+					`""Replacements File \(opt\.\)""' 		+   ///
+					`""Master Tracking Dataset \(opt\.\)""' +	///
+					`""Text Audit File \(opt\.\)""' 		+   ///
+					`""Submission Date""' 					+   ///
+					`""Survey ID""' 						+   ///
+					`""Enumerator ID""' 					+   ///
+					`""Form Version""' 						+   ///
+					`""Geographic Cluster""' 				+   ///
+					`""Text Audit""' 						+   ///	
+					`""Field Comment""' 					+	///
+					`""Target Sample Size""' 				+   ///
+					`""SurveyCTO Server""' 					+   ///
+					`""Missing Value \(\.d\)""' 			+   ///
+					`""Missing Value \(\.r\)""' 			+   ///
+					`""Missing Value \(\.n\)""' 			+   ///
+					`""Use SD for Outliers""' 				+   ///
 					`""Use label for Factors""' 
 
-				local globals   ///
-					dataset     ///
-					infile      ///
-					outfile     ///
-					enumdb      ///
-					researchdb  ///
-					repfile     ///
-					master      ///
-					date        ///
-					id          ///
-					enum        ///
-					formversion ///
-					geounit     ///
-					target      ///
-					server      ///
-					mv1         ///
-					mv2         ///
-					mv3         ///
-					sd          ///
+				local globals   	///
+					dataset     	///
+					infile      	///
+					outfile     	///
+					enumdb      	///
+					researchdb  	///
+					repfile     	///
+					master      	///
+					textauditdb		///
+					fieldcomment	///
+					date        	///
+					id          	///
+					enum        	///
+					formversion 	///
+					geounit     	///
+					textaudit		///
+					target      	///
+					server      	///
+					mv1         	///
+					mv2         	///
+					mv3         	///
+					sd          	///
 					nolabel
 
 				* count the number of entry boxes
