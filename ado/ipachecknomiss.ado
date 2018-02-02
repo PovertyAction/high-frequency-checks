@@ -11,8 +11,12 @@ program ipachecknomiss, rclass
 	       - survey meta data
 	       - the consent variable.
 	   Note: A variable at the start of a section often 
-	   should not be missing. */
-	version 13
+	   should not be missing. 
+	   
+	   version 2.0.1: includes some formatting for stata 14 and higher
+	   */
+	
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -20,7 +24,7 @@ program ipachecknomiss, rclass
 	    saving(string) 
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+		[KEEPvars(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -47,9 +51,6 @@ program ipachecknomiss, rclass
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
 	local meta `"variable label value message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
 
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
@@ -68,12 +69,6 @@ program ipachecknomiss, rclass
 		g `var' = ""
 	}
 	
-	*generate scto_link variable
-	if !missing("`sctodb'") {
-		replace scto_link = subinstr(key, ":", "%3A", 1)
-		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
-	}
-
 	* initialize temporary output file
 	poke `tmp', var(`keeplist')
 
@@ -162,26 +157,16 @@ program ipachecknomiss, rclass
 	export excel using "`saving'" ,  ///
 		sheet("4. no miss") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
-
-	*export scto links as links
-	if !missing("`sctodb'") & c(version) >= 14 {
-		if !missing(scto_link[1]) {
-			putexcel set "`saving'", sheet("4. no miss") modify
-			ds
-			loc allvars `r(varlist)'
-			loc linkpos: list posof "scto_link" in allvars
-			alphacol `linkpos'
-			loc col = r(alphacol)
-			count
-			forval x = 1 / `r(N)' {
-				loc row = `x' + 1
-				loc formula = scto_link[`x']
-				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
-			}
-			putexcel `putlist'
-		}
-	}
 	
+	* Format headers
+	if `c(version)' >= 14.0 {
+			d, s
+			loc endcol = char(65 + `r(k)' - 1)
+			
+			putexcel set "`saving'", sheet("4. no miss") modify
+			putexcel A1:`endcol'1, bold border(bottom)
+	}
+
 	* revert to original
 	use `org', clear
 
