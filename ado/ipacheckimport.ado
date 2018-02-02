@@ -90,6 +90,7 @@ program ipacheckimport, rclass
 					`""HFC Enumerator File""' 				+   ///
 					`""HFC Research File""' 				+   ///
 					`""Replacements File \(opt\.\)""' 		+   ///
+					`""Replacements Log \(opt\.\)""' 		+   ///
 					`""Master Tracking Dataset \(opt\.\)""' +	///
 					`""Text Audit File \(opt\.\)""' 		+   ///
 					`""Submission Date""' 					+   ///
@@ -114,15 +115,16 @@ program ipacheckimport, rclass
 					enumdb      	///
 					researchdb  	///
 					repfile     	///
+					replog			///
 					master      	///
 					textauditdb		///
-					fieldcomment	///
 					date        	///
 					id          	///
 					enum        	///
 					formversion 	///
 					geounit     	///
 					textaudit		///
+					fieldcomment	///
 					target      	///
 					server      	///
 					mv1         	///
