@@ -10,8 +10,13 @@ program ipacheckdates, rclass
            4. survey start dates are not after the 
               current date
            5. survey start dates within the same geographic 
-              cluster are within X days of each other */
-    version 13
+              cluster are within X days of each other 
+			  
+		version 2.0.1: includes text formatting for stata 14 and higher
+			
+			*/
+    
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -21,7 +26,7 @@ program ipacheckdates, rclass
 	    saving(string) 
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+		[KEEPvars(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -68,194 +73,176 @@ program ipacheckdates, rclass
 	
 	qui {
 
-    * count nvars
-	unab vars : _all
-	local nvars : word count `vars'
+		* count nvars
+		unab vars : _all
+		local nvars : word count `vars'
 
-	* define temporary files 
-	tempfile tmp org
-	save `org'
+		* define temporary files 
+		tempfile tmp org
+		save `org'
 
-	* define temporary variable
-	tempvar viol
-	g `viol' = .
+		* define temporary variable
+		tempvar viol
+		g `viol' = .
 
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator'
-	local meta `"`start' `end' message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
+		* define default output variable list
+		unab admin : `submitted' `id' `enumerator'
+		local meta `"`start' `end' message"'
 
-	* add user-specified keep vars to output list
-    local lines : subinstr local keepvars ";" "", all
-    local lines : subinstr local lines "." "", all
+		* add user-specified keep vars to output list
+		local lines : subinstr local keepvars ";" "", all
+		local lines : subinstr local lines "." "", all
 
-    local unique : list uniq lines
-    local keeplist : list admin | meta
-    local keeplist : list keeplist | unique
-	
-	* initialize locals
-	local missing = 0
-	local diff_end = 0
-	local diff_start = 0
-	local diff_today = 0
-	local diff_enumarea = 0
-	local surveystart_f : di %tdnn/dd/YY `surveystart'
-	local today = date(c(current_date), "DMY")
-	local today_f : di %tdnn/dd/YY `today'
-
-	* initialize meta data variables
-	g message = ""
-	*generate scto_link variable
-	if !missing("`sctodb'") {
-		gen scto_link = subinstr(key, ":", "%3A", 1)
-		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
-	}
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	/* =====================
-	    PERFORM DATE CHECKS
-	   ===================== */	
-
-	* 1. check that no dates are missing
-	cap assert !(missing(`startdate') | missing(`enddate'))
-	if _rc {
-		replace `viol' = missing(`startdate') | missing(`enddate')
+		local unique : list uniq lines
+		local keeplist : list admin | meta
+		local keeplist : list keeplist | unique
 		
-		* count the missing dates
-		count if `viol' == 1
-		local missing = `r(N)'
-
-		* update values of meta data variables
- 		replace message = "Interview has missing start or end date."
-
-		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
-			keep("`keeplist'")
-	}
-
-	* 2. check that interview start and end date are the same.
-	cap assert !(`startdate' == `enddate')
-	if _rc {
-		replace `viol' = `startdate' != `enddate'
+		* initialize locals
+		local missing = 0
+		local diff_end = 0
+		local diff_start = 0
+		local diff_today = 0
+		local diff_enumarea = 0
+		local surveystart_f : di %tdnn/dd/YY `surveystart'
+		local today = date(c(current_date), "DMY")
+		local today_f : di %tdnn/dd/YY `today'
 		
-		* count the missing dates
-		count if `viol' == 1
-		local diff_end = `r(N)'
+		* initialize meta data variables
+		g message = ""
 
-		* update values of meta data variables
- 		replace message = "Interview has unequal start and end dates."
+		* initialize temporary output file
+		poke `tmp', var(`keeplist')
 
-		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
-			keep("`keeplist'")
-	}
+		/* =====================
+			PERFORM DATE CHECKS
+		   ===================== */	
 
-	* 3. check that interview date is not before the start of data collection. 
-    cap assert !(`startdate' < `surveystart')
-    if _rc {
-    	replace `viol' = `startdate' < `surveystart'
-		
-		* count the missing dates
-		count if `viol' == 1
-		local diff_start = `r(N)'
-
-		* update values of meta data variables
- 		replace message = "Interview is before the start of" + ///
- 		    " data collection (`surveystart_f')."
-
-		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
-			keep("`keeplist'")
-	}
-	
-	* 4. check that interview date is not after the system date.
-	cap assert !(`startdate' > `today')
-	if _rc {
-		replace `viol' = `startdate' > `today'
-		
-		* count the missing dates
-		count if `viol' == 1
-		local diff_today = `r(N)'
-
-		* update values of meta data variables
- 		replace message = "Interview is after the current " + ///
- 		    "system date (`today_f')."
-
-		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
-			keep("`keeplist'")
-	}
-
-	* Last check only applies if an enumeration area is specified
-	if "`enumarea'" != "" {
-		bysort `enumarea': egen modedate = mode(`startdate')
-		
-		/* 5. check that, within the same enumeration area, 
-		      interview dates are close to the same date. */
-		cap assert !(`startdate' > modedate + `days' | `startdate' < modedate - `days')
+		* 1. check that no dates are missing
+		cap assert !(missing(`startdate') | missing(`enddate'))
 		if _rc {
-			replace `viol' = `startdate' > modedate + `days' | `startdate' < modedate - `days'
-	
+			replace `viol' = missing(`startdate') | missing(`enddate')
+			
 			* count the missing dates
 			count if `viol' == 1
-			local diff_enumarea = `r(N)'
+			local missing = `r(N)'
 
 			* update values of meta data variables
-	 		replace message = "Interview is more than `days' days " + ///
-	 		    "apart from others in the same enumeration area."
+			replace message = "Interview has missing start or end date."
 
 			* append violations to the temporary data set
 			saveappend using `tmp' if `viol' == 1, ///
 				keep("`keeplist'")
 		}
-	}	
 
-	* import compiled list of violations
-	use `tmp', clear
+		* 2. check that interview start and end date are the same.
+		cap assert !(`startdate' == `enddate')
+		if _rc {
+			replace `viol' = `startdate' != `enddate'
+			
+			* count the missing dates
+			count if `viol' == 1
+			local diff_end = `r(N)'
 
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
+			* update values of meta data variables
+			replace message = "Interview has unequal start and end dates."
 
-	* create additional meta data for tracking
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
-
-	order `keeplist' notes drop newvalue
-    gsort -`submitted'
-
-	* export compiled list to excel
-	export excel using "`saving'" ,  ///
-		sheet("10. dates") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
-		
-	*export scto links as links
-	if !missing("`sctodb'") & c(version) >= 14 {
-		if !missing(scto_link[1]) {
-			putexcel set "`saving'", sheet("10. dates") modify
-			ds
-			loc allvars `r(varlist)'
-			loc linkpos: list posof "scto_link" in allvars
-			alphacol `linkpos'
-			loc col = r(alphacol)
-			count
-			forval x = 1 / `r(N)' {
-				loc row = `x' + 1
-				loc formula = scto_link[`x']
-				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
-			}
-			putexcel `putlist'
+			* append violations to the temporary data set
+			saveappend using `tmp' if `viol' == 1, ///
+				keep("`keeplist'")
 		}
-	}
-	
-	* revert to original
-	use `org', clear
+
+		* 3. check that interview date is not before the start of data collection. 
+		cap assert !(`startdate' < `surveystart')
+		if _rc {
+			replace `viol' = `startdate' < `surveystart'
+			
+			* count the missing dates
+			count if `viol' == 1
+			local diff_start = `r(N)'
+
+			* update values of meta data variables
+			replace message = "Interview is before the start of" + ///
+				" data collection (`surveystart_f')."
+
+			* append violations to the temporary data set
+			saveappend using `tmp' if `viol' == 1, ///
+				keep("`keeplist'")
+		}
+		
+		* 4. check that interview date is not after the system date.
+		cap assert !(`startdate' > `today')
+		if _rc {
+			replace `viol' = `startdate' > `today'
+			
+			* count the missing dates
+			count if `viol' == 1
+			local diff_today = `r(N)'
+
+			* update values of meta data variables
+			replace message = "Interview is after the current " + ///
+				"system date (`today_f')."
+
+			* append violations to the temporary data set
+			saveappend using `tmp' if `viol' == 1, ///
+				keep("`keeplist'")
+		}
+
+		* Last check only applies if an enumeration area is specified
+		if "`enumarea'" != "" {
+			bysort `enumarea': egen modedate = mode(`startdate')
+			
+			/* 5. check that, within the same enumeration area, 
+				  interview dates are close to the same date. */
+			cap assert !(`startdate' > modedate + `days' | `startdate' < modedate - `days')
+			if _rc {
+				replace `viol' = `startdate' > modedate + `days' | `startdate' < modedate - `days'
+		
+				* count the missing dates
+				count if `viol' == 1
+				local diff_enumarea = `r(N)'
+
+				* update values of meta data variables
+				replace message = "Interview is more than `days' days " + ///
+					"apart from others in the same enumeration area."
+
+				* append violations to the temporary data set
+				saveappend using `tmp' if `viol' == 1, ///
+					keep("`keeplist'")
+			}
+		}	
+
+		* import compiled list of violations
+		use `tmp', clear
+
+		* if there are no violations
+		if `=_N' == 0 {
+			set obs 1
+		} 
+
+		* create additional meta data for tracking
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+
+		order `keeplist' notes drop newvalue
+		gsort -`submitted'
+
+		* export compiled list to excel
+		export excel using "`saving'" ,  ///
+			sheet("10. dates") `sheetreplace' `sheetmodify' ///
+			firstrow(variables) `nolabel'
+			
+		* Format headers
+		if `c(version)' >= 14.0 {
+				d, s
+				loc endcol = char(65 + `r(k)' - 1)
+				
+				putexcel set "`saving'", sheet("10. dates") modify
+				putexcel A1:`endcol'1, bold border(bottom)
+		}
+
+		* revert to original
+		use `org', clear
 	}
 	* return list
 	return scalar missing = `missing'
