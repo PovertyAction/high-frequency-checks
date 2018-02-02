@@ -1,3 +1,4 @@
+*! version 2.1.0 Ishmail Azindoo Baako 02feb2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckconstraints, rclass
@@ -7,8 +8,13 @@ program ipacheckconstraints, rclass
 	   Most numeric questions that are asked during an 
 	   interview have a logical range of possible values.
 	   Entries that exceed these limits could be a sign of
-	   misentry or fraud. */
-	version 13
+	   misentry or fraud. 
+	   
+	   * Version 2.1.0: Check for violations already marked as okay and f
+						ormatting for stata 14 or higher
+	   */
+	
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -20,7 +26,7 @@ program ipacheckconstraints, rclass
 	    saving(string) 
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+		[KEEPvars(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -51,9 +57,6 @@ program ipacheckconstraints, rclass
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
 	local meta `"variable label value message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
 
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
@@ -74,12 +77,6 @@ program ipacheckconstraints, rclass
 		g `var' = ""
 	}
 	
-	*generate scto_link variable
-	if !missing("`sctodb'") {
-		replace scto_link = subinstr(key, ":", "%3A", 1)
-		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
-	}
-
 	* initialize temporary output file
 	poke `tmp', var(`keeplist')
 
@@ -106,11 +103,18 @@ program ipacheckconstraints, rclass
 		replace variable = "`var'"
 		replace label = "`varl'"
 		replace value = string(`var')
+		
+		* Generate _hfcokay & _hfcokayvar if they do not exist
+		cap confirm var _hfcokay
+		if _rc == 111 gen _hfcokay = 0
+		cap confirm var _hfcokayvar 
+		if _rc == 111 gen _hfcokayvar = ""
 			
 		/* =======================
 		   = check hard minimums =
 		   ======================= */
-		replace `viol' = `var' < `minhard' & `minhard' < .
+		* only flag as violation if not previously marked as okay
+		replace `viol' = `var' < `minhard' & `minhard' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'")) 
 		replace message = "Value is too small. Hard Min. = `minhard'"
 
 		* count the violations
@@ -126,7 +130,7 @@ program ipacheckconstraints, rclass
 		/* =======================
 		   = check hard maximums =
 		   ======================= */
-		replace `viol' = `var' > `maxhard' & `maxhard' < . & `var' < . 
+		replace `viol' = `var' > `maxhard' & `maxhard' < . & `var' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'")) 
 		replace message = "Value is too high. Hard Max. = `maxhard'"
 
 		* count the violations
@@ -143,7 +147,7 @@ program ipacheckconstraints, rclass
 		   = check soft minimums =
 		   ======================= */
 
-		replace `viol' = `var' < `minsoft' & `minsoft' < .
+		replace `viol' = `var' < `minsoft' & `minsoft' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
 		replace message = "Value is too small. Soft Min. = `minsoft'"
 
 		* count the violations
@@ -160,7 +164,7 @@ program ipacheckconstraints, rclass
 		   = check soft maximums =
 		   ======================= */
 
-		replace `viol' = `var' > `maxsoft' & `maxsoft' < . & `var' < . 
+		replace `viol' = `var' > `maxsoft' & `maxsoft' < . & `var' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
 		replace message = "Value is too high. Soft Max. = `maxsoft'"
 
 		* count the violations
@@ -199,26 +203,16 @@ program ipacheckconstraints, rclass
 	export excel using "`saving'" ,  ///
 		sheet("8. constraints") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
-	
-	*export scto links as links
-	if !missing("`sctodb'") & c(version) >= 14 {
-		if !missing(scto_link[1]) {
+		
+	* Format headers
+	if `c(version)' >= 14.0 {
+			d, s
+			loc endcol = char(65 + `r(k)' - 1)
+			
 			putexcel set "`saving'", sheet("8. constraints") modify
-			ds
-			loc allvars `r(varlist)'
-			loc linkpos: list posof "scto_link" in allvars
-			alphacol `linkpos'
-			loc col = r(alphacol)
-			count
-			forval x = 1 / `r(N)' {
-				loc row = `x' + 1
-				loc formula = scto_link[`x']
-				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
-			}
-			putexcel `putlist'
-		}
+			putexcel A1:`endcol'1, bold border(bottom)
 	}
-	
+
 	* revert to original
 	use `org', clear
 	}
