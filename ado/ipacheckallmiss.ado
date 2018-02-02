@@ -3,8 +3,12 @@
 program ipacheckallmiss, rclass
 	/* Check that no variables have only missing values, where missing indicates
 	   a skip. This could mean that the routing of the survey program was
-	   incorrectly programmed. */
-	version 13
+	   incorrectly programmed. 
+	   
+	   version 2.0.1: includes formatting for stata 14 and above
+	   */
+	
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -123,12 +127,22 @@ program ipacheckallmiss, rclass
 	g newvalue = ""	
 
 	order `keeplist' notes drop newvalue
-
+	keep variable label value message notes drop newvalue
+	
 	* export compiled list to excel
 	export excel using "`saving'" ,  ///
 		sheet("7. all missing") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 	
+	* Format to headers
+	if `c(version)' >= 14.0 {
+		d, s
+		loc endcol = char(65 + `r(k)' - 1)
+				
+		putexcel set "`saving'", sheet("7. all missing") modify
+		putexcel A1:`endcol'1, bold border(bottom)
+	}
+
 	* revert to original
 	use `org', clear
 
