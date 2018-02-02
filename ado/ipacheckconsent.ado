@@ -7,8 +7,12 @@ program ipacheckconsent, rclass
 	   questions at that asks the enumerator to document 
 	   the consent of the interviewee. This check verifies 
 	   that all surveys have appropriate consent values for
-	   all consent variables. */
-	version 13
+	   all consent variables. 
+	   
+	   version 2.0.1: includes formatting for stata 14 and above
+	   */
+	
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -20,7 +24,7 @@ program ipacheckconsent, rclass
 	    [CONDition(string)]
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+		[KEEPvars(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -33,138 +37,120 @@ program ipacheckconsent, rclass
 	di "HFC 3 => Checking that all interviews have consent..."
 
 	qui {
-	* count nvars
-	unab vars : _all
-	local nvars : word count `vars'
+		* count nvars
+		unab vars : _all
+		local nvars : word count `vars'
 
-	* define temporary files 
-	tempfile tmp org
-	save `org'
+		* define temporary files 
+		tempfile tmp org
+		save `org'
 
-	* define temporary variable
-	tempvar consent
-	g `consent' = .
+		* define temporary variable
+		tempvar consent
+		g `consent' = .
 
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
+		* define default output variable list
+		unab admin : `submitted' `id' `enumerator'
+		local meta `"variable label value message"'
 
-	* add user-specified keep vars to output list
-    local lines : subinstr local keepvars ";" "", all
-    local lines : subinstr local lines "." "", all
+		* add user-specified keep vars to output list
+		local lines : subinstr local keepvars ";" "", all
+		local lines : subinstr local lines "." "", all
 
-    local unique : list uniq lines
-    local keeplist : list admin | meta
-    local keeplist : list keeplist | unique
+		local unique : list uniq lines
+		local keeplist : list admin | meta
+		local keeplist : list keeplist | unique
 
- 	* define loop locals
-	local numnoconsent = 0
-	local i = 1
+		* define loop locals
+		local numnoconsent = 0
+		local i = 1
 
-	* initialize meta data variables
-	foreach var in `meta' {
-		g `var' = ""
-	}
-	
-	*generate scto_link variable
-	if !missing("`sctodb'") {
-		replace scto_link = subinstr(key, ":", "%3A", 1)
-		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
-	}
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	* loop through varlist and capture the number of unconsented surveys 
-	foreach var in `varlist' {
-		local val : word `i' of `consentvalue'
-		gettoken cond condition : condition, p(";")
-		local condition : subinstr local condition ";" ""
-
-		if "`cond'" != "" {
-			local condstr "if `cond'"
+		* initialize meta data variables
+		foreach var in `meta' {
+			g `var' = ""
 		}
-		else {
-			local condsrt ""
-		}
+		
+		* initialize temporary output file
+		poke `tmp', var(`keeplist')
 
-		* check if there are any violations
-		cap assert `var' == `val' `condstr'
-		if _rc {
-			* create temp marker variable
-			replace `consent' = `var' == `val' `condstr'
+		* loop through varlist and capture the number of unconsented surveys 
+		foreach var in `varlist' {
+			local val : word `i' of `consentvalue'
+			gettoken cond condition : condition, p(";")
+			local condition : subinstr local condition ";" ""
 
-			* count the unconsented
-			count if `consent' == 0
-			local num = `r(N)'
-
-			* capture variable label
-			local varl : variable label `var'
-
-			* update values for additional variables
-			replace variable = "`var'"
-			replace label = "`varl'"
-			replace value = string(`var') if `consent' == 0
-			replace message = "Interview does not have valid consent."
-
-			* append violations to the temporary data set
-			saveappend using `tmp' if `consent' == 0, ///
-			    keep("`keeplist'") sort(`id')
-		}
-		else {
-			* if all consented, set the number of no consent to zero
-			local num = 0
-		}
-		* update the total number of no consents
-		local numnoconsent = `numnoconsent' + `num'
-		local i = `i' + 1
-	}
-
-	* import compiled list of violations
-	use `tmp', clear
-
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
-
-	* create additional meta data for tracking
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
-
-	order `keeplist' notes drop newvalue
-    gsort -`submitted'
-
-	* export compiled list to excel
-	export excel using "`saving'" ,  ///
-		sheet("3. consent") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
-	
-	*export scto links as links
-	if !missing("`sctodb'") & c(version) >= 14 {
-		if !missing(scto_link[1]) {
-			putexcel set "`saving'", sheet("3. consent") modify
-			ds
-			loc allvars `r(varlist)'
-			loc linkpos: list posof "scto_link" in allvars
-			alphacol `linkpos'
-			loc col = r(alphacol)
-			count
-			forval x = 1 / `r(N)' {
-				loc row = `x' + 1
-				loc formula = scto_link[`x']
-				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'	
+			if "`cond'" != "" {
+				local condstr "if `cond'"
 			}
-			putexcel `putlist'
+			else {
+				local condsrt ""
+			}
+
+			* check if there are any violations
+			cap assert `var' == `val' `condstr'
+			if _rc {
+				* create temp marker variable
+				replace `consent' = `var' == `val' `condstr'
+
+				* count the unconsented
+				count if `consent' == 0
+				local num = `r(N)'
+
+				* capture variable label
+				local varl : variable label `var'
+
+				* update values for additional variables
+				replace variable = "`var'"
+				replace label = "`varl'"
+				replace value = string(`var') if `consent' == 0
+				replace message = "Interview does not have valid consent."
+
+				* append violations to the temporary data set
+				saveappend using `tmp' if `consent' == 0, ///
+					keep("`keeplist'") sort(`id')
+			}
+			else {
+				* if all consented, set the number of no consent to zero
+				local num = 0
+			}
+			* update the total number of no consents
+			local numnoconsent = `numnoconsent' + `num'
+			local i = `i' + 1
 		}
-	}
-	
-	* revert to original 
-	use `org', clear
+
+		* import compiled list of violations
+		use `tmp', clear
+
+		* if there are no violations
+		if `=_N' == 0 {
+			set obs 1
+		} 
+
+		* create additional meta data for tracking
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+
+		order `keeplist' notes drop newvalue
+		gsort -`submitted'
+
+		* export compiled list to excel
+		export excel using "`saving'" ,  ///
+			sheet("3. consent") `sheetreplace' `sheetmodify' ///
+			firstrow(variables) `nolabel'
+			
+		* Add text formatting to headers
+		if `c(version)' >= 14 {
+			d, s
+			loc endcol = char(65 + `r(k)' - 1)
+			
+			putexcel set "`saving'", sheet("3. consent") modify
+			putexcel A1:`endcol'1, bold border(bottom)
+		}
+
+			
+		* revert to original 
+		use `org', clear
 	}
 
 	* display stats and return
