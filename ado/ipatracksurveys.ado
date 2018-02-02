@@ -1,15 +1,19 @@
+*! version 1.1.0 Ishmail Azindoo Baako 02feb2018
 *! version 1.0.0 Caton brewster 10nov2016
 
 program ipatracksurveys, rclass
 	/* Create a sheet that shows progress of surveying by a specified geographic unit
 		The sheet generated shows number of surveys completed in each geo unit, number 
 		surveys left to complete (based on list of expected sample/respondents, specified
-		by user), first day of surveying in that geo unit and last day of surveying. */
+		by user), first day of surveying in that geo unit and last day of surveying. 
+		
+		version 1.1.0: 	includes options includedups and ignoredups and some formatting
+						for stata 14 or higher
+		*/
 
+* version 15
 
 //define inputs
-version 13
-
 #delimit ;
 syntax using/,  
 	/* unit that will be used (e.g. community) */
@@ -21,7 +25,7 @@ syntax using/,
 	/* sample/respondents list file name */
 	sample(string)
 	/* specify unit and uid in sample/respondent list data if they are named differently */
-	[s_unit(string) s_id(string)]	
+	[s_unit(string) s_id(string) includedups ignoredups]	
 	;	
 #delimit cr
 
@@ -54,36 +58,27 @@ qui {
 	total_surveys_left 
 	;	
 	#delimit cr
-
 	
 	* test for fatal conditions 
-	duplicates tag `id', gen(`tagdupids')
-	count if `tagdupids' > 0 
-	if `r(N)' > 0{
-		di as err "Duplicate IDs (`id') are not allowed. Please correct this before running ipatracksurveys."
-		error 101
-		}
-		
-	count if `submit' == . 
-	if `r(N)' > 0 {
-		di as err `"Missing values of `submit' are not allowed. Please correct this before running ipatracksurveys."'
-		error 101
-		}
-		
-	cap confirm string var `id'
-	if _rc {
-		count if `id' == . 
-		if `r(N)' > 0 {
-			di as err `"Missing values of `id' are not allowed. Please correct this before running ipatracksurveys."'
+	if "`includedups'" == "" & "`ignoredups'" == "" {
+		duplicates tag `id', gen(`tagdupids')
+		count if `tagdupids' > 0 
+		if `r(N)' > 0{
+			di as err "{p}Duplicate IDs (`id') are not allowed. Please correct this or specify option includedups before running ipatracksurveys.{p_end}"
 			error 101
 		}
 	}
-	else {
-		count if `id' == "" 
-		if `r(N)' > 0 {
-			di as err `"Missing values of `id' are not allowed. Please correct this before running ipatracksurveys."'
-			error 101
-		}
+		
+	count if `submit' == . 
+	if `r(N)' > 0 {
+		di as err "{p}Missing values of `submit' are not allowed. Please correct this before running ipatracksurveys.{p_end}"
+		error 101
+	}
+		
+	count if missing(`id')
+	if `r(N)' > 0 {
+		di as err "{p}Missing values of `id' are not allowed. Please correct this before running ipatracksurveys.{p_end}"
+		error 101
 	}
 
 	
@@ -126,6 +121,9 @@ qui {
 	* save current data as master
 	save `master', replace
 	
+	* if ignoredups is used, drop duplicate observations
+	if "`ignoredups'" ~= "" duplicates drop `id', force
+	
 	* create dates data  
 	keep `unit_string' `formatted_submit' 
 	bysort `unit_string': egen `survey_start_date' = min(`formatted_submit') 
@@ -150,7 +148,7 @@ qui {
 		infile using "`sample'", automatic clear
 	}
 	else {
-		di as err `"Must specify file type for sample data, "`sample'"  Valid options include .xls, .xlsx, .csv, .dta, and .raw."'
+		di as err `"{p}Must specify file type for sample data, "`sample'"  Valid options include .xls, .xlsx, .csv, .dta, and .raw.{p_end}"'
 		error 100 
 	}
 		
@@ -167,7 +165,7 @@ qui {
 		if !mi("``sample_var''") {
 			cap confirm var ``sample_var''
 			if _rc {
-				noisily di as err `"The var "``sample_var''" does not exist in your sample data, , "`sample'"."' 
+				noisily di as err `"{p}The var "``sample_var''" does not exist in your sample data, , "`sample'".{p_end}"' 
 				error 111
 			}
 			else {
@@ -183,7 +181,7 @@ qui {
 		else {
 			cap confirm var `main_var'
 			if _rc {
-				noisily di as err `"ERROR: Your var "`main_var'" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_unit()"."'
+				noisily di as err `"{p}ERROR: Your var "`main_var'" does not exist in your sample data, , "`sample'". If it exists but is named differently, specify the alternate name using "s_unit()".{p_end}"'
 				error 111 
 			}
 			else {
@@ -201,11 +199,11 @@ qui {
 	count if `id_string' == ""
 	if `r(N)' > 0{
 		if !mi("`s_id'") {
-			di as err `"Missing IDs (`s_id') in your sample data ("`sample'") are not allowed."'
+			di as err `"{p}Missing IDs (`s_id') in your sample data ("`sample'") are not allowed.{p_end}"'
 			error 101
 		}
 		else {
-			di as err `"Missing IDs (`id') in your sample data ("`sample'") are not allowed."'
+			di as err `"{p}Missing IDs (`id') in your sample data ("`sample'") are not allowed.{p_end}"'
 			error 101
 		}
 	}
@@ -213,11 +211,11 @@ qui {
 	count if `unit_string' == "" 
 	if `r(N)' > 0{
 		if !mi("`s_unit'") {
-			di as err `"Missing values of the unit variable (`s_unit') in your sample data ("`sample'") are not allowed."'
+			di as err `"{p}Missing values of the unit variable (`s_unit') in your sample data ("`sample'") are not allowed.{p_end}"'
 			error 101
 		}
 		else {
-			di as err `"Missing values of the unit variable (`unit') in your sample data ("`sample'") are not allowed."'
+			di as err `"{p}Missing values of the unit variable (`unit') in your sample data ("`sample'") are not allowed.{p_end}"'
 			error 101
 		}
 	}
@@ -227,11 +225,11 @@ qui {
 	count if `tagdupids_sample' > 0 
 	if `r(N)' > 0{
 		if !mi("`s_id'") {
-			di as err `"Dupliacte IDs (`s_id') in your sample data ("`sample'") are not allowed."'
+			di as err `"{p}Duplicate IDs (`s_id') in your sample data ("`sample'") are not allowed.{p_end}"'
 			error 101
 		}
 		else {
-			di as err `"Duplicate IDs (`id') in your sample data ("`sample'") are not allowed."'
+			di as err `"{p}Duplicate IDs (`id') in your sample data ("`sample'") are not allowed.{p_end}"'
 			error 101
 		}
 	}
@@ -242,7 +240,7 @@ qui {
 	
 	* merge in dates data
 	merge 1:1 `unit_string' using `dates'	
-	
+
 	* if missing, means incomplete
 	replace `num_surveys_done' = 0 if `num_surveys_done' == . 	
 	
@@ -318,12 +316,19 @@ qui {
 	export excel using "`using'", sheet("T2. track surveys") firstrow(varl) datestring("%tdCCYY/NN/DD") cell(A2)  sheetreplace	
 	
 	* export header 
+	* Include text formatting for stata 14 and higher
 	local today = date(c(current_date), "DMY")
 	local today_f : di %tdCCYY/NN/DD `today'
 	putexcel set "`using'", sheet("T2. track surveys") modify  
-	putexcel A1 = ("Survey Statuses as of `today_f'")
+	if `c(version)' >= 14.0 {
+		putexcel A1:F1 = ("Survey Statuses as of `today_f'"), hcenter merge font(calibri, 12) bold border(bottom, double)
+		putexcel A2:F2, font(calibri, 12) bold border(bottom)
+	}
+	else {
+		putexcel A1 = ("Survey Statuses as of `today_f'")
+	}
 
-	use `master', replace 
+	use `master', clear
 }
 
 	display `"Saved tracking information on `total' surveys in "`using'""'
@@ -332,12 +337,19 @@ qui {
 	display "First survey completed on `first'"
 	display "Last survey completed on `last'"
 	if `num_mi_unit_var' > 0 {
-		noisily disp in r `"WARNING: `num_mi_unit_var' observations are missing `unit' in your data. Listed as "MISSING `unit'" in "`using'"."'
+		disp in r "{p}WARNING: `num_mi_unit_var' observations are missing `unit' in your data. Listed as MISSING `unit' in `using'{p_end}"
+		disp
 	}
 	if `num_surveyed_not_in_sample' > 0 {
-		disp in r "WARNING: For `num_surveyed_not_in_sample' value(s) of `unit', the number of surveys completed exceeds the number of scheduled surveys from your sample() data." 	
-		disp in r "This suggests there are missing values of id() or the unit varible in your sample() data. Ensure that your sample() dataset includes all IDs you plan(ned) to survey." 
-		disp in r `"These observations are flagged in "`using'"."'
-	}
-		
-	end
+		#d;
+		disp in r `"{p}WARNING: For `num_surveyed_not_in_sample' value(s) of `unit', 
+					the number of surveys completed exceeds the number of scheduled 
+					surveys from your sample() data. This suggests there are missing 
+					values of id() or the unit varible in your sample() data. Ensure 
+					that your sample() dataset includes all IDs you plan(ned) to survey. 
+					These observations are flagged in "`using'"{p_end}"'
+				;
+		#d cr
+		disp 
+	}	
+end
