@@ -1,5 +1,5 @@
-*! version 2.0.0 Christopher Boyer/Caton Brewster 18mar2017
-
+*! version 2.0.1 Christopher Boyer/Caton Brewster 03Jan2017
+	
 program ipatracksummary, rclass
     /* Add a summary sheet to the output excel file detailing
        progress towards survey targets.
@@ -7,9 +7,12 @@ program ipatracksummary, rclass
 	   Version 2 update: now looks at stats by submission date
 	   instead of by date the HFCs are run. No longer does 
 	   number of check violations.
+	   
+	   version 2.0.1: Includes text formatting for stata 14 and later
 	  */
-  version 13
-
+  
+  * version 15
+  
   #d ;
   syntax using/, 
     /* target number of surveys */ 
@@ -57,7 +60,7 @@ qui {
 	format `perc_targ' %9.2f 
 	gen `cum_perc_targ' = sum(`perc_targ') 
 	format `cum_perc_targ' %9.2f 
-
+	
 	export excel using "`using'", sheet("T1. summary") datestring("%tdCCYY/NN/DD") sheetreplace cell(A3) 
 		
 	restore
@@ -77,19 +80,25 @@ program headers, rclass
 
     * set the output sheet
     putexcel set "`using'", sheet("T1. summary") modify
+	
+	* include some formatting for stata 14 and higher
+	if `c(version)' >= 14 loc hformat ", hcenter font(calibri, 12) bold border(bottom)"
 
 	* today's date
 	local today = date(c(current_date), "DMY")
 	local today_f : di %tdCCYY/NN/DD `today'
 	
 	* date header
-	putexcel A1 = ("Summary as of `today_f'")
-	
+
+	if `c(version)' >= 14 putexcel A1:E1 = ("Summary as of `today_f'"), hcenter merge font(calibri, 12) bold border(bottom, double)
+	else putexcel A1 = ("Summary as of `today_f'")
+
     * write the column headers
     putexcel A2=("Submission Date") ///
       B2=("Frequency") ///
       C2=("Cumulative Frequency") ///
       D2=("Percent Target") ///
-      E2=("Cumulative Percent Target")
+      E2=("Cumulative Percent Target")`hformat'
+
 end
 
