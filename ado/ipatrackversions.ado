@@ -1,17 +1,20 @@
-*! version 2.0.1 ChristopherBoyer 25apr2017
+*! version 2.0.1 Christopher Boyer 25apr2017
 *! version 1.0.0 Caton brewster 10nov2016
-
+	
+	* version 2.0.2 Ishmail Azindoo Baako, 03Jan2018
 program ipatrackversions, rclass
 	/* Create a sheet that shows the survey versions used for each day of surveying. 
 	For the most recent day of surveying, if there are surveys that have been submitted
 	using the wrong version, list the enumerator ID, respondent ID, etc. for those observations
 	to facilitate finding that enumerator and ensuring they upload the latest version of the 
-	survey */
+	survey 
+		
+	version 2.0.2: Includes text formatting for stata 14 and higher
+	*/
 	
-	
+	* version 15
 
 	* define inputs
-	version 13
 
 	#delimit ;
 	syntax varname,  //varname is the form version variable - must be num. 
@@ -99,14 +102,24 @@ program ipatrackversions, rclass
 	}
 
 	mata: tab_to_dta("rows", "cols", "X")
-
+	
 	label variable var1 "Submission Date"
-	label variable var2 "Form Versions"
+	if `c(version)' < 14.0 label variable var2 "Form Versions"
  
  	export excel using "`saving'", ///
 	    sheet("T3. form versions") sheetreplace firstrow(varl) date("%tdCCYY/NN/DD")
+		
+	* Export Headers
+	putexcel set "`saving'", sheet("T3. form versions") modify
+	
+	if `c(version)' >= 14.0 {
+		d, s
+		loc endcol = char(65 + `r(k)' - 1)
+		putexcel B1:`endcol'1 = "Form Versions", hcenter merge bold border(bottom)
+	}
 
 	use `tmp', clear
+	
 
 	* save most recent submission date
 	sum `submit_td'
@@ -119,8 +132,7 @@ program ipatrackversions, rclass
 	local str_max_date: disp %tdCCYY/NN/DD `max_date'
 	local str_max_date = trim("`str_max_date'")
 	
- 	local export_str = "List of submissions using outdated form version on `str_max_date'."
-	mata: export_excel_string(`r' + 5, 1, "`export_str'", "`saving'")
+ 	* local export_str = "List of submissions using outdated form version on `str_max_date'."
 
 	* determine which submissions used wrong form on most recent date
 	g `wrong_form' = `submit_td' == `max_date' & !inlist(`varlist', ., `max_version')
@@ -132,11 +144,18 @@ program ipatrackversions, rclass
  	keep `submit' `id' `enumerator' `keepvars' 
  	order `submit' `id' `enumerator' `keepvars'
  	
-	* export header 
-	local row = `r' + 6
+	* export header
+	local hrow 	= `r' + 5
+	local row 	= `r' + 6
 	if _N > 0 {
 		export excel `submit' `enumerator' `id' `keepvars'  using "`saving'", ///
 			sheet("T3. form versions") sheetmodify cell(A`row') firstrow(var)
+			
+		loc varcount = wordcount("`submit' `enumerator' `id' `keepvars'")
+		loc endcol = char(65 + `varcount' - 1)
+		if `c(version)' >= 14.0 putexcel A`hrow':`endcol'`hrow' = ///
+			("List of submissions using outdated form version on `str_max_date'."), merge bold font(calibri, 12, red) border(bottom, double)
+		else putexcel A`hrow' = ("List of submissions using outdated form version on `str_max_date'.")
 	}
 
 	local perc_wrong_form: disp %12.2f `num_wrong_form' * 100 / `N'
@@ -151,6 +170,7 @@ program ipatrackversions, rclass
 
 end
 
+
 mata: 
 // explain what this function does
 void tab_to_dta(string scalar rowname, string scalar colname, string scalar matname)
@@ -164,18 +184,6 @@ void tab_to_dta(string scalar rowname, string scalar colname, string scalar matn
 	X = (. \ rows), (cols \ X)
 
 	st_store(., ., X)
-}
-
-void export_excel_string(real scalar row, real scalar column, string scalar str, string scalar filename)
-{
-	class xl scalar b
-	
-	b = xl()
-
-	b.load_book(filename)
-	b.set_sheet("T3. form versions")
-	b.put_string(row, column, str)
-	b.close_book()
 }
 
 end
