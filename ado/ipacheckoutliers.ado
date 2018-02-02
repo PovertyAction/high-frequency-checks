@@ -1,11 +1,14 @@
-*! version 2.0.1 Christopher Boyer 26jul2017
-*! version 1.1.0 Kelsey Larson 21feb2017
+*! version 1.1.1 Kelsey Larson 21feb2017
 *! version 1.0.0 Christopher Boyer 04may2016
 
 program ipacheckoutliers, rclass
 	/* This program checks for outliers among 
-	   unconstrained survey variables. */
-	version 13
+	   unconstrained survey variables. 
+	   
+	   * Includes text formatting for stata 14 and later version
+	   */
+	
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -15,7 +18,7 @@ program ipacheckoutliers, rclass
 	    saving(string) 
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
-		[IGNore(string) SCTOdb(string)]
+		[IGNore(string)]
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -48,165 +51,154 @@ program ipacheckoutliers, rclass
 	di "HFC 11 => Checking that unconstrained variables have no outliers..."
 	qui {
 
-	* count nvars
-	unab vars : _all
-	local nvars : word count `vars'
+		* count nvars
+		unab vars : _all
+		local nvars : word count `vars'
 
-	* define temporary files 
-	tempfile tmp org
-	save `org'
+		* define temporary files 
+		tempfile tmp org
+		save `org'
 
-	* define temporary variable
-	tempvar outlier min max use
-	g `outlier' = .
-	g `min' = .
-	g `max' = .
-	g `use' = .
-
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
-
-	* add user-specified keep vars to output list
-    local lines : subinstr local keepvars ";" "", all
-    local lines : subinstr local lines "." "", all
-
-    local unique : list uniq lines
-    local keeplist : list admin | meta
-    local keeplist : list keeplist | unique
-
-    * initialize local counters
-	local noutliers = 0
-	local i = 1
-
-	* initialize meta data variables
-	foreach var in `meta' {
-		g `var' = ""
-	}
-	* generate scto_link variable
-	if !missing("`sctodb'") {
-		replace scto_link = subinstr(key, ":", "%3A", 1)
-		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
-	}
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	foreach var in `varlist' {
-		* mark variables that contain error codes and should be ignored
-		replace `use' = 1
-		foreach num in `ignore' {
-			replace `use' = 0 if `var' == `num'
-		}
-		* get current value of iqr
-		local val : word `i' of `multiplier'
+		* define temporary variable
+		tempvar outlier min max use
+		g `outlier' = .
+		g `min' = .
+		g `max' = .
+		g `use' = .
 		
-		* capture variable label
-		local varl : variable label `var'
+		* Generate _hfcokay & _hfcokayvar if they do not exist
+		cap confirm var _hfcokay
+		if _rc == 111 gen _hfcokay = 0
+		cap confirm var _hfcokayvar 
+		if _rc == 111 gen _hfcokayvar = ""
 
-		* update values for additional variables
-		replace variable = "`var'"
-		replace label = "`varl'"
-		replace value = string(`var')
 
-		if "`sd'" == "" {
-			* create temp stats variables
-			tempvar sigma q1 q3
+		* define default output variable list
+		unab admin : `submitted' `id' `enumerator'
+		local meta `"variable label value message"'
 
-			* calculate iqr stats
-			egen `sigma' = iqr(`var') if `use' == 1
-			egen `q1' = pctile(`var') if `use' == 1, p(25)
-			egen `q3' = pctile(`var') if `use' == 1, p(75)
-			replace `max' = `q3' + `val' * `sigma'
-			replace `min' = `q1' - `val' * `sigma'
+		* add user-specified keep vars to output list
+		local lines : subinstr local keepvars ";" "", all
+		local lines : subinstr local lines "." "", all
 
-			* drop reused egen variables
-			drop `sigma' `q1' `q3'
+		local unique : list uniq lines
+		local keeplist : list admin | meta
+		local keeplist : list keeplist | unique
 
-			replace message = "Potential outlier " + value + ///
-			    " in variable `var' (`val' * IQR: " + ///
-			    string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
-		}
-		else {
-			* create temp stats variables
-			tempvar sigma  mu
+		* initialize local counters
+		local noutliers = 0
+		local i = 1
 
-			* calculate sd stats
-			egen `sigma' = sd(`var') if `use' == 1
-			egen `mu' = mean(`var') if `use' == 1
-			replace `max' = `mu' + `val' * `sigma'
-			replace `min' = `mu' - `val' * `sigma'
-
-			* drop reused egen variables
-			drop `sigma' `mu'
-
-			replace message = "Potential outlier " + value + ///
-			    " in variable `var' (`val' * SD: " + ///
-			    string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
+		* initialize meta data variables
+		foreach var in `meta' {
+			g `var' = ""
 		}
 
-		* identify outliers 
-		replace `outlier' = (`var' > `max' | `var' < `min') ///
-			& !mi(`var') & `use' == 1
+		* initialize temporary output file
+		poke `tmp', var(`keeplist')
 
-		* count outliers
-		count if `outlier' == 1
-		local n = `r(N)'
-		local noutliers = `noutliers' + `n'
-
-		* append violations to the temporary data set
-		saveappend using `tmp' if `outlier' == 1, ///
-		    keep("`keeplist'") sort(`id')
-
-		* alert user
-		nois di "  Variable `var' has `n' potential outliers."
-	}
-
-	* import compiled list of violations
-	use `tmp', clear
-
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
-
-	* create additional meta data for tracking
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
-
-	order `keeplist' notes drop newvalue
-    gsort -`submitted'
-
-	* export compiled list to excel
-	export excel using "`saving'" ,  ///
-		sheet("11. outliers") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
-	
-	*export scto links as links
-	if !missing("`sctodb'") & c(version) >= 14 {
-		if !missing(scto_link[1]) {
-			putexcel set "`saving'", sheet("11. outliers") modify
-			ds
-			loc allvars `r(varlist)'
-			loc linkpos: list posof "scto_link" in allvars
-			alphacol `linkpos'
-			loc col = r(alphacol)
-			count
-			forval x = 1 / `r(N)' {
-				loc row = `x' + 1
-				loc formula = scto_link[`x']
-				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+		foreach var in `varlist' {
+			* mark variables that contain error codes and should be ignored
+			replace `use' = 1
+			foreach num in `ignore' {
+				replace `use' = 0 if `var' == `num'
 			}
-			putexcel `putlist'
-		}
-	}
+			* get current value of iqr
+			local val : word `i' of `multiplier'
+			
+			* capture variable label
+			local varl : variable label `var'
 
-	* revert to original
-	use `org', clear
+			* update values for additional variables
+			replace variable = "`var'"
+			replace label = "`varl'"
+			replace value = string(`var')
+
+			if "`sd'" == "" {
+				* create temp stats variables
+				tempvar sigma q1 q3
+
+				* calculate iqr stats
+				egen `sigma' = iqr(`var') if `use' == 1
+				egen `q1' = pctile(`var') if `use' == 1, p(25)
+				egen `q3' = pctile(`var') if `use' == 1, p(75)
+				replace `max' = `q3' + `val' * `sigma'
+				replace `min' = `q1' - `val' * `sigma'
+
+				* drop reused egen variables
+				drop `sigma' `q1' `q3'
+
+				replace message = "Potential outlier " + value + ///
+					" in variable `var' (`val' * IQR: " + ///
+					string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
+			}
+			else {
+				* create temp stats variables
+				tempvar sigma  mu
+
+				* calculate sd stats
+				egen `sigma' = sd(`var') if `use' == 1
+				egen `mu' = mean(`var') if `use' == 1
+				replace `max' = `mu' + `val' * `sigma'
+				replace `min' = `mu' - `val' * `sigma'
+
+				* drop reused egen variables
+				drop `sigma' `mu'
+
+				replace message = "Potential outlier " + value + ///
+					" in variable `var' (`val' * SD: " + ///
+					string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
+			}
+
+			* identify outliers 
+			replace `outlier' = (`var' > `max' | `var' < `min') ///
+				& !mi(`var') & `use' == 1 & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
+
+			* count outliers
+			count if `outlier' == 1
+			local n = `r(N)'
+			local noutliers = `noutliers' + `n'
+
+			* append violations to the temporary data set
+			saveappend using `tmp' if `outlier' == 1, ///
+				keep("`keeplist'") sort(`id')
+
+			* alert user
+			nois di "  Variable `var' has `n' potential outliers."
+		}
+
+		* import compiled list of violations
+		use `tmp', clear
+
+		* if there are no violations
+		if `=_N' == 0 {
+			set obs 1
+		} 
+
+		* create additional meta data for tracking
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+
+		order `keeplist' notes drop newvalue
+		gsort -`submitted'
+
+		* export compiled list to excel
+		export excel using "`saving'" ,  ///
+			sheet("11. outliers") `sheetreplace' `sheetmodify' ///
+			firstrow(variables) `nolabel'
+			
+		* Format to headers
+		if `c(version)' >= 14.0 {
+			d, s
+			loc endcol = char(65 + `r(k)' - 1)
+						
+			putexcel set "`saving'", sheet("11. outliers") modify
+			putexcel A1:`endcol'1, bold border(bottom)
+		}
+
+		* revert to original
+		use `org', clear
 	}
 
 	* return scalars
