@@ -2,8 +2,12 @@
 
 program ipacheckspecify, rclass
 	/* This program checks for recodes of specify other variables 
-	   by listing all other values specified. */
-	version 13
+	   by listing all other values specified. 
+	   
+	   version 2.0.1: includes formatting for stata 14
+	   */
+	
+	* version 15
 
 	#d ;
 	syntax varlist, 
@@ -13,7 +17,7 @@ program ipacheckspecify, rclass
 	    saving(string) 
 	    /* output options */
         id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+		[KEEPvars(string)] 
 
 		/* other options */
 		[SHEETMODify SHEETREPlace NOLabel];	
@@ -23,141 +27,122 @@ program ipacheckspecify, rclass
 	di "HFC 9 => Checking specify other variables for misscodes and new categories..."
 	qui {
 
-	* count nvars
-	unab vars : _all
-	local nvars : word count `vars'
+		* count nvars
+		unab vars : _all
+		local nvars : word count `vars'
 
-	* define temporary files 
-	tempfile tmp org
-	save `org'
+		* define temporary files 
+		tempfile tmp org
+		save `org'
 
-	* define temporary variable
-	tempvar specified
-	g `specified' = .
+		* define temporary variable
+		tempvar specified
+		g `specified' = .
 
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator' 
-	local meta `"parent parent_label parent_value child child_label child_value choices message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
+		* define default output variable list
+		unab admin : `submitted' `id' `enumerator' 
+		local meta `"parent parent_label parent_value child child_label child_value choices message"'
 
-	* add user-specified keep vars to output list
-    local lines : subinstr local keepvars ";" "", all
-    local lines : subinstr local lines "." "", all
+		* add user-specified keep vars to output list
+		local lines : subinstr local keepvars ";" "", all
+		local lines : subinstr local lines "." "", all
 
-    local unique : list uniq lines
-    local keeplist : list admin | meta
-    local keeplist : list keeplist | unique
+		local unique : list uniq lines
+		local keeplist : list admin | meta
+		local keeplist : list keeplist | unique
 
-    * initialize local counters
-	local nother = 0
-	local i = 1
+		* initialize local counters
+		local nother = 0
+		local i = 1
 
-	* initialize meta data variables
-	foreach var in `meta' {
-		g `var' = ""
-	}
-	
-	*generate scto_link variable
-	if !missing("`sctodb'") {
-		replace scto_link = subinstr(key, ":", "%3A", 1)
-		replace scto_link = `"=HYPERLINK("https://`sctodb'.surveycto.com/view/submission.html?uuid="' + scto_link + `"", "View Submission")"'
-	}
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	/* idea - could add check here for additional specify other variables
-	   not included in the input file */
-
-	* loop through other specify variables in varlist and find nonmissing values
-	foreach var in `varlist' {
-		* get current other variable
-		local parent : word `i' of `parentvars'
-
-		cap confirm string variable `var'
-		if !_rc {
-			replace `specified' = `var' != ""
-
-			* count the number of specified other values
-			count if `specified' == 1
-			local n = `r(N)'
-			local nother = `nother' + `n'
-
-			* capture variable label
-			local pvarl : variable label `parent'
-			local cvarl : variable label `var'
-
-			* capture choices 
-			getlabel `parent'
-			local vall = "`r(label)'"
-
-			* update values of meta data variables
-			replace parent = "`parent'"
-			replace parent_label = "`pvarl'"
-			replace child = "`var'"
-			replace child_label = "`cvarl'"
-			replace child_value = `var'
-			replace choices = "`vall'"
-	 		replace message = "Other value specified for `var'. Check for possible recodes."
-
-	 		cap confirm numeric variable `parent'
-	 		if !_rc {
-	 			replace parent_value = string(`parent')
-	 		}
-
-			* append violations to the temporary data set
-			saveappend using `tmp' if `specified' == 1, ///
-				keep("`keeplist'")
-
-			noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
-			local i = `i' + 1
+		* initialize meta data variables
+		foreach var in `meta' {
+			g `var' = ""
 		}
-	}
+		
+		* initialize temporary output file
+		poke `tmp', var(`keeplist')
 
-	* import compiled list of violations
-	use `tmp', clear
+		/* idea - could add check here for additional specify other variables
+		   not included in the input file */
 
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
+		* loop through other specify variables in varlist and find nonmissing values
+		foreach var in `varlist' {
+			* get current other variable
+			local parent : word `i' of `parentvars'
 
-	* create additional meta data for tracking
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
+			cap confirm string variable `var'
+			if !_rc {
+				replace `specified' = `var' != ""
 
-	order `keeplist' notes drop newvalue
-    gsort -`submitted'
+				* count the number of specified other values
+				count if `specified' == 1
+				local n = `r(N)'
+				local nother = `nother' + `n'
 
-	* export compiled list to excel
-	export excel using "`saving'" ,  ///
-		sheet("9. specify") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
+				* capture variable label
+				local pvarl : variable label `parent'
+				local cvarl : variable label `var'
 
-	*export scto links as links
-	if !missing("`sctodb'") & c(version) >= 14 {
-		if !missing(scto_link[1]) {
-			putexcel set "`saving'", sheet("9. specify") modify
-			ds
-			loc allvars `r(varlist)'
-			loc linkpos: list posof "scto_link" in allvars
-			alphacol `linkpos'
-			loc col = r(alphacol)
-			count
-			forval x = 1 / `r(N)' {
-				loc row = `x' + 1
-				loc formula = scto_link[`x']
-				loc putlist `"`putlist' `col'`row' = formula(`"`formula'"')"'
+				* capture choices 
+				getlabel `parent'
+				local vall = "`r(label)'"
+
+				* update values of meta data variables
+				replace parent = "`parent'"
+				replace parent_label = "`pvarl'"
+				replace child = "`var'"
+				replace child_label = "`cvarl'"
+				replace child_value = `var'
+				replace choices = "`vall'"
+				replace message = "Other value specified for `var'. Check for possible recodes."
+
+				cap confirm numeric variable `parent'
+				if !_rc {
+					replace parent_value = string(`parent')
+				}
+
+				* append violations to the temporary data set
+				saveappend using `tmp' if `specified' == 1, ///
+					keep("`keeplist'")
+
+				noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
+				local i = `i' + 1
 			}
-			putexcel `putlist'
 		}
-	}
-	
-	* revert to original
-	use `org', clear
+
+		* import compiled list of violations
+		use `tmp', clear
+
+		* if there are no violations
+		if `=_N' == 0 {
+			set obs 1
+		} 
+
+		* create additional meta data for tracking
+		g notes = ""
+		g drop = ""
+		g newvalue = ""	
+
+		order `keeplist' notes drop newvalue
+		gsort -`submitted'
+
+		* export compiled list to excel
+		export excel using "`saving'" ,  ///
+			sheet("9. specify") `sheetreplace' `sheetmodify' ///
+			firstrow(variables) `nolabel'
+			
+		* Format to headers
+		if `c(version)' >= 14 {
+			d, s
+			loc endcol = char(65 + `r(k)' - 1)
+					
+			putexcel set "`saving'", sheet("9. specify") modify
+			putexcel A1:`endcol'1, bold border(bottom)
+		}
+
+		* revert to original
+		use `org', clear
 	
 	}
 
