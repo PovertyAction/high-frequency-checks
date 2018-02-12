@@ -1,12 +1,12 @@
-*! version 1.0.0 Ishmail Azindoo Baako 26jul2017
+*! version 1.0.0 Ishmail Azindoo Baako 12feb2018
 
-* Stata program for merging and analyzing text audit data from surveycto
+* Stata program for merging and summarise text audit data from surveycto
 * This program draws heavily from Nathan Barker and Chris Boyer's work on tamerge
 
 prog define ipachecktextaudit, rclass
 	syntax varname  using/, MEDia(string) 					///
 							ENUMerator(varname)				///
-							[KEEP(string)					///
+							[KEEPvars(string)				///
 							PREfix(name)					///
 							STATS(name min = 1 max = 9)		///
 							save(string)]					
@@ -17,20 +17,24 @@ prog define ipachecktextaudit, rclass
 		
 		* clean keepvars
 		loc keep = trim(itrim(subinstr("`keep'", ";", "", .)))
-		noi disp "`keep'"
 
 		* if stats are specified, check that is in the allowed list of stats
 		loc all_stats "count mean max min sd iqr p25 p50 p75"
 		if "`stats'" ~= "" {
 			loc stats = subinstr("`stats'", "median", "p50", .)
 			loc viol: list stats - all_stats
-			if "`stats'" ~= "" {
-				loc all_stats = subinstr("`all_str'", "p50", "p50 (median)", 1)
-				nois disp as err "{p} `stats' invalid statistic. " ///
-					"Allowed stats inlcude `all_stats'" 
+			if "`viol'" ~= "" {
+				loc all_stats = subinstr("`all_stats'", "p50", "p50 (median)", 1)
+				nois disp as err "{p}" as res "`viol'" as txt " invalid statistic. " ///
+					"Allowed stats inlcude " as res "`all_stats' {p_end}" 
 				ex 198
 			}
 		}
+		
+		* get prefix. Use dfault prefix ta_ if no prefix is specified
+		if 		"`prefix'" ~= "" loc pre "`prefix'"
+		else 	loc pre "ta_"
+
 	
 		* temporary files
 		#d;
@@ -45,10 +49,6 @@ prog define ipachecktextaudit, rclass
 		
 		save `master', replace
 		
-		* get prefix. Use dfault prefix ta_ if no prefix is specified
-		if 		"`prefix'" ~= "" loc pre "`prefix'"
-		else 	loc pre "ta_"
-
 		* keep only data with text audits
 		drop if missing(`varlist')
 		save `tadata', emptyok
@@ -69,29 +69,29 @@ prog define ipachecktextaudit, rclass
 			save `tadata_long', emptyok
 			
 			* miss_count will track number of ta files that could not be found in file
-			loc miss_count 0
+			loc misscount 0
 			forval i = 1/`tacount' {
 				cap import delim using "`media'/`taf_`i''", clear
 				if !_rc {
-					gen 	text_audit = "media\\`taf_`i''"
+					gen 	`varlist' = "media\\`taf_`i''"
 					append	using `tadata_long'
 					save 	`tadata_long', replace
 				}
-				else if _rc == 601 loc ++miss_count
+				else if _rc == 601 loc ++misscount
 				
 			}
 
 			* Compares the number of missing ta files to the number of files expected
 			* STOP: If all files are missing from folder	
-			if `miss_count' == `tacount' {
-				noi disp as err "{p}All " as res `miss_ta' " of " as res `tacount' ///
+			if `misscount' == `tacount' {
+				noi disp as err "{p}All " as res `misscount' " of " as res `tacount' ///
 					" media files not found in folder `media'. Please specify the correct media folder{p_end}"
 				ex 601
 			}
 			else {
 				* SHOW WARNING: If some ta files are missing
 				if `miss_count' > 0 {
-					noi disp as err "{p} " as res `miss_ta' " of " `tacount' ///
+					noi disp as err "{p} " as res `misscount' " of " `tacount' ///
 						" media files not found in folder `media'. Please specify the correct media folder{p_end}"
 				}
 			
@@ -115,7 +115,7 @@ prog define ipachecktextaudit, rclass
 				replace fieldname = "`pre'" + fieldname
 				
 				* merge in enumerator and other data
-				loc keeplist: list keep - enumerator
+				loc keeplist: list keepvars - enumerator
 				merge m:1 `varlist' using `tadata', keepusing(`enumerator' `keeplist') ///
 					assert(match) nogen
 				order `enumerator' `keeplist' fieldname `pre' `varlist'
@@ -135,7 +135,7 @@ prog define ipachecktextaudit, rclass
 					* Check that group names are uniques
 					isid group_name
 					* prefix exclude vars
-					replace exclude_variable = "ta_" + exclude_variable
+					replace exclude_variable = "`pre'" + exclude_variable
 					* keep count of the number of groups
 					loc groupcount `=_N'
 					* save group names and excluded vars in locals
