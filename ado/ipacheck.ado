@@ -64,7 +64,8 @@ program define ipacheckversion
 	    ipadoheader         ///
 	    ipatracksummary     ///
 	    ipatracksurveys     ///     
-	    ipatrackversions           
+	    ipatrackversions 	///
+		ipachecktextaudit	
 
 	foreach prg in `programs' {
 		cap which `prg'
