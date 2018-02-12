@@ -27,22 +27,23 @@ program ipacheckimport, rclass
 		tempvar tmp
 		tempfile tmpsheet
 
-		local sheets 				=   ///
-			`""0. setup""' 			+   ///
-			`""1. incomplete""' 	+   ///
-			`""2. duplicates""' 	+   ///
-			`""3. consent""' 		+   ///
-			`""4. no miss""' 		+   ///
-			`""5. follow up""' 		+   ///
-			`""6. skip""' 			+   ///
-			`""7. all miss""'  		+   ///
-			`""8. constraints""' 	+   ///
-			`""9. specify""' 		+   ///
-			`""10. dates""' 		+   ///
-			`""11. outliers""'  	+   ///
-			`""enumdb""'  			+   ///
-			`""research oneway""' 	+   ///
-			`""research twoway""' 	+   ///
+		local sheets 					=   ///
+			`""0. setup""' 				+   ///
+			`""1. incomplete""' 		+   ///
+			`""2. duplicates""' 		+   ///
+			`""3. consent""' 			+   ///
+			`""4. no miss""' 			+   ///
+			`""5. follow up""' 			+   ///
+			`""6. skip""' 				+   ///
+			`""7. all miss""'  			+   ///
+			`""8. constraints""' 		+   ///
+			`""9. specify""' 			+   ///
+			`""10. dates""' 			+   ///
+			`""11. outliers""'  		+   ///
+			`""12. field comments""'  	+   ///
+			`""enumdb""'  				+   ///
+			`""research oneway""' 		+   ///
+			`""research twoway""' 		+   ///
 			`""text audit""'
 		
 		* store number of sheets
@@ -100,7 +101,7 @@ program ipacheckimport, rclass
 					`""Form Version""' 						+   ///
 					`""Geographic Cluster""' 				+   ///
 					`""Text Audit""' 						+   ///	
-					`""Field Comment""' 					+	///
+					`""Field Comments""' 					+	///
 					`""Target Sample Size""' 				+   ///
 					`""SurveyCTO Server""' 					+   ///
 					`""Missing Value \(\.d\)""' 			+   ///
@@ -126,7 +127,7 @@ program ipacheckimport, rclass
 					formversion 	///
 					geounit     	///
 					textaudit		///
-					fieldcomment	///
+					fieldcomments	///
 					target      	///
 					server      	///
 					mv1         	///
