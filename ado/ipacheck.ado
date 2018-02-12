@@ -65,7 +65,8 @@ program define ipacheckversion
 	    ipatracksummary     ///
 	    ipatracksurveys     ///     
 	    ipatrackversions 	///
-		ipachecktextaudit	
+		ipachecktextaudit	///
+		ipacheckcomment
 
 	foreach prg in `programs' {
 		cap which `prg'
