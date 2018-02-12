@@ -93,6 +93,7 @@ program ipacheckimport, rclass
 					`""Replacements Log \(opt\.\)""' 		+   ///
 					`""Master Tracking Dataset \(opt\.\)""' +	///
 					`""Text Audit File \(opt\.\)""' 		+   ///
+					`""SurveyCTO Media Folder \(opt\.\)""' 	+   ///
 					`""Submission Date""' 					+   ///
 					`""Survey ID""' 						+   ///
 					`""Enumerator ID""' 					+   ///
@@ -118,6 +119,7 @@ program ipacheckimport, rclass
 					replog			///
 					master      	///
 					textauditdb		///
+					sctomedia		///
 					date        	///
 					id          	///
 					enum        	///
