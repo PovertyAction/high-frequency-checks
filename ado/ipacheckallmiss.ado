@@ -1,10 +1,11 @@
+*! version 3.0.0 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckallmiss, rclass
 	/* Check that no variables have only missing values, where missing indicates
 	   a skip. This could mean that the routing of the survey program was
 	   incorrectly programmed. */
-	version 13
+	version 14.1
 
 	#d ;
 	syntax varlist, 
@@ -37,7 +38,7 @@ program ipacheckallmiss, rclass
 
 	* define default output variable list
 	unab admin : `id' `enumerator'
-	local meta `"variable label value message"'
+	local meta `"variable label"'
 	
 	* add user-specified keep vars to output list
     local keeplist : list admin | meta
@@ -71,8 +72,6 @@ program ipacheckallmiss, rclass
 			* update values of meta data variables
 			replace variable = "`var'"
 			replace label = "`varl'"
-			replace value = ""
-	 		replace message = "Variable `var' has only missing values. Consider checking survey programming and skip patterns."
 
 			* append violations to the temporary data set
 			saveappend using `tmp' if _n == 1, ///
@@ -98,8 +97,6 @@ program ipacheckallmiss, rclass
 			* update values of meta data variables
 			replace variable = "`var'"
 			replace label = "`varl'"
-			replace value = ""
-	 		replace message = "Variable `var' has only missing values. Consider checking survey programming and skip patterns."
 
 			* append violations to the temporary data set
 			saveappend using `tmp' if _n == 1, ///
@@ -117,18 +114,16 @@ program ipacheckallmiss, rclass
 		set obs 1
 	} 
 
-	* create additional meta data for tracking
-	g notes = ""
-	g drop = ""
-	g newvalue = ""	
 
-	order `keeplist' notes drop newvalue
+	order `keeplist'
 
 	* export compiled list to excel
-	export excel using "`saving'" ,  ///
+	export excel `meta' using "`saving'" ,  ///
 		sheet("7. all missing") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 	
+	mata: basic_formatting("`saving'", "7. all missing", tokens("`meta'"), tokens("`colorcols'"), `=_N')	
+
 	* revert to original
 	use `org', clear
 
@@ -194,3 +189,86 @@ program poke
 	restore
 
 end
+
+
+mata: 
+mata clear
+void basic_formatting(string scalar filename, string scalar sheet, string matrix vars, string matrix colors, real scalar nrow) 
+{
+
+class xl scalar b
+real scalar i, ncol
+real vector column_widths, varname_widths, bottomrows
+real matrix bottom
+
+b = xl()
+ncol = length(vars)
+
+b.load_book(filename)
+b.set_sheet(sheet)
+b.set_mode("open")
+
+b.set_bottom_border(1, (1, ncol), "thin")
+b.set_font_bold(1, (1, ncol), "on")
+b.set_horizontal_align(1, (1, ncol), "center")
+
+if (length(colors) > 1 & nrow > 2) {	
+for (j=1; j<=length(colors); j++) {
+	b.set_font((3, nrow+1), strtoreal(colors[j]), "Calibri", 11, "lightgray")
+	}
+}
+
+
+// Add separating bottom lines : figure out which columns to gray out	
+// bottom = st_data(., st_local("bottom"))
+// bottomrows = selectindex(bottom :== 1)
+column_widths = colmax(strlen(st_sdata(., vars)))	
+varname_widths = strlen(vars)
+
+for (i=1; i<=cols(column_widths); i++) {
+	if	(column_widths[i] < varname_widths[i]) {
+		column_widths[i] = varname_widths[i]
+	}
+
+	b.set_column_width(i, i, column_widths[i] + 2)
+}
+
+/*if (rows(bottomrows) > 1) {
+for (i=1; i<=rows(bottomrows); i++) {
+	b.set_bottom_border(bottomrows[i]+1, (1, ncol), "thin")
+	if (length(colors) > 1) {
+		for (k=1; k<=length(colors); k++) {
+			b.set_font(bottomrows[i]+2, strtoreal(colors[k]), "Calibri", 11, "black")
+		}
+	}
+}
+}
+else b.set_bottom_border(2, (1, ncol), "thin")
+*/
+b.close_book()
+
+}
+
+void add_scto_link(string scalar filename, string scalar sheetname, string scalar variable, real scalar col)
+{
+	class xl scalar b
+	string matrix links
+	real scalar N
+
+	b = xl()
+	links = st_sdata(., variable)
+	N = length(links) + 1
+
+	b.load_book(filename)
+	b.set_sheet(sheetname)
+	b.set_mode("open")
+	b.put_formula(2, col, links)
+	b.set_font((2, N), col, "Calibri", 11, "5 99 193")
+	b.set_font_underline((2, N), col, "on")
+	b.set_column_width(col, col, 17)
+	
+	b.close_book()
+	}
+
+end
+

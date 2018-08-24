@@ -1,25 +1,14 @@
 *! version 3.0.0 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
-program ipacheckcomplete, rclass
-	/* Check that all interviews were completed. 
-
-	   IPA best practice is generally to include a question at
-	   the end of a survey that asks the enumerator to document 
-	   the completness of the interview. This command checks that 
-	   all survey values of the completeness variable are equal
-	   to the "completed" option. Incomplete surveys are listed 
-	   in the output.
-	   
-	   Optionally, users can also specify a minimum nonmissing 
-	   response threshold and this check will output the surveys
-	   that have fewer nonmissing responses than the minimum. */
+program ipachecklogic, rclass
+	/* This program checks skip patterns and logical constraints */
 	version 14.1
 
 	#d ;
-	syntax varlist, 
-		/* completeness options */
-	    COMPlete(numlist) [Percent(real 0)]
+	syntax anything, 
+		/* soft constraint options */
+	    ASSert(string) [CONDition(string)]
 		/* output filename */
 	    saving(string) 
 	    /* output options */
@@ -30,19 +19,8 @@ program ipacheckcomplete, rclass
 		[SHEETMODify SHEETREPlace NOLabel];	
 	#d cr
 
-	* test for fatal conditions
-	if `percent' != 0 {
-		cap assert `percent' > 0 & `percent' <= 100
-		if _rc {
-			di as err "percent value must be between 0 and 100."
-			error 198
-		} 
-	}
-
-	* display header text
 	di ""
-	di "HFC 1 => Checking that all interviews are complete..."
-
+	di "HFC 6 => Checking skip patterns and survey logic..."
 	qui {
 
 	* count nvars
@@ -54,27 +32,44 @@ program ipacheckcomplete, rclass
 	save `org'
 
 	* define temporary variable
-	tempvar comp nonmiss
-	g `comp' = .
+	tempvar test
+	g `test' = .
+	
+	* break down the varlist into sets of variables
+	local testnum = 0
+	local varnum = 1
+	while strpos("`anything'", ";") > 0  {
+		local ++testnum
+		gettoken varlist`testnum' anything : anything, p(";")
+		local anything : subinstr loc anything ";" ""
+		
+		*find maximum number of variables listed in a test
+		local new_words: word count `varlist`testnum''
+		if `new_words' > `varnum'{
+			local varnum = `new_words'
+		}
+	}
 
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value message"'
+	forval x = 1 / `varnum' {
+		local meta `meta' variable_`x' label_`x'
+	}
 	if !missing("`sctodb'") {
 		local meta `"`meta' scto_link"'
 	}
-	
+	local meta `"`meta' message"'
+
 	* add user-specified keep vars to output list
     local lines : subinstr local keepvars ";" "", all
     local lines : subinstr local lines "." "", all
-
     local unique : list uniq lines
     local keeplist : list admin | meta
     local keeplist : list keeplist | unique
 
- 	* define loop locals
-	local nincomplete = 0
+    * set locals
 	local i = 1
+	local nviol = 0
 
 	* initialize meta data variables
 	foreach var in `meta' {
@@ -98,62 +93,66 @@ program ipacheckcomplete, rclass
 	* initialize temporary output file
 	poke `tmp', var(`keeplist')
 
-	* loop through varlist and capture the number of incomplete surveys 
-	foreach var in `varlist' {
-		local val : word `i' of `complete'
+	* loop through varlist and test assertions
+	forval x = 1 / `testnum' {
+		local varlist `varlist`x''
+		gettoken cond1 assert : assert, p(";")
+		gettoken cond2 condition : condition, p(";")
+		local assert : subinstr local assert ";" ""
+		local condition : subinstr local condition ";" ""
 
-		* check if there are any violations
-		cap assert `var' == `val'
-		if _rc {
-			* create temp marker variable
-			replace `comp' = `var' == `val'
-
-			* count the incomplete
-			count if `comp' == 0
-			local num = `r(N)'
-
-			local varl : variable label `var'
-
-			* update values for additional variables
-			replace variable = "`var'"
-			replace label = "`varl'"
-			replace value = string(`var') if `comp' == 0
-			replace message = "Interview is marked as incomplete."
-
-			* append violations to the temporary data set
-			saveappend using `tmp' if `comp' == 0, ///
-			    keep("`keeplist'") sort(`id')
+		replace `test' = .
+		replace message = ""
+		forval a = 1 / `varnum' {
+			replace variable_`a' = ""
+			replace label_`a' = ""
 		}
+
+		if "`cond2'" == ";" {
+			cap assert `cond1'
+			if _rc {
+				replace `test' = `cond1'
+				replace message = `"Assertion "`cond1'" is invalid "'
+			}
+		} 
 		else {
-			* if all complete, set the number of incomplete to zero
-			local num = 0
+			cap assert `cond1' if `cond2'
+			if _rc {
+				replace `test' = `cond1' if `cond2'
+				replace message = `"Assertion "`cond1' if `cond2'" is invalid "'
+			}
 		}
-		* update the total number of incomplete 
-		local nincomplete = `nincomplete' + `num'
-		local i = `i' + 1
-	}
-
-	
-	if `percent' > 0 {
-		* check nonmissing percentage
-		egen `nonmiss' = rownonmiss(`vars'), strok
-		replace `nonmiss' = `nonmiss'/`nvars'
-
-		* update values for additional variables
-		replace variable = ""
-		replace label = ""
-		replace value = ""
-		replace message = "Interview is " + string(`nonmiss'*100, "%2.0f") + ///
-		    "% complete (max is " + string(`percent', "%2.0f") + "%)."
-
-		* store number of violations in local 
-		count if `nonmiss' < `percent' / 100
-		local nonmissviol = `r(N)'	
 		
-		* append violation list to output file
-		saveappend using `tmp' if `nonmiss' < `percent' / 100 , ///
-		    keep("`keeplist'")
-	} 
+		* count the invalid assertions
+		count if `test' == 0
+		local viol = `r(N)'
+		local nviol = `nviol' + `viol'
+
+		* capture variable label
+		local n = 1
+		foreach var in `varlist' {
+			local varl_`n' : variable label `var'
+			local ++n
+		}
+
+		* update values of meta data variables
+		local n = 1
+		foreach var in `varlist' {
+			replace label_`n' = "`varl_`n''"
+			cap confirm numeric variable `var' 
+			if !_rc {
+				replace variable_`n' = "`var' = " + string(`var')
+			}
+			else {
+				replace variable_`n' = "`var' = " + `var'
+			}
+			local ++n
+		}
+
+		* append violations to the temporary data set
+		saveappend using `tmp' if `test' == 0, ///
+			keep("`keeplist'")
+	}
 
 	* import compiled list of violations
 	use `tmp', clear
@@ -164,44 +163,42 @@ program ipacheckcomplete, rclass
 	} 
 
 
-	order `keeplist' 
-    gsort -`submitted', gen(order)
-	
-	**ADDED
+	order `keeplist'
+	gsort -`submitted', gen(order)
+
 	format `submitted' %td
 	tempvar bot bottom lines
-	
-	bysort `enumerator' (order) : gen `lines' = _n
+
+	bysort `enumerator' (variable_* order): gen `lines' = _n
 	egen `bot' = max(`lines'), by(`enumerator')
 	gen `bottom' = cond(`bot' == `lines', 1, 0)
-	
 	loc colorcols
-	foreach var in `enumerator' variable label  {
+	foreach var in `enumerator'  {
 		loc pos : list posof "`var'" in keeplist
 		loc colorcols `colorcols' `pos'
 	}
-	***
-
 	* export compiled list to excel
 	export excel `keeplist' using "`saving'" ,  ///
-		sheet("1. incomplete") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel' replace
-	
-	mata: basic_formatting("`saving'", "1. incomplete", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
+		sheet("6. survey logic") `sheetreplace' `sheetmodify' ///
+		firstrow(variables) `nolabel'
 		
+	mata: basic_formatting("`saving'", "6. survey logic", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
+
 	*export scto links as links
 	if !missing("`sctodb'") {
+		*nois di c(version)
 		unab allvars : _all
 		local pos : list posof "scto_link" in allvars
-		mata: add_scto_link("`saving'", "1. incomplete", "scto_link", `pos')
-	}
-	* revert to original
-	use `org', clear
+		mata: add_scto_link("`saving'", "6. survey logic", "scto_link", `pos')
 	}
 
-	* display stats and return 
-	di "  Found `nincomplete' total incomplete interviews."
-	return scalar nincomplete = `nincomplete'
+	* revert to original
+	use `org', clear
+
+	}
+	di ""
+	di "  Found `nviol' total skip pattern and survey logic violations."
+	return scalar nviol = `nviol'
 end
 
 program saveappend
@@ -271,6 +268,7 @@ real scalar i, ncol
 real vector column_widths, varname_widths, bottomrows
 real matrix bottom
 
+
 b = xl()
 ncol = length(vars)
 
@@ -285,9 +283,8 @@ b.set_horizontal_align(1, (1, ncol), "center")
 if (length(colors) > 1 & nrow > 2) {	
 for (j=1; j<=length(colors); j++) {
 	b.set_font((3, nrow), strtoreal(colors[j]), "Calibri", 11, "lightgray")
-	}
 }
-
+}
 
 // Add separating bottom lines : figure out which columns to gray out	
 bottom = st_data(., st_local("bottom"))
@@ -302,21 +299,18 @@ for (i=1; i<=cols(column_widths); i++) {
 
 	b.set_column_width(i, i, column_widths[i] + 2)
 }
-
-if (rows(bottomrows) > 1) {
 for (i=1; i<=rows(bottomrows); i++) {
 	b.set_bottom_border(bottomrows[i]+1, (1, ncol), "thin")
 	if (length(colors) > 1) {
-		for (k=1; k<=length(colors); k++) {
-			b.set_font(bottomrows[i]+2, strtoreal(colors[k]), "Calibri", 11, "black")
-		}
+	for (k=1; k<=length(colors); k++) {
+	b.set_font(bottomrows[i]+2, strtoreal(colors[k]), "Calibri", 11, "black")
+	}
 	}
 }
-}
-else b.set_bottom_border(2, (1, ncol), "thin")
+
+
 
 b.close_book()
-
 }
 
 void add_scto_link(string scalar filename, string scalar sheetname, string scalar variable, real scalar col)
@@ -341,4 +335,5 @@ void add_scto_link(string scalar filename, string scalar sheetname, string scala
 	}
 
 end
+
 
