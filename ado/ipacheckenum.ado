@@ -404,3 +404,145 @@ program _updatesheet
 	}
 end
 
+///////////// FORMATING ////////////////
+
+***To do: 
+* Change color so bottom and top tenth are red -- DONE
+* fix percentage so it shows decimals -- DONE
+* add min/max duration to summary sheet
+* add scale colors to summary sheet
+
+mata:
+mata clear
+
+// Format summary sheet
+void format_summary(string scalar filename, real scalar N) 
+{
+	// set up
+	class xl scalar b
+	real matrix merges
+	real scalar i, column_width
+
+	b = xl()
+	b.load_book(filename)
+	b.set_mode("open")
+	b.set_sheet("summary")
+	
+	// Titles
+	b.put_string(1, 2, "Interviews")
+	b.put_string(1, 4, "Missing")
+	b.put_string(1, 6, "Don't Know")
+	b.put_string(1, 8, "Refusals")
+	b.put_string(1, 10, "Other")
+	b.put_string(1, 12, "Duration")
+
+	b.put_string(2, 2, "count")
+	b.put_string(2, 4, "% of all responses")
+	b.put_string(2, 6, "% of non-missing")
+	b.put_string(2, 8, "% of non-missing")
+	b.put_string(2, 10, "% of non-missing")
+	b.put_string(2, 12, "mean")
+
+	b.put_string(3, 1, "Enumerator")
+	
+	merges = (2\4\6\8\10\12)
+	for (i=1; i<=6; i++) {
+		b.set_horizontal_align(1, (merges[i], merges[i]+1), "merge")
+		b.set_horizontal_align(2, (merges[i], merges[i]+1), "merge")
+		b.put_string(3, merges[i], "7 days")
+		b.put_string(3, merges[i]+1, "Total")
+	}
+	
+	// Format
+	b.set_font_bold((1,3), (1,13), "on")
+	b.set_font_italic(2, (2, 13), "on")
+	
+	b.set_horizontal_align(3, (1, 13), "center")
+	b.set_horizontal_align((4, N+4), (2, 13), "center")
+
+	b.set_bottom_border(1, (2, 13), "thin")
+	b.set_bottom_border(3, (1, 13), "thin")
+	b.set_bottom_border(N+3, (1, 13), "thin")
+	
+	lines = (1\3\5\7\9\11\13)
+	for (i=1; i<8; i++) {
+		b.set_right_border((4,N+3), lines[i], "thin")
+	}
+	
+	b.set_number_format((4, N+3), (4, 11), "percent_d2")
+	
+	enums = b.get_string((3,N+4), 1)
+	column_width = colmax(strlen(enums))
+	b.set_column_width(1, 1, column_width)
+	
+	
+	b.close_book()
+
+}
+
+// Format missing, dontknow, refusal, other, and duration sheets
+void format_sheets(string scalar filename, string scalar sheet, real scalar colcount, real scalar N) 
+{
+	// set up
+	class xl scalar b
+	string scalar locallow, localhi, str
+	real scalar lower, higher, i, j, column_width
+	string matrix varnames, enums
+
+	b.load_book(filename)
+	b.set_mode("open")
+	b.set_sheet(sheet)
+
+	// Titles
+	b.put_string(1, 1, "Enumerator") 
+	
+	// Format
+	b.set_font_bold(1, (1, colcount), "on")
+	b.set_bottom_border(1, (1, colcount), "thin") 
+	b.set_bottom_border(N+1, (1, colcount), "thin")
+	b.set_horizontal_align(1, (1, colcount), "center")
+
+	enums = b.get_string((1,N+1), 1)
+	column_width = colmax(strlen(enums))
+	b.set_column_width(1,1,column_width)
+
+	// color scales
+	if (colcount <= 2) {
+		varnames = b.get_string(1, 2)
+	}
+	else varnames = b.get_string(1, (2, colcount))
+
+	if (sheet=="dontknow") str = "dk"
+	else if (sheet=="missing") str = "mi"
+	else if (sheet=="refusal") str = "rf"
+	else if (sheet=="duration") str = "dur"
+	else if (sheet=="other") str = "oth"
+
+	for (i=1; i<=length(varnames); i++) {
+
+		column_width = strlen(varnames[i])+2
+		b.set_column_width(i+1, i+1, column_width)
+		locallow = str + varnames[i] + "low"
+		localhi = str + varnames[i] + "hi"
+		lower = strtoreal(st_local(locallow))
+		higher = strtoreal(st_local(localhi))
+		
+		values = b.get_number((2,N+1), i + 1)
+		
+		for (j=1; j<=N; j++) {
+			if (sheet!="duration") {
+				b.set_number_format(j+1, i+1, "percent_d2")
+			}
+			if (sheet=="duration") {
+				b.set_number_format(j+1, i+1, "number_sep_d2")
+			}
+			if (values[j]!=0 & (values[j] <= lower | values[j] >= higher)) {
+				b.set_fill_pattern(j + 1, i + 1, "solid", "pink")
+			}
+			b.set_horizontal_align(j+1, i+1, "center")
+		}
+	}
+	
+	// Close
+	b.close_book()
+}
