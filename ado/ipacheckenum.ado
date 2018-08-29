@@ -1,14 +1,26 @@
 *! version 2.1.2 Isabel Onate & Rosemarie Sandino 15Aug2018
 
+
 program ipacheckenum
-	/* This command constructs the enumerator dashboard, a
-	   collection of summary indicators of enumerator performance
-	   including: 
+	/* This command constructs: 
+	a) The enumerator dashboard - a collection of summary indicators 
+	of enumerator performance including 
 	      * Number of interviews
 	      * Rates of don't know/refusal
 	      * Rates of missing response
 		  * Rates of "other" response
-	      * Duration of interview */
+	      * Duration of interview 
+	B) Summary statistics on selected variables, by ennumerator 
+	(this is a separate program - ipacheckenumstats - defined at the end of this di file)
+	The options of stats to stats to export are:
+		  * mean
+		  * sd
+		  * min
+		  * max
+	Note: This ado file will export formatted tables into excel. The formatting is done 
+	with mata defined programs located at the end of the ado file.
+	*/
+
 	version 15
 	
 	#d ;
@@ -372,11 +384,15 @@ program ipacheckenum
 
 	restore 
 	
+	// run stats by enum (program defined below)
+	ipacheckenumvarstats `enum' using "`using'", statvars(`statvars') `mean' `sd' `min' `max'
+
+	
 	}
 end
 
 capture program drop _updatesheet
-program _updatesheet
+program _updatesheet, rclass
 	/* this subroutine updates the sub sheet temp files
 	   that capture per variable rates and stats */
 	qui {
@@ -388,7 +404,10 @@ program _updatesheet
 	format `varlist' %9.3f
 	collapse (max) `varlist', by(`by')
 	ren `varlist' `rename'
-	
+	**Adding locals for cutoffs
+	noi summ `rename', detail
+	return local low = `r(p10)'
+	return local high = `r(p90)'
 	save `tmp', replace 
 
 	cap confirm file "`using'"
@@ -403,6 +422,149 @@ program _updatesheet
 	restore
 	}
 end
+
+program define ipacheckenumvarstats 
+	/* this subprogram creates summary stats by enumerator */  
+	version 15
+	
+	#d ;
+	syntax varname using/ ,
+	    statvars(varlist) [mean] [sd] [min] [max]
+		[replace modify];
+	#d cr
+	
+	//////////////////
+	// ERROR MESSAGES
+	//////////////////
+	
+	// List of stats to calculate
+	loc stats `mean' `sd' `min' `max'
+	
+	if mi("`stats'") {
+		di as err "Must select at least one statistic to display"
+	}
+	
+	// Fill up
+	
+	// capture enumerator variable
+	local enum `varlist'
+	
+	// temporary files
+	tempfile total_stats
+	tempfile enums_stats
+	
+	
+	////////////////
+	// TOTAL STATS
+	///////////////
+	preserve
+		// Survey count
+		gen survey = 1 if !mi(`enum')
+		
+		// Generate list of stats for collapse
+		loc collapse
+		loc order
+		forvalues s = 1/`:word count `stats'' {
+			loc stat "`:word `s' of `stats''"
+			loc vars_`stat'
+			foreach var in `statvars' {
+				loc vars_`stat' `vars_`stat'' `var'_`stat' // we could do the name of the stat in this last local but i worry about var lenght
+				gen `var'_`stat' = `var'
+			}
+			loc collapse `collapse' (`stat') `vars_`stat''
+		}
+
+		// Add count variable to collapse
+		loc collapse `collapse' (count) survey
+
+
+		// local for order of variables
+		loc order 
+		foreach var in `statvars' {
+			loc order `order' `var'*
+		}
+		
+		// Collapse dataset
+		collapse `collapse' 
+
+		// Gen enumerator variable with total
+		gen `enum' = "Total"
+		
+		order `enum' survey `order'
+
+		// Save 
+		save `total_stats'
+		
+	restore
+
+
+	///////////////////////
+	// STATS BY ENUMERATOR
+	///////////////////////
+	preserve
+		// Survey count
+		gen survey = 1 if !mi(`enum')
+
+		// Generate list of stats for collapse
+		*loc stats `mean `sd `min `max
+		loc collapse
+		loc order
+		forvalues s = 1/`:word count `stats'' {
+			loc stat "`:word `s' of `stats''"
+			loc vars_`stat'
+			foreach var in `statvars' {
+				loc vars_`stat' `vars_`stat'' `var'_`stat'
+				gen `var'_`stat' = `var'
+			}
+			loc collapse `collapse' (`stat') `vars_`stat''
+		}
+
+		// Add count variable to collapse
+		loc collapse `collapse' (count) survey
+
+
+		// local for order of variables
+		loc order 
+		foreach var in `statvars' {
+			loc order `order' `var'*
+		}
+
+		// Collapse dataset
+		collapse `collapse', by(`enum')
+		isid `enum'
+
+		// Convert enum variable to string
+		rename `enum' `enum'_temp
+		decode `enum'_temp, gen(`enum')
+		drop `enum'_temp
+		
+		order `enum' survey `order'
+
+		// Save 
+		save `enums_stats'
+
+		// Append with total stats
+		append using `total_stats'
+		loc n = _N
+		
+		////////////////////
+		// Export into excel
+		////////////////////
+		
+		// Label enumerator variable with "total"
+		label var survey "Number of surveys"
+		if "`: value label `enum''"!="" {
+			label define `: value label `enum'' `tot' "Total", add
+			label val `enum' enum
+		}
+		
+		export excel using "`using'", sheet("stats") sheetreplace cell(A3) 
+		// Format
+		mata: format_stats("`using'", "stats", "`statvars'", "`stats'", `: word count `statvars'', `: word count `stats'', `n')
+		
+	restore	
+end
+
 
 ///////////// FORMATING ////////////////
 
@@ -476,6 +638,7 @@ void format_summary(string scalar filename, real scalar N)
 	b.set_column_width(1, 1, column_width)
 	
 	
+	// close
 	b.close_book()
 
 }
@@ -546,3 +709,62 @@ void format_sheets(string scalar filename, string scalar sheet, real scalar colc
 	// Close
 	b.close_book()
 }
+
+// Format stats sheet
+void format_stats(string scalar filename, string scalar sheetname, string scalar varlist, string scalar statlist, real scalar V, real scalar S, real scalar N) 
+{
+	// Set up
+	class xl scalar b
+	real matrix merges
+	real scalar i, column_width
+	b = xl()
+
+	b.load_book(filename)
+	b.set_mode("open")
+	b.set_sheet(sheetname)
+	
+	// Titles 
+	var_names = tokens(varlist) 
+	stats_names = tokens(statlist) 
+	
+	b.put_string(2, 1, "Enumerator")
+	b.put_string(2, 2, "Interviews")
+	
+	for (i = 1; i <=V ; i++) {
+		A = i*S-(S-1)+2
+		b.put_string(2, A, stats_names)
+		b.set_horizontal_align(1, (A, A+S-1), "merge")
+		b.put_string(1, A, var_names[i])
+		b.set_left_border((3, N+2), A, "thin")
+	}
+	
+	// Format
+	
+	b.set_bottom_border(2, (1, V*S+2), "thin")
+	b.set_bottom_border(1, (3, V*S+2), "thin")
+	b.set_bottom_border(N+1, (1, V*S+2), "thin")
+	b.set_bottom_border(N+2, (1, V*S+2), "thin")
+	b.set_left_border((3, N+2), 2, "thin")
+	b.set_right_border((3, N+2), V*S+2, "thin")
+	b.set_font_bold((1,2), (1, V*S+2), "on")
+	
+	b.set_horizontal_align(2, 1, "center")
+	b.set_horizontal_align((2,N+4), (2, V*S+2), "center")
+	
+	for (i = 3; i < V*S+3; i++) {
+		b.set_number_format((3, N+4), i, "number_sep_d2")
+	}
+	
+	for (i = 1; i < 3; i++) {
+		col_i = b.get_string((2, N+4), i)
+		column_width_i = colmax(strlen(col_i))
+		b.set_column_width(i, i, column_width_i)
+	}
+	
+	// Close
+	b.close_book()
+}
+
+
+end
+
