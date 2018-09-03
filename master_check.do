@@ -46,12 +46,14 @@ if !mi("${mv3}") recode `numeric' (${mv3} = .n)
 	
 if !mi("${repfile}") {
 	ipacheckreadreplace using "${repfile}", ///
-	    id("id") ///
+	    id("${id}") ///
 		variable("variable") ///
-		value("newvalue") ///
-        selectmultiple(selectmultiple) ///
-		excel ///
-		import(firstrow)
+		value("value") ///
+		newvalue("newvalue") ///
+		action("action") ///
+		comments("comments") ///
+		sheet("${repsheet}") ///
+		logusing("${replog}") 
 }
 
 
