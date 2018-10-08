@@ -185,7 +185,7 @@ program ipacheckcomplete, rclass
 	* export compiled list to excel
 	export excel `keeplist' using "`saving'" ,  ///
 		sheet("1. incomplete") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel' replace
+		firstrow(variables) `nolabel' 
 	
 	mata: basic_formatting("`saving'", "1. incomplete", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 		
