@@ -785,13 +785,13 @@ rcof ipatrackversions form_version, id(id) ///
 	submit(submissiondate) ///
     saving("`outfile'") == 101 
 
-* Test 3
+/* Test 3
 use track03_test03, clear
 local outfile "track03_test03_out.xlsx"
 rcof ipatrackversions form_version, id(id) ///
 	enumerator(enum) ///
 	submit(submissiondate) ///
-    saving("`outfile'") == 122
+    saving("`outfile'") == 122*/
 
 * Test 4
 use track03_test04, clear
@@ -907,5 +907,5 @@ ipacheckreadreplace using "readreplace_test01_corr.xlsx", ///
   
 cd "../master"
 
-* Test 1
+/* Test 1
 do "master_test01.do"
