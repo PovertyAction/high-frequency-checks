@@ -900,7 +900,7 @@ ipacheckreadreplace using "readreplace_test01_corr.xlsm", ///
     action(action) ///
     comments(comments) ///
     sheet(replacements) ///
-    logusing("replog.txt")
+    logusing("replog_out.xlsx")
    
 /* =================================================
    ==================== Master ===================== 
