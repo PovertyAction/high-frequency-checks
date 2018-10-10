@@ -1,4 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
+*! version 3.0.0 Rosemarie Sandino 10oct2018
 *! version 2.0.1 ChristopherBoyer 25apr2017
 *! version 1.0.0 Caton brewster 10nov2016
 
@@ -192,21 +192,15 @@ program ipatrackversions, rclass
  	order `submit' `id' `enumerator' `starttime' `endtime' `keepvars'
  	
 	* export header 
-	loc allvars `submit' `id' `enumerator' `starttime' `endtime' `keepvars' 
-	loc columns `:word count `submit' `enumerator' `id' `starttime' `endtime''
-	local col = char(`columns' + 64)
+	loc columns `:word count `submit' `enumerator' `id' `starttime' `endtime' `keepvars''
+	local col = char(`c' + 66)
 	if _N > 0 {
 		export excel `submit' `enumerator' `id' `starttime' `endtime' `keepvars'  using "`saving'", /// this is for the outdated versions
 			sheet("Version Control") sheetmodify cell(`col'2) firstrow(var) missing("") //added starttime and endtime
-	}
-
-//Fix this beofre running
-	mata: v_formatting("`saving'", "Version Control", `=`c' + 2', `= `columns' + `c' + 1', 1, `=`=_N' + 1' )  
 	
- 	local export_str = "List of submissions using outdated form version on `str_max_date'."
-	local perc_wrong_form: disp %12.2f `num_wrong_form' * 100 / `N'
-	local perc_wrong_form = trim("`perc_wrong_form'")
-
+		mata: v_formatting("`saving'", "Version Control", `=`c' + 2', `= `columns' + `c' + 1', 1, `=`=_N' + 1' )  
+	}
+	
 	use `org', clear
 
 	} // qui bracket
