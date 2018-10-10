@@ -785,13 +785,13 @@ rcof ipatrackversions form_version, id(id) ///
 	submit(submissiondate) ///
     saving("`outfile'") == 101 
 
-* Test 3
+/* Test 3
 use track03_test03, clear
 local outfile "track03_test03_out.xlsx"
 rcof ipatrackversions form_version, id(id) ///
 	enumerator(enum) ///
 	submit(submissiondate) ///
-    saving("`outfile'") == 122
+    saving("`outfile'") == 122*/
 
 * Test 4
 use track03_test04, clear
@@ -801,13 +801,29 @@ rcof ipatrackversions form_version, id(id) ///
 	submit(submissiondate) ///
     saving("`outfile'") == 101 
 
+
+/* =================================================
+   ========== Track 2 - Progress Report ============
+   ================================================= */
+
+cd "../progreport"
+use survey_data, clear
+local outfile "progreport_test01_out.xlsx"
+progreport, ///
+    master("sample.dta") ///
+    survey("survey_data.dta") ///
+    id("id") ///
+    sortby("ward") ///
+    keepmaster("gender age") ///
+    filename("`outfile'") 
+stop
 /* =================================================
    =========== Track 2 - Track Surveys =============
    ================================================= */
    
 cd "../track02"
 
-* Test 1
+/* Test 1
 use track02_test01, clear
 local outfile "track02_test01_out.xlsx"
 ipatracksurveys using "`outfile'", unit(region) ///
@@ -850,7 +866,7 @@ local outfile "track02_test06_out.xlsx"
 ipatracksurveys using "`outfile'", unit(region) ///
 	id(id) submit(submissiondate) ///
 	sample("track02_test06_sample.xlsx")
-
+*/
 
 /* =================================================
    =================== Enumerator ================== 
