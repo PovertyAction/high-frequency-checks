@@ -1,4 +1,4 @@
-*! version 2.0.0 Rosemarie Sandino 24aug2018
+*! version 2.0.1 Rosemarie Sandino 10oct2018
 *! version 1.0.1 Rosemarie Sandino 17jul2018
 
 program progreport
@@ -16,8 +16,8 @@ program progreport
 		[VARiable]				/// default is to use variable labels
 		[NOLabel]				/// default is to use value labels
 		[clear]					///	to show merged dataset; if not included, console remains the same
-		[summary]				// if used, does not include individual observations
-
+		[summary]				/// if used, does not include individual observations
+		[WORKbooks]				// separates into workbooks instead of worksheets in one workbook
 	version 14.1
 
 /* ------------------------------ Load Sample ------------------------------- */
@@ -112,9 +112,14 @@ if "`summary'"	== "" {
 	if "`nolabel'" == "" {
 		ds `allvars', has(vallab)
 		foreach var in `r(varlist)' {
-			decode `var', gen(`var'_new)
-			drop `var'
-			ren `var'_new `var'
+			cap decode `var', gen(`var'_new)
+			if _rc == 111 {
+				lab val `var' .
+			}
+			if !_rc {
+				drop `var'
+				ren `var'_new `var'
+			}
 		}
 	}
 
@@ -134,6 +139,13 @@ if "`summary'"	== "" {
 	}
 
 	levelsof `sortby', local(byvalues)
+	qui tab `sortby'
+	loc sortcount `r(r)'
+	
+	if `sortcount' > 20 & "`workbooks'" == "" {
+	dis as error "`sortby' has more than 20 unique values. Please use the -workbooks- option to create workbooks instead of worksheets."
+	error 134
+	}
 
 	preserve
 	if "`variable'" == "variable" {
@@ -144,13 +156,26 @@ if "`summary'"	== "" {
 	}
 
 	foreach sortval in `byvalues' {
-		export excel `allvars' if `sortby' == "`sortval'" using "`filename'.xlsx", ///
+		if "`workbooks'" == "workbooks" {
+			export excel `allvars' if `sortby' == "`sortval'" using "`filename'_`sortval'.xlsx", ///
+			firstrow(varl) sheet("`sortval'") replace `nolabel'
+			}
+		else {
+			export excel `allvars' if `sortby' == "`sortval'" using "`filename'.xlsx", ///
 			firstrow(varl) sheet("`sortval'") sheetreplace `nolabel'
-			
+		
+		}
 		qui count if `sortby' == "`sortval'"
 		local N = `r(N)' + 1
 		
-		mata : create_progress_report("`filename'.xlsx", "`sortval'", tokens("`allvars'"), `N')
+		if "`workbooks'" == "workbooks" {
+			mata : create_progress_report("`filename'_`sortval'.xlsx", "`sortval'", tokens("`allvars'"), `N')
+		}
+		
+		else {
+			mata : create_progress_report("`filename'.xlsx", "`sortval'", tokens("`allvars'"), `N')
+
+		}
 		local den = `N' - 1
 		qui count if `sortby' == "`sortval'" & _merge == 3
 		local num = `r(N)'
@@ -243,8 +268,13 @@ void create_summary_sheet(string scalar filename, string matrix allvars, real sc
 	varname_widths = strlen(allvars)
 	
 	for (i=1; i<=cols(column_widths); i++) {
-		if	(column_widths[i] < varname_widths[i]) {
-			column_widths[i] = varname_widths[i]
+					varlabel = st_varlabel(allvars[i])
+					if (varname_widths[i] < strlen(varlabel)) {
+						varname_widths[i] = strlen(varlabel)
+				}
+		
+		if	(column_widths[i] < (varname_widths[i])) {
+			column_widths[i] = (varname_widths[i])
 		}
 		b.set_column_width(i, i, column_widths[i] + 2)
 	}
