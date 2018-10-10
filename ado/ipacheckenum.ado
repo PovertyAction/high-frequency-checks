@@ -1,5 +1,4 @@
-*! version 2.1.2 Isabel Onate & Rosemarie Sandino 15Aug2018
-
+*! version 2.1.2 Isabel Onate & Rosemarie Sandino 10oct018
 
 program ipacheckenum
 	/* This command constructs: 
@@ -534,10 +533,23 @@ program define ipacheckenumvarstats
 		isid `enum'
 
 		// Convert enum variable to string
-		rename `enum' `enum'_temp
-		decode `enum'_temp, gen(`enum')
-		drop `enum'_temp
-		
+		cap confirm numeric variable `enum' 
+		// numeric variables
+		if _rc==0  {
+			local label_name :value label `enum'    
+			// with labels
+			if ("`label_name'" != ""){
+			di in r "label"
+				rename `enum' `enum'_temp
+				decode `enum'_temp, gen(`enum')
+				drop `enum'_temp
+			}
+			else if ("`label_name'" == "") {
+				di in r "no label"
+				tostring `enum', replace
+			}
+		}
+	
 		order `enum' survey `order'
 
 		// Save 
@@ -566,13 +578,9 @@ program define ipacheckenumvarstats
 end
 
 
-///////////// FORMATING ////////////////
-
-***To do: 
-* Change color so bottom and top tenth are red -- DONE
-* fix percentage so it shows decimals -- DONE
-* add min/max duration to summary sheet
-* add scale colors to summary sheet
+////////////////
+// FORMATTING //
+////////////////
 
 mata:
 mata clear
