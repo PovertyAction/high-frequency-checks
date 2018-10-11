@@ -1,9 +1,6 @@
 *! version 1.0.0 Christopher Boyer 04may2016
 *! version 1.0.1 Adjustments to ipachecnew by Isabel Onate 15Aug2018
 
-program drop _all
-clear mata
-
 program ipacheck, rclass
 	/* This is a utility function to help update the ipacheck package
 	   and initialize new projects. */
