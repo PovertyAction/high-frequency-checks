@@ -153,7 +153,7 @@ if !mi("${master}") {
 
 
 /* <============= HFC 6. Check skip patterns and survey logic =============> */
-ipacheckskip ${variable6}, assert(${assert6}) ///
+ipachecklogic ${variable6}, assert(${assert6}) ///
   condition(${if_condition6}) ///
   id(${id}) ///
   enumerator(${enum}) ///
