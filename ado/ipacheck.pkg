@@ -22,7 +22,7 @@ f ipacheckdups.ado
 f ipacheckconsent.ado
 f ipachecknomiss.ado
 f ipacheckfollowup.ado
-f ipacheckskip.ado
+f ipachecklogic.ado
 f ipacheckallmiss.ado
 f ipacheckconstraints.ado
 f ipacheckspecify.ado

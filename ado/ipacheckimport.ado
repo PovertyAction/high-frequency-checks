@@ -27,7 +27,7 @@ program ipacheckimport, rclass
 			`""3. consent""' +      ///
 			`""4. no miss""' +      ///
 			`""5. follow up""' +    ///
-			`""6. skip""' +         ///
+			`""6. logic""' +         ///
 			`""7. all miss""'  +    ///
 			`""8. constraints""' +  ///
 			`""9. specify""' +      ///

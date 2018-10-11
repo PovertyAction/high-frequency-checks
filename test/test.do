@@ -360,7 +360,7 @@ cd "../check06"
 * Test 1
 use check06_test01, clear
 ipacheckimport using "check06_test01_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -373,7 +373,7 @@ ipacheckskip ${variable6}, ///
 * Test 2
 use check06_test02, clear
 ipacheckimport using "check06_test02_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -386,7 +386,7 @@ ipacheckskip ${variable6}, ///
 	* Test 3
 use check06_test03, clear
 ipacheckimport using "check06_test03_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(`"${assert6}"') ///
 	condition(`"${if_condition6}"') ///
 	keepvars(${keep_variable6}) ///
@@ -399,7 +399,7 @@ ipacheckskip ${variable6}, ///
 	/* Test 4
 use check06_test04, clear
 ipacheckimport using "check06_test04_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -412,7 +412,7 @@ ipacheckskip ${variable6}, ///
 	* Test 5
 use check06_test05, clear
 ipacheckimport using "check06_test05_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(`"${assert6}"') ///
 	condition(`"${if_condition6}"') ///
 	keepvars(${keep_variable6}) ///
@@ -425,7 +425,7 @@ ipacheckskip ${variable6}, ///
 * Test 6
 use check06_test06, clear
 ipacheckimport using "check06_test06_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -791,7 +791,7 @@ local outfile "track03_test03_out.xlsx"
 rcof ipatrackversions form_version, id(id) ///
 	enumerator(enum) ///
 	submit(submissiondate) ///
-    saving("`outfile'") == 122*/    
+    saving("`outfile'") == 122*/
 
 * Test 4
 use track03_test04, clear
@@ -908,5 +908,5 @@ ipacheckreadreplace using "readreplace_test01_corr.xlsm", ///
 /*  
 cd "../master"
 
-* Test 1
+/* Test 1
 do "master_test01.do"
