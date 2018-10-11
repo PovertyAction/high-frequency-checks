@@ -892,19 +892,20 @@ ipacheckresearch using "research_test02_out.xlsx", ///
 cd "../readreplace"
 *Test 1
 use readreplace_test01, clear
-ipacheckreadreplace using "readreplace_test01_corr.xlsx", ///
+ipacheckreadreplace using "readreplace_test01_corr.xlsm", ///
 	id(id) ///
 	variable(variable) ///
 	value(value) ///
-	oldvalue(oldvalue) ///
-	selectmultiple(selectmultiple) ///
-	excel ///
-	import(firstrow)
+	newvalue(newvalue) ///
+    action(action) ///
+    comments(comments) ///
+    sheet(replacements) ///
+    logusing("replog_out.xlsx")
    
 /* =================================================
    ==================== Master ===================== 
    ================================================= */
-  
+/*  
 cd "../master"
 
 /* Test 1
