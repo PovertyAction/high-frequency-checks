@@ -6,6 +6,7 @@ Example_HFC output.xlsx
 *_out.xlsx
 *_outputs.xlsx
 *out.xlsx
+*_diffs.xlsx
 
 # ignore the research file
 *research.xlsx
