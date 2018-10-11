@@ -860,10 +860,12 @@ cd "../enumerator"
 * Test 1
 use enumerator_test01, clear
 ipacheckimport using "enumerator_test01_in.xlsx"
-ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
+ipacheckenum enum using "enumerator_test01_out.xlsx", ///
    dkrfvars(${dkrf_variable12}) ///
    missvars(${missing_variable12}) ///
-   subdate(${submission_date12}) ///
+   othervars(dontknow) ///
+   statvars(age) ///
+   subdate(${submission_date12}) mean max min sd ///
    days(2000)
 
    
