@@ -179,17 +179,17 @@ program ipachecklogic, rclass
 	}
 	* export compiled list to excel
 	export excel `keeplist' using "`saving'" ,  ///
-		sheet("6. survey logic") `sheetreplace' `sheetmodify' ///
+		sheet("6. logic") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 		
-	mata: basic_formatting("`saving'", "6. survey logic", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
+	mata: basic_formatting("`saving'", "6. logic", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 
 	*export scto links as links
 	if !missing("`sctodb'") {
 		*nois di c(version)
 		unab allvars : _all
 		local pos : list posof "scto_link" in allvars
-		mata: add_scto_link("`saving'", "6. survey logic", "scto_link", `pos')
+		mata: add_scto_link("`saving'", "6. logic", "scto_link", `pos')
 	}
 
 	* revert to original
