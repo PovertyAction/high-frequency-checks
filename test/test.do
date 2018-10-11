@@ -808,15 +808,29 @@ rcof ipatrackversions form_version, id(id) ///
 
 cd "../progreport"
 use survey_data, clear
+
+* Test 1
 local outfile "progreport_test01_out.xlsx"
+rcof progreport, ///
+    master("sample.dta") ///
+    survey("survey_data.dta") ///
+    id("id") ///
+    sortby("ward") ///
+    keepmaster("gender age") ///
+    filename("`outfile'") == 134
+
+* Test 2
+local outfile "progreport_test02_out.xlsx"
 progreport, ///
     master("sample.dta") ///
     survey("survey_data.dta") ///
     id("id") ///
     sortby("ward") ///
     keepmaster("gender age") ///
-    filename("`outfile'") 
-stop
+    filename("`outfile'") ///
+    workbooks
+
+
 /* =================================================
    =========== Track 2 - Track Surveys =============
    ================================================= */
