@@ -185,7 +185,7 @@ program define ipachecknew
 				loc set "`:word `f' of `folders_add''"
 				forvalues n=1/`:word count `surveys'' {
 					loc form "`:word `n' of `surveys''"
-					loc fol "`set'/`form'"
+					loc fol "`set'/`n'_`form'"
 					loc new_list `new_list' `fol'
 				}
 			}
@@ -269,15 +269,17 @@ program define ipachecknew
 		// Multiple forms with subfolders
 		if `:word count `surveys'' > 1 & "`subfolders'" != "" {
 		
-			foreach form in `surveys' {
+			//foreach form in `surveys' {
+			forvalues n=1/`:word count `surveys'' {
+			loc form "`:word `n' of `surveys''"
 				// HFC input file
 				di "Saving HFC input file - `form'"
-				loc output "`folder'//`hfc_input_loc'//`form'/hfc_inputs_`form'.xlsx"
+				loc output "`folder'//`hfc_input_loc'//`n'_`form'/hfc_inputs_`form'.xlsx"
 				copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
 				
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
-				loc output "`folder'//`hfc_replace_loc'//`form'/hfc_replacements_`form'.xlsx"
+				loc output "`folder'//`hfc_replace_loc'//`n'_`form'/hfc_replacements_`form'.xlsx"
 				copy "`git_hfc'/master/xlsx/hfc_replacements.xlsx" "`output'", replace
 				
 				// HFC master do file
