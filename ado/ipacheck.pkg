@@ -32,7 +32,7 @@ f ipacheckenum.ado
 f ipacheckresearch.ado
 f ipacheckreadreplace.ado
 f ipatracksummary.ado
-f ipatracksurveys.ado
+f progreport.ado
 f ipatrackversions.ado
 f ../xlsx/hfc_enumerators.xlsx
 f ../xlsx/hfc_inputs.xlsx
