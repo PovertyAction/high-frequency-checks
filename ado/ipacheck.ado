@@ -1,6 +1,9 @@
 *! version 1.0.0 Christopher Boyer 04may2016
 *! version 1.0.1 Adjustments to ipachecnew by Isabel Onate 15Aug2018
 
+program drop _all
+clear mata
+
 program ipacheck, rclass
 	/* This is a utility function to help update the ipacheck package
 	   and initialize new projects. */
@@ -251,11 +254,6 @@ program define ipachecknew
 			loc output "`folder'//`hfc_input_loc'/hfc_inputs.xlsx"
 			copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
 			
-			// HFC enumerators file
-			di "Saving HFC enumerators file"
-			loc output "`folder'//`hfc_enum_loc'/hfc_enumerators.xlsx"
-			copy "`git_hfc'//blob/master/xlsx/hfc_enumerators.xlsx" "`output'", replace
-			
 			// HFC replacements file
 			di "Saving HFC replacements file"
 			loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsx"
@@ -276,11 +274,6 @@ program define ipachecknew
 				di "Saving HFC input file - `form'"
 				loc output "`folder'//`hfc_input_loc'//`form'/hfc_inputs_`form'.xlsx"
 				copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
-				
-				// HFC enumerators file
-				di "Saving HFC enumerators file - `form'"
-				loc output "`folder'//`hfc_enum_loc'//`form'/hfc_enumerators_`form'.xlsx"
-				copy "`git_hfc'/master/xlsx/hfc_enumerators.xlsx" "`output'", replace
 				
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
@@ -303,11 +296,6 @@ program define ipachecknew
 				loc output "`folder'//`hfc_input_loc'//hfc_inputs_`form'.xlsx"
 				copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
 				
-				// HFC enumerators file
-				di "Saving HFC enumerators file - `form'"
-				loc output "`folder'//`hfc_enum_loc'//hfc_enumerators_`form'.xlsx"
-				copy "`git_hfc'/master/xlsx/hfc_enumerators.xlsx" "`output'", replace
-				
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
 				loc output "`folder'//`hfc_replace_loc'//hfc_replacements_`form'.xlsx"
@@ -318,12 +306,9 @@ program define ipachecknew
 				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
 				copy "`git_hfc'/master/master_check.do" "`output'", replace
 			}	
-		}
-		
-	
+		}	
 	}
 	
-
 end
 
 
