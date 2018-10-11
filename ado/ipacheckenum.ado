@@ -539,13 +539,11 @@ program define ipacheckenumvarstats
 			local label_name :value label `enum'    
 			// with labels
 			if ("`label_name'" != ""){
-			di in r "label"
 				rename `enum' `enum'_temp
 				decode `enum'_temp, gen(`enum')
 				drop `enum'_temp
 			}
 			else if ("`label_name'" == "") {
-				di in r "no label"
 				tostring `enum', replace
 			}
 		}
