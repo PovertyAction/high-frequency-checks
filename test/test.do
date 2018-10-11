@@ -901,6 +901,33 @@ ipacheckreadreplace using "readreplace_test01_corr.xlsx", ///
 	excel ///
 	import(firstrow)
    
+
+/* =================================================
+   ================== Back Checks ================== 
+   ================================================= */
+
+cd "../bcstats"
+
+ipacheckimport using "bcstats_test01_inputs.xlsx"
+bcstats, ///
+    surveydata(${dataset}) ///
+    bcdata(${bcdataset})   ///
+    id(${id})              ///
+    enumerator(${enum})    ///
+    enumteam(${enumteam})  ///
+    backchecker(${bcer})   ///
+    bcteam(${bcerteam})    ///
+    t1vars(${type1_15})    ///
+    t2vars(${type2_15})    ///
+    t3vars(${type3_15})    ///
+    ttest(${ttest15})     ///
+    keepbc(${bckeepbc})    ///
+    keepsurvey(${bckeepsurvey}) ///
+    reliability(${reliability15}) ///
+    filename("${bcoutfile}") ///
+    lower nosymbol trim showall ///
+    replace
+
 /* =================================================
    ==================== Master ===================== 
    ================================================= */
