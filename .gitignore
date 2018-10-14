@@ -6,6 +6,7 @@
 *_outputs.xlsx
 *out.xlsx
 *_out_*.xlsx
+*_diffs.xlsx
 
 # ignore the research file
 *research.xlsx
