@@ -34,7 +34,8 @@ f ipacheckreadreplace.ado
 f ipatracksummary.ado
 f progreport.ado
 f ipatrackversions.ado
-f ../xlsx/hfc_enumerators.xlsx
-f ../xlsx/hfc_inputs.xlsx
-f ../xlsx/hfc_replacements.xlsx
+f ipachecktextaudit.ado
+f ipacheckcomment.ado
+f ../xlsx/hfc_inputs.xlsm
+f ../xlsx/hfc_replacements.xlsm
 f ../master_check.do
