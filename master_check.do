@@ -73,8 +73,8 @@ progreport, ///
     workbooks
 }
 
- /* <======== Track 3. Track form versions used by submission date ========> */
 
+ /* <======== Track 3. Track form versions used by submission date ========> */
       
 ipatrackversions ${formversion}, /// 
   id(${id}) ///
@@ -90,6 +90,7 @@ ipatrackversions ${formversion}, ///
   
   
 /* <=========== HFC 1. Check that all interviews were completed ===========> */
+
 if ${run_incomplete} {
   ipacheckcomplete ${variable1}, ///
     complete(${complete_value1}) ///
@@ -105,6 +106,7 @@ if ${run_incomplete} {
 
 
 /* <======== HFC 2. Check that there are no duplicate observations ========> */
+
 if ${run_duplicates} {
   ipacheckdups ${variable2}, ///
     id(${id}) ///
@@ -118,6 +120,7 @@ if ${run_duplicates} {
 
   
 /* <============== HFC 3. Check that all surveys have consent =============> */
+
 if ${run_consent} { 
   ipacheckconsent ${variable3}, ///
     consentvalue(${consent_value3}) ///
@@ -130,7 +133,9 @@ if ${run_consent} {
     sheetreplace ${nolabel}
 }
 
+
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
+
 if ${run_no_miss} {
   ipachecknomiss ${variable4}, ///
     id(${id}) /// 
@@ -141,8 +146,10 @@ if ${run_no_miss} {
     sctodb("${server}") ///
     sheetreplace ${nolabel}
 }
-  
+ 
+ 
 /* <======== HFC 5. Check that follow up record ids match original ========> */
+
 if ${run_follow_up} {
   ipacheckfollowup ${variable5} using ${master}, ///
     id(${id}) ///
@@ -155,6 +162,7 @@ if ${run_follow_up} {
 
 
 /* <============= HFC 6. Check skip patterns and survey logic =============> */
+
 if ${run_logic} {
   ipachecklogic ${variable6}, ///
     assert(${assert6}) ///
@@ -170,6 +178,7 @@ if ${run_logic} {
 
      
 /* <======== HFC 7. Check that no variable has all missing values =========> */
+
 if ${run_all_miss} {
   ipacheckallmiss ${variable7}, ///
     id(${id}) ///
@@ -180,6 +189,7 @@ if ${run_all_miss} {
 
 
 /* <=============== HFC 8. Check for hard/soft constraints ================> */
+
 if ${run_constraints} {
   ipacheckconstraints ${variable8}, ///
     smin(${soft_min8}) ///
@@ -195,6 +205,7 @@ if ${run_constraints} {
 
 
 /* <================== HFC 9. Check specify other values ==================> */
+
 if ${run_specify} {
   ipacheckspecify ${child9}, ///
     parentvars(${parent9}) ///
@@ -209,6 +220,7 @@ if ${run_specify} {
 
   
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
+
 if ${run_dates} {
   ipacheckdates ${startdate10} ${enddate10}, ///
     surveystart(${surveystart10}) ///
@@ -223,6 +235,7 @@ if ${run_dates} {
 
 
 /* <============= HFC 11. Check for outliers in unconstrained =============> */
+
 if ${run_outliers} {
   ipacheckoutliers ${variable11}, id(${id}) ///
     enumerator(${enum}) ///
@@ -237,6 +250,7 @@ if ${run_outliers} {
 
 
 /* <============= HFC 12. Check for and output field comments =============> */
+
 if ${run_field_comments} {
   ipacheckcomment ${fieldcomments}, id(${id}) ///
     media(${sctomedia}) ///
@@ -249,6 +263,7 @@ if ${run_field_comments} {
 
 
 /* <=============== HFC 13. Output summaries for text audits ==============> */
+
 if ${run_text_audits} {
   ipachecktextaudit ${textaudit} using "${textauditdb}",  ///
     media("${sctomedia}") ///
