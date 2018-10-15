@@ -29,7 +29,7 @@ local numeric `r(varlist)'
 if !mi("${mv1}") recode `numeric' (${mv1} = .d)
 if !mi("${mv2}") recode `numeric' (${mv2} = .r)
 if !mi("${mv3}") recode `numeric' (${mv3} = .n)
-  
+
 if !mi("${repfile}") {
   ipacheckreadreplace using "${repfile}", ///
     id("${id}") ///
@@ -75,14 +75,13 @@ progreport, ///
 
  /* <======== Track 3. Track form versions used by submission date ========> */
 
-if ${run_progreport} {        
-ipatrackversions ${progreport}, 
+      
+ipatrackversions ${formversion}, /// 
   id(${id}) ///
   enumerator(${enum}) ///
   submit(${date}) ///
-  saving("${progreport}") 
+  saving("${outfile}") 
 
-}   
    
 
 /* =============================================================== 
@@ -131,7 +130,6 @@ if ${run_consent} {
     sheetreplace ${nolabel}
 }
 
-
 /* <===== HFC 4. Check that critical variables have no missing values =====> */
 if ${run_no_miss} {
   ipachecknomiss ${variable4}, ///
@@ -144,7 +142,6 @@ if ${run_no_miss} {
     sheetreplace ${nolabel}
 }
   
-
 /* <======== HFC 5. Check that follow up record ids match original ========> */
 if ${run_follow_up} {
   ipacheckfollowup ${variable5} using ${master}, ///
