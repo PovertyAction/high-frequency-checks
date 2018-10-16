@@ -244,7 +244,7 @@ program define ipachecknew
 		loc hfc_master_loc "02_dofiles"
 		
 		// Single form
-		if `:word count `surveys'' == 1 {	
+		if (`:word count `surveys'' == 1) | (`:word count `surveys'' == 0) {	
 			
 			// HFC input file
 			di "Saving HFC input file"
@@ -254,12 +254,12 @@ program define ipachecknew
 			// HFC replacements file
 			di "Saving HFC replacements file"
 			loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsx"
-			copy "`git_hfc'//blob/master/xlsx/hfc_replacements.xlsx" "`output'", replace
+			copy "`git_hfc'/master/xlsx/hfc_replacements.xlsx" "`output'", replace
 			
 			// HFC master do file
 			di "Saving master do file"
 			loc output "`folder'//`hfc_master_loc'/master_check.do"
-			copy "`git_hfc'//blob/master/master_check.do" "`output'", replace
+			copy "`git_hfc'/master/master_check.do" "`output'", replace
 			
 		}
 		
