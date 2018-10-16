@@ -20,22 +20,24 @@ program ipacheckimport, rclass
 		tempvar tmp
 		tempfile tmpsheet
 
-		local sheets =              ///
-			`""0. setup""' +        ///
-			`""1. incomplete""' +   ///
-			`""2. duplicates""' +   ///
-			`""3. consent""' +      ///
-			`""4. no miss""' +      ///
-			`""5. follow up""' +    ///
-			`""6. logic""' +         ///
-			`""7. all miss""'  +    ///
-			`""8. constraints""' +  ///
-			`""9. specify""' +      ///
-			`""10. dates""' +       ///
-			`""11. outliers""'  +   ///
-			`""enumdb""'  +         ///
-			`""research oneway""' + ///
-			`""research twoway""' + ///
+		local sheets =                  ///
+			`""0. setup""' +            ///
+			`""1. incomplete""' +       ///
+			`""2. duplicates""' +       ///
+			`""3. consent""' +          ///
+			`""4. no miss""' +          ///
+			`""5. follow up""' +        ///
+			`""6. logic""' +            ///
+			`""7. all miss""'  +        ///
+			`""8. constraints""' +      ///
+			`""9. specify""' +          ///
+			`""10. dates""' +           ///
+			`""11. outliers""'  +       ///
+			`""12. field comments""' +  ///
+			`""13. text audit""' 	 +  ///
+			`""enumdb""'  +             ///
+			`""research oneway""' +     ///
+			`""research twoway""' +     ///
 			`""backchecks""'
 		
 		* store number of sheets
@@ -77,60 +79,139 @@ program ipacheckimport, rclass
 				* define lists of entry boxes and matching globals to be defined
 				*<!> TO ADD => replacements file, master tracking list, tracking globals
 				local boxes =                                 ///
-					`""Stata Dataset""' +                     ///
-					`""Back Check Dataset""' +                ///
-					`""HFC Input File""' +                    ///
-					`""HFC Output File""' +                   ///
-					`""HFC Enumerator File""' +               ///
-					`""HFC Research File""' +                 ///
-					`""Replacements File \(opt\.\)""' +       ///
+					`""Survey Dataset""' 	 				+ ///
+					`""Back Check Dataset""' 				+ ///
 					`""Master Tracking Dataset \(opt\.\)""' + ///
-					`""Submission Date""' +                   ///
-					`""Survey ID""' +                         ///
-					`""Enumerator ID""' +                     ///
-					`""Enumerator Team""' +                   ///
-					`""Backchecker ID""' +                    ///
-					`""Backchecker Team""' +                  ///					
-					`""Form Version""' +                      ///
-					`""Geographic Cluster""' +                ///
-					`""Target Sample Size""' +                ///
-					`""SurveyCTO Server""' +                  ///
-					`""Missing Value \(\.d\)""' +             ///
-					`""Missing Value \(\.r\)""' +             ///
-					`""Missing Value \(\.n\)""' +             ///
-					`""Use SD for Outliers""' +               ///
-					`""Use label for Factors""' +             ///
-					`""Variables to keep from survey""' +     ///
-					`""Variables to keep from back check""' + ///
-					`""Exclude""' 
+					`""HFC \& BC Input file""' 				+ ///
+					`""Corrections Workbook (opt.)""' 		+ ///
+					`""Corrections WorkSheet \(opt\.\)""' 	+ ///
+					`""HFC Output File""' 					+ ///
+					`""HFC Enumerator File""' 				+ ///
+					`""Progress Report Output \(opt\.\)""'  + ///
+					`""Back Check Comparison Output \(opt\.\)""' 	+ ///
+					`""HFC Research File""' 						+ ///
+					`""Replacements Log \(opt\.\)""' 	+ ///
+					`""Submission Date""' 				+ ///
+					`""Survey ID""' 					+ ///
+					`""Enumerator ID""' 				+ ///
+					`""Enumerator Team ID""' 			+ ///
+					`""Back Checker ID""' 				+ ///
+					`""Back Checker Team ID""' 			+ ///
+					`""Form Version""' 					+ ///
+					`""Missing Value \(\.d\)""' 		+ ///
+					`""Missing Value \(\.r\)""' 		+ ///
+					`""Missing Value \(\.n\) \(opt\.\)""' 	+ ///
+					`""Statify Progress Report By""' 		+ ///
+				    `""Variables to keep in Master Data""' 	+ ///
+				    `""Variables to keep in Survey Data \(opt\.\)""' 	+ ///
+				    `""Save Descrepancy As \(opt\.\)""' 				+ ///
+				    `""Target Completion Rate \(opt\.\)""' 				+ ///
+				    `""Use Variable Names as Headers \(opt\.\)""' 		+ ///
+				    `""Use Values for Factors \(opt\.\)""' 				+ ///
+				    `""ID in Master Tracking Data \(opt\.\)""' 			+ ///
+				    `""Statistics to include in Enum DB""' 				+ ///
+				    `""Statistic Variables for Enum DB""' 				+ ///
+					`""Use SD for Outliers \(opt\.\)""' 				+ ///
+					`""Use Label for Factors \(opt\.\)""' 				+ ///
+					`""Show Unique IDs \(opt\.\)""' 					+ ///
+				    `""Show All Discrepancies \(opt\.\)""' 				+ ///
+				    `""Include All Comparisons \(opt\.\)""' 			+ ///
+				    `""Do not Use Value labels for Factors \(opt\.\)""' + ///
+				    `""Replace Back Check Comparison File \(opt\.\)""' 	+ ///
+				    `""Save Discrepancy in Stata Format""' 		+ ///
+				    `""Exclude BC Responses that Equal""' 		+ ///
+				    `""Convert All Strings to Lower""' 			+ ///
+				    `""Convert All Strings to Upper""' 			+ ///
+				    `""Replace Symbols with Spaces""' 			+ ///
+				    `""Remove Leading and Trailing Blanks""' 	+ ///
+			        `""Server Name""' 							+ ///
+				    `""Username""'								+ ///
+					`""Progress Report""' 	+ ///
+					`""1. incomplete""' 	+ ///
+					`""2. duplicates""' 	+ ///
+					`""3. consent""' 		+ ///
+					`""4. no miss""' 		+ ///
+					`""5. follow up""' 		+ ///
+					`""6. logic""' 			+ ///
+					`""7. all miss""' 		+ ///
+					`""8. constraints""' 	+ ///
+					`""9. specify""' 		+ ///
+					`""10. dates""' 		+ ///
+					`""11. outliers""' 		+ ///
+					`""12. field comments""' 	+ ///
+					`""13. text audits""' 		+ ///
+					`""enumdb""' 				+ ///
+					`""research oneway""' 		+ ///
+					`""research twoway""' 		+ ///
+					`""backcheck""'
+
 
 				local globals   ///
-					dataset     ///
-					bcdataset   ///
+					sdataset    ///
+					bdataset	///
+					master		///
 					infile      ///
+					repfile     ///
+					repsheet    ///
 					outfile     ///
 					enumdb      ///
+					progreport	///
+					bcfile		///
 					researchdb  ///
-					repfile     ///
-					master      ///
+					replog		///
 					date        ///
 					id          ///
 					enum        ///
-					enumteam    ///
-					bcer        ///
-					bcerteam    ///
+					enumteam	///
+					bcer		///
+					bcerteam	///
 					formversion ///
-					geounit     ///
-					target      ///
-					server      ///
 					mv1         ///
 					mv2         ///
 					mv3         ///
+					psortby	 	///
+					pkeepmaster ///
+					pkeepsurvey ///
+					psave		///
+					ptarget		///
+					pvariable	///
+					plabel		///
+					pmid		///
+					stats		///
+					statvars	///
 					sd          ///
-					nolabel     ///
-					bckeepbc    ///
-					bckeepsurvey ///
-					bcexclude
+					nolabel		///
+					bcshowrate	///
+					bcshowall	///
+					bcfull		///
+					bcnolabel	///
+					bcreplace	///
+					bcsave		///
+					bcexclude	///
+					bclower		///
+					bcupper		///
+					bcnosymbols ///
+					bctrim		///
+					server		///
+					username	///
+					run_progreport 		 ///
+					run_incomplete		 ///
+					run_duplicates		 ///
+					run_consent			 ///
+					run_no_miss			 ///
+					run_follow_up		 ///
+					run_logic			 ///
+					run_all_miss		 ///
+					run_constraints		 ///
+					run_specify			 ///
+					run_dates	 		 ///
+					run_outliers	 	 ///
+					run_field_comments   ///
+					run_text_audits		 ///
+					run_enumdb			 ///
+					run_research_oneway  ///
+					run_research_twoway  ///
+					run_backcheck
 
 
 				* count the number of entry boxes
@@ -138,10 +219,18 @@ program ipacheckimport, rclass
 
 				* loop through boxes and define the matching global 
 				forval i = 1/`nboxes' {
+					if `i' <= 56 {
+						loc strCol "DataManagementSystem"
+						loc valCol "B"
+					}
+					else {
+						loc strCol "C"
+						loc valCol "D"
+					}
 					gettoken global globals : globals
 					gettoken box boxes : boxes
-					summarize `tmp' if regexm(HighFrequencyChecks, `"`box'"'), meanonly
-					local value = B[r(max)]
+					summarize `tmp' if regexm(`strCol', `"`box'"'), meanonly
+					local value = `valCol'[r(max)]
 					mata: st_global("`global'", "")
 					mata: st_global("`global'", `"`value'"')
 				}
@@ -150,11 +239,11 @@ program ipacheckimport, rclass
 			else {
 
 				* expand wild cards in variable list
-				if inlist(`n', 1, 3, 8, 11, 13, 14/*, 15*/) & `rows' > 0 {
+				if inlist(`n', 1, 3, 8, 11, 13, 15) & `rows' > 0 {
 	    			mata: rv = st_sdata(., "variable")
 	    			mata: nrv = ""
 	    			mata: copies = .
-	    			use "${dataset}", clear
+	    			use "${sdataset}", clear
 	    			forval i = 1/`rows' {
 	    				mata: st_local("vlist", rv[`i'])
 						unab vlist : `vlist'
@@ -210,10 +299,11 @@ program ipacheckimport, rclass
 			    	}
 		    	}
 				if inlist(`"`sheet'"', "backchecks") {
-
-					* okrange global
-					g okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) +  "], "
-					replace okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) + "]" if _n == _N
+					if `rows' > 0 {
+						* okrange global
+						g okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) +  "], "
+						replace okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) + "]" if _n == _N
+					}
 
 					* initialize Stata global
 					mata: st_global("type1_`n'", "")

@@ -132,7 +132,6 @@ program ipacheckspecify, rclass
 		set obs 1
 	} 
 
-
 	order `keeplist'
     gsort -`submitted', gen(order)
 
@@ -144,7 +143,7 @@ program ipacheckspecify, rclass
 	gen `bottom' = cond(`bot' == `lines', 1, 0)
 	
 	loc colorcols
-	foreach var in `enumerator' parent parent_label parent_value child child_label choices  {
+	foreach var in parent parent_label parent_value child child_label choices  {
 		loc pos : list posof "`var'" in keeplist
 		loc colorcols `colorcols' `pos'
 	}
@@ -297,7 +296,9 @@ for (i=1; i<=cols(column_widths); i++) {
 	if	(column_widths[i] < varname_widths[i]) {
 		column_widths[i] = varname_widths[i]
 	}
-
+	if (column_widths[i] > 78) {
+	column_widths[i] = 78
+	}
 	b.set_column_width(i, i, column_widths[i] + 2)
 }
 
@@ -340,4 +341,3 @@ void add_scto_link(string scalar filename, string scalar sheetname, string scala
 	}
 
 end
-
