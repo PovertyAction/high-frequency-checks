@@ -87,7 +87,7 @@ program ipacheckimport, rclass
 					`""Corrections WorkSheet \(opt\.\)""' 	+ ///
 					`""HFC Output File""' 					+ ///
 					`""HFC Enumerator File""' 				+ ///
-					`""Progress Report Output \(opt\.\)""'  + ///
+					`""Progress Report Output""'  + ///
 					`""Back Check Comparison Output \(opt\.\)""' 	+ ///
 					`""HFC Research File""' 						+ ///
 					`""Replacements Log \(opt\.\)""' 	+ ///
