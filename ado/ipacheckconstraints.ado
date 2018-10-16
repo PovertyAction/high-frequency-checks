@@ -116,10 +116,16 @@ program ipacheckconstraints, rclass
 		replace label = "`varl'"
 		replace value = string(`var')
 			
+		* generate _hfcokay & _hfcokayvar if they do not exist
+		cap confirm var _hfcokay
+		if _rc == 111 gen _hfcokay = 0
+		cap confirm var _hfcokayvar 
+		if _rc == 111 gen _hfcokayvar = ""
+
 		/* =======================
 		   = check hard minimums =
 		   ======================= */
-		replace `viol' = `var' < `minhard' & `minhard' < .
+		replace `viol' = `var' < `minhard' & `minhard' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'")) 
 		replace message = "Value is too small. Hard Min. = `minhard'"
 
 		* count the violations
@@ -135,7 +141,7 @@ program ipacheckconstraints, rclass
 		/* =======================
 		   = check hard maximums =
 		   ======================= */
-		replace `viol' = `var' > `maxhard' & `maxhard' < . & `var' < . 
+		replace `viol' = `var' > `maxhard' & `maxhard' < . & `var' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'")) 
 		replace message = "Value is too high. Hard Max. = `maxhard'"
 
 		* count the violations
@@ -152,7 +158,7 @@ program ipacheckconstraints, rclass
 		   = check soft minimums =
 		   ======================= */
 
-		replace `viol' = `var' < `minsoft' & `minsoft' < .
+		replace `viol' = `var' < `minsoft' & `minsoft' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
 		replace message = "Value is too small. Soft Min. = `minsoft'"
 
 		* count the violations
@@ -169,7 +175,7 @@ program ipacheckconstraints, rclass
 		   = check soft maximums =
 		   ======================= */
 
-		replace `viol' = `var' > `maxsoft' & `maxsoft' < . & `var' < . 
+		replace `viol' = `var' > `maxsoft' & `maxsoft' < . & `var' < . & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
 		replace message = "Value is too high. Soft Max. = `maxsoft'"
 
 		* count the violations

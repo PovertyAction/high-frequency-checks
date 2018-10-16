@@ -64,6 +64,12 @@ program ipacheckoutliers, rclass
 	g `max' = .
 	g `use' = .
 
+	* generate _hfcokay & _hfcokayvar if they do not exist
+	cap confirm var _hfcokay
+	if _rc == 111 gen _hfcokay = 0
+	cap confirm var _hfcokayvar 
+	if _rc == 111 gen _hfcokayvar = ""
+
 	* define default output variable list
 	unab admin : `submitted' `id' `enumerator'
 	local meta `"variable label value message"'
@@ -158,7 +164,7 @@ program ipacheckoutliers, rclass
 
 		* identify outliers 
 		replace `outlier' = (`var' > `max' | `var' < `min') ///
-			& !mi(`var') & `use' == 1
+			& !mi(`var') & `use' == 1 & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
 
 		* count outliers
 		count if `outlier' == 1
