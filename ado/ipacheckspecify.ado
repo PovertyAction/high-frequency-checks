@@ -135,7 +135,7 @@ program ipacheckspecify, rclass
 	order `keeplist'
     gsort -`submitted', gen(order)
 
-	format `submitted' %td
+	format `submitted' %tc
 	tempvar bot bottom lines
 
 	bysort parent : gen `lines' = _n

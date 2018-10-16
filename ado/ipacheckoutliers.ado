@@ -185,7 +185,7 @@ program ipacheckoutliers, rclass
 	order `keeplist'
     gsort -`submitted', gen(order)
 
-	format `submitted' %td
+	format `submitted' %tc
 	tempvar bot bottom lines
 
 	bysort variable (`enumerator' order) : gen `lines' = _n

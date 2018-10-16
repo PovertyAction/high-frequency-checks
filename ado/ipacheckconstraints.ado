@@ -200,7 +200,7 @@ program ipacheckconstraints, rclass
 	order `keeplist'
     gsort -`submitted', gen(order)
 
-	format `submitted' %td
+	format `submitted' %tc
 	tempvar bot bottom lines
 
 	bysort `enumerator' (variable order) : gen `lines' = _n

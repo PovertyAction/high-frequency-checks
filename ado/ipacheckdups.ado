@@ -167,8 +167,7 @@ program ipacheckdups, rclass
 	order `keeplist'
     gsort -`submitted', gen(order)
 	
-	**ADDED
-	format `submitted' %td
+	format `submitted' %tc
 	tempvar bot bottom lines
 	
 	bysort value (variable) : gen `lines' = _n
@@ -181,7 +180,6 @@ program ipacheckdups, rclass
 		loc colorcols `colorcols' `pos'
 	}
 	
-	***
 	* export compiled list to excel
 	export excel `keeplist' using "`saving'" ,  ///
 		sheet("2. duplicates") `sheetreplace' `sheetmodify' ///

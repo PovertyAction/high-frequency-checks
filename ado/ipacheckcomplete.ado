@@ -167,8 +167,7 @@ program ipacheckcomplete, rclass
 	order `keeplist' 
     gsort -`submitted', gen(order)
 	
-	**ADDED
-	format `submitted' %td
+	format `submitted' %tc
 	tempvar bot bottom lines
 	
 	bysort `enumerator' (order) : gen `lines' = _n
@@ -180,7 +179,6 @@ program ipacheckcomplete, rclass
 		loc pos : list posof "`var'" in keeplist
 		loc colorcols `colorcols' `pos'
 	}
-	***
 
 	* export compiled list to excel
 	export excel `keeplist' using "`saving'" ,  ///
