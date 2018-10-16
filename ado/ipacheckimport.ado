@@ -83,7 +83,7 @@ program ipacheckimport, rclass
 					`""Back Check Dataset""' 				+ ///
 					`""Master Tracking Dataset \(opt\.\)""' + ///
 					`""HFC \& BC Input file""' 				+ ///
-					`""Corrections Workbook (opt.)""' 		+ ///
+					`""Corrections Workbook \(opt\.\)""' 		+ ///
 					`""Corrections WorkSheet \(opt\.\)""' 	+ ///
 					`""HFC Output File""' 					+ ///
 					`""HFC Enumerator File""' 				+ ///
