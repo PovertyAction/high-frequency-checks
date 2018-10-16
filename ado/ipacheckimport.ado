@@ -101,6 +101,7 @@ program ipacheckimport, rclass
 					`""Missing Value \(\.d\)""' 		+ ///
 					`""Missing Value \(\.r\)""' 		+ ///
 					`""Missing Value \(\.n\) \(opt\.\)""' 	+ ///
+					`""Total Number of Surveys Planned""' 		+ ///
 					`""Statify Progress Report By""' 		+ ///
 				    `""Variables to keep in Master Data""' 	+ ///
 				    `""Variables to keep in Survey Data \(opt\.\)""' 	+ ///
@@ -171,11 +172,12 @@ program ipacheckimport, rclass
 					mv1         ///
 					mv2         ///
 					mv3         ///
+					pnumber     ///
 					psortby	 	///
 					pkeepmaster ///
 					pkeepsurvey ///
 					psave		///
-					ptarget		///
+					prate		///
 					pvariable	///
 					plabel		///
 					pmid		///
@@ -223,7 +225,7 @@ program ipacheckimport, rclass
 
 				* loop through boxes and define the matching global 
 				forval i = 1/`nboxes' {
-					if `i' <= 58 {
+					if `i' <= 59 {
 						loc strCol "DataManagementSystem"
 						loc valCol "B"
 					}

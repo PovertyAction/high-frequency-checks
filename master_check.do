@@ -53,7 +53,7 @@ if !mi("${repfile}") {
 if ${run_progreport} {    
 ipatracksummary using "${progreport}", ///
   submit(${date}) ///
-  target(${ptarget}) 
+  target(${pnumber}) 
 }
 
 
@@ -66,9 +66,9 @@ progreport, ///
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
-    keepsurvey(${pkeepsurvey})
+    keepsurvey(${pkeepsurvey}) ///
     filename("${progreport}") /// 
-    target(${ptarget}) ///
+    target(${prate}) ///
     mid(${pmid}) ///
     ${pvariable} ///
     ${plabel} ///
