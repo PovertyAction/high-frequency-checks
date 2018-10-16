@@ -95,7 +95,8 @@ program define ipachecknew
 	loc git "https://raw.githubusercontent.com/PovertyAction"
 	loc git_hfc "`git'/high-frequency-checks"
 	loc git_readme "https://raw.githubusercontent.com/PovertyAction/New_HFCs-Readmes"
-	
+	loc branch develop
+
 	////////////////////
 	// ERROR MESSAGES
 	////////////////////
@@ -224,7 +225,7 @@ program define ipachecknew
 			loc fol = "`:word `i' of `folders_main''"
 			loc name = "`:word `i' of `folders_names''"
 			di "Saving read me for `fol'"
-			loc output "`folder'\\`fol'\\`fol'_readme.txt"
+			loc output "`folder'/`fol'/`fol'_readme.txt"
 			copy "`git_readme'/master//`fol'_readme.txt" "`output'", replace
 		}
 	}
@@ -248,18 +249,18 @@ program define ipachecknew
 			
 			// HFC input file
 			di "Saving HFC input file"
-			loc output "`folder'//`hfc_input_loc'/hfc_inputs.xlsx"
-			copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
+			loc output "`folder'//`hfc_input_loc'/hfc_inputs.xlsm"
+			copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
 			
 			// HFC replacements file
 			di "Saving HFC replacements file"
-			loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsx"
-			copy "`git_hfc'//blob/master/xlsx/hfc_replacements.xlsx" "`output'", replace
+			loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsm"
+			copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
 			
 			// HFC master do file
 			di "Saving master do file"
 			loc output "`folder'//`hfc_master_loc'/master_check.do"
-			copy "`git_hfc'//blob/master/master_check.do" "`output'", replace
+			copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
 			
 		}
 		
@@ -271,18 +272,18 @@ program define ipachecknew
 			loc form "`:word `n' of `surveys''"
 				// HFC input file
 				di "Saving HFC input file - `form'"
-				loc output "`folder'//`hfc_input_loc'//`n'_`form'/hfc_inputs_`form'.xlsx"
-				copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
+				loc output "`folder'//`hfc_input_loc'//`n'_`form'/hfc_inputs_`form'.xlsm"
+				copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
 				
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
-				loc output "`folder'//`hfc_replace_loc'//`n'_`form'/hfc_replacements_`form'.xlsx"
-				copy "`git_hfc'/master/xlsx/hfc_replacements.xlsx" "`output'", replace
+				loc output "`folder'//`hfc_replace_loc'//`n'_`form'/hfc_replacements_`form'.xlsm"
+				copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
 				
 				// HFC master do file
 				di "Saving master do file - `form'"
 				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
-				copy "`git_hfc'/master/master_check.do" "`output'", replace
+				copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
 			}	
 		}
 		
@@ -292,18 +293,18 @@ program define ipachecknew
 			foreach form in `surveys' {
 				// HFC input file
 				di "Saving HFC input file - `form'"
-				loc output "`folder'//`hfc_input_loc'//hfc_inputs_`form'.xlsx"
-				copy "`git_hfc'/master/xlsx/hfc_inputs.xlsx" "`output'", replace
+				loc output "`folder'//`hfc_input_loc'//hfc_inputs_`form'.xlsm"
+				copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
 				
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
-				loc output "`folder'//`hfc_replace_loc'//hfc_replacements_`form'.xlsx"
-				copy "`git_hfc'/master/xlsx/hfc_replacements.xlsx" "`output'", replace
+				loc output "`folder'//`hfc_replace_loc'//hfc_replacements_`form'.xlsm"
+				copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
 				
 				// HFC master do file
 				di "Saving master do file - `form'"
 				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
-				copy "`git_hfc'/master/master_check.do" "`output'", replace
+				copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
 			}	
 		}	
 	}
