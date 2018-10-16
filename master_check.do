@@ -66,8 +66,10 @@ progreport, ///
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
+    keepsurvey(${pkeepsurvey})
     filename("${progreport}") /// 
     target(${ptarget}) ///
+    mid(${pmid}) ///
     ${pvariable} ///
     ${plabel} ///
     ${psummary} ///
