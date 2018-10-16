@@ -223,7 +223,7 @@ program ipacheckimport, rclass
 
 				* loop through boxes and define the matching global 
 				forval i = 1/`nboxes' {
-					if `i' <= 56 {
+					if `i' <= 58 {
 						loc strCol "DataManagementSystem"
 						loc valCol "B"
 					}
@@ -321,13 +321,13 @@ program ipacheckimport, rclass
 					mata: st_global("exclude`n'", "")
 
 					forval i = 1/`rows' {
-						if type[`i'] == 1 {
+						if type[`i'] == "type 1" {
 							mata: st_global("type1_`n'", `"${type1_`n'} `=variable[`i']'"')
 						}
-						else if type[`i'] == 2 {
+						else if type[`i'] == "type 2" {
 							mata: st_global("type2_`n'", `"${type2_`n'} `=variable[`i']'"')
 						}
-						else if type[`i'] == 3 {
+						else if type[`i'] == "type 3" {
 							mata: st_global("type3_`n'", `"${type3_`n'} `=variable[`i']'"')
 						}
 						else {
