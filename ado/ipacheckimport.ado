@@ -109,6 +109,8 @@ program ipacheckimport, rclass
 				    `""Use Variable Names as Headers \(opt\.\)""' 		+ ///
 				    `""Use Values for Factors \(opt\.\)""' 				+ ///
 				    `""ID in Master Tracking Data \(opt\.\)""' 			+ ///
+				    `""Summary only, no individual lists \(opt\.\)""'   + ///
+				    `""Export lists as separate workbooks \(opt\.\)""'  + ///
 				    `""Statistics to include in Enum DB""' 				+ ///
 				    `""Statistic Variables for Enum DB""' 				+ ///
 					`""Use SD for Outliers \(opt\.\)""' 				+ ///
@@ -177,6 +179,8 @@ program ipacheckimport, rclass
 					pvariable	///
 					plabel		///
 					pmid		///
+					psummary    ///
+					pworkbooks  ///
 					stats		///
 					statvars	///
 					sd          ///

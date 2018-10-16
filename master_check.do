@@ -70,7 +70,8 @@ progreport, ///
     target(${ptarget}) ///
     ${pvariable} ///
     ${plabel} ///
-    workbooks
+    ${psummary} ///
+    ${pworkbooks} 
 }
 
 

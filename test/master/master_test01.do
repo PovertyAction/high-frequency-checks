@@ -59,7 +59,7 @@ ipatracksummary using "${progreport}", ///
 
 /* <========== Track 2. Track surveys completed against planned ==========> */
 
-if ${run_progreport} {    	  
+if ${run_progreport} {        
 progreport, ///
     master("${master}") /// 
     survey("${sdataset}") /// 
@@ -70,8 +70,10 @@ progreport, ///
     target(${ptarget}) ///
     ${pvariable} ///
     ${plabel} ///
-    workbooks
+    ${psummary} ///
+    ${pworkbooks} 
 }
+
 
  /* <======== Track 3. Track form versions used by submission date ========> */
 
