@@ -226,7 +226,7 @@ program define ipachecknew
 			loc name = "`:word `i' of `folders_names''"
 			di "Saving read me for `fol'"
 			loc output "`folder'/`fol'/`fol'_readme.txt"
-			copy "`git_readme'/master//`fol'_readme.txt" "`output'", replace
+			copy "`git_readme'/master/`fol'_readme.txt" "`output'", replace
 		}
 	}
 	
@@ -245,7 +245,7 @@ program define ipachecknew
 		loc hfc_master_loc "02_dofiles"
 		
 		// Single form
-		if `:word count `surveys'' == 1 {	
+		if (`:word count `surveys'' == 1) | (`:word count `surveys'' == 0) {	
 			
 			// HFC input file
 			di "Saving HFC input file"
