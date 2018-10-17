@@ -18,6 +18,18 @@ ipacheckimport using "hfc_inputs.xlsm"
 
 
 /* =============================================================== 
+   ==================== Replace existing files  ================== 
+   =============================================================== */
+
+foreach file in "${outfile}" "${enumdb}" "${researchdb}" {
+  capture confirm file "`file'"
+  if !_rc {
+    rm "`file'"
+  }
+}
+
+
+/* =============================================================== 
    ================= Replacements and Corrections ================ 
    =============================================================== */
 
@@ -54,7 +66,6 @@ ipacheckids ${id} using "${dupfile}", ///
 
 preserve
 duplicates drop ${id}, force
-tempfile dedup
 save "`dedup'"
 restore
 
@@ -350,3 +361,4 @@ if ${run_backcheck} {
       ${bcshowall} ${bcshowrate} ${bcfull} ///
       ${bcnolabel} ${bcreplace}
 }
+
