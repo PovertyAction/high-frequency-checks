@@ -83,11 +83,12 @@ program ipacheckimport, rclass
 					`""Back Check Dataset""' 				+ ///
 					`""Master Tracking Dataset \(opt\.\)""' + ///
 					`""HFC \& BC Input file""' 				+ ///
-					`""Corrections Workbook \(opt\.\)""' 		+ ///
+					`""Corrections Workbook \(opt\.\)""' 	+ ///
 					`""Corrections WorkSheet \(opt\.\)""' 	+ ///
 					`""HFC Output File""' 					+ ///
 					`""HFC Enumerator File""' 				+ ///
-					`""Progress Report Output""'  + ///
+					`""Progress Report Output""'            + ///
+					`""Survey Duplicate Output File""' 	            + ///
 					`""Back Check Comparison Output \(opt\.\)""' 	+ ///
 					`""HFC Research File""' 						+ ///
 					`""Replacements Log \(opt\.\)""' 	+ ///
@@ -159,6 +160,7 @@ program ipacheckimport, rclass
 					outfile     ///
 					enumdb      ///
 					progreport	///
+					dupfile     ///
 					bcfile		///
 					researchdb  ///
 					replog		///
@@ -225,7 +227,7 @@ program ipacheckimport, rclass
 
 				* loop through boxes and define the matching global 
 				forval i = 1/`nboxes' {
-					if `i' <= 59 {
+					if `i' <= 60 {
 						loc strCol "DataManagementSystem"
 						loc valCol "B"
 					}
@@ -306,6 +308,12 @@ program ipacheckimport, rclass
 		    	}
 				if inlist(`"`sheet'"', "backchecks") {
 					if `rows' > 0 {
+						foreach var in okrange_min okrange_max {
+							cap confirm string variable `var' 
+							if _rc {
+								tostring `var', replace
+							}
+						}
 						* okrange global
 						g okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) +  "], "
 						replace okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) + "]" if _n == _N
@@ -337,11 +345,11 @@ program ipacheckimport, rclass
 							exit 198
 						}
 
-						if ttest[`i'] != "" {
+						if ttest[`i'] == "Yes" {
 							mata: st_global("ttest`n'", `"${ttest`n'} `=variable[`i']'"')
 						}
 						
-						if reliability[`i'] != "" {
+						if reliability[`i'] == "Yes" {
 							mata: st_global("reliability`n'", `"${reliability`n'} `=variable[`i']'"')
 						}
 

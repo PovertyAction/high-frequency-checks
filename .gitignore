@@ -8,8 +8,18 @@
 *_out_*.xlsx
 *_diffs.xlsx
 
+# ignore the tracking file
+*_tracking_*.xlsx
+*_tracking.xlsx
+
+# ignore the enumdb file
+*_enumdb.xlsx 
+
 # ignore the research file
 *research.xlsx
+
+# ignore the duplicates file
+*dups.xlsx
 
 # ignore the exercise folder
 exercise/

@@ -7,7 +7,7 @@
    =============================================================== */
    
 * this line adds standard boilerplate headings
-ipadoheader, version(13.0)
+ipadoheader, version(15.0)
    
 
 /* =============================================================== 
@@ -44,6 +44,21 @@ if !mi("${repfile}") {
 
 
 /* =============================================================== 
+   ================== Resolve survey duplicates ================== 
+   =============================================================== */
+
+ipacheckids ${id} using "${dupfile}", ///
+  enum(${enum}) ///
+  nolabel ///
+  variable
+
+preserve
+duplicates drop ${id}, force
+tempfile dedup
+save "`dedup'"
+restore
+
+/* =============================================================== 
    ==================== Survey Tracking ==========================
    =============================================================== */
 
@@ -62,7 +77,7 @@ ipatracksummary using "${progreport}", ///
 if ${run_progreport} {        
 progreport, ///
     master("${master}") /// 
-    survey("${sdataset}") /// 
+    survey("`dedup'") /// 
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
@@ -310,34 +325,26 @@ if ${run_research_twoway} {
    
    
 /* ===============================================================
-   =============== User Checks Programming Template ==============
+   =================== Analyze Back Check Data ===================
    =============================================================== */
 
-   /* we ENCOURAGE you to use this section to add additional 
-      data quality checks that are more specific to your data 
-      collection activities. we include several examples below to 
-      give you an sense of the possibilities and to show you how
-      to integrate the results of your custom checks in the 
-    standard Excel output. */
-
-* Example 1 
-* Check if GPS coordinates are within shapefile bounds (ssc install gpsbound)
-
-/*
-local shapefile "shapefiles/Ward.shp"
-
-preserve
-gpsbound using `shapefile', ///
-  lat(gpsLatitude)          ///
-  long(gpsLongitude)        ///
-  keepusing(ward)
-  
-assert ward_clean == ward 
-if _rc {
-  keep SubmissionDate id enumid gpsLatitude gpsLongitude ward ward_clean
-  keep if ward_clean != ward
-  export excel using "${outfile}", sheet("12. GPS bounds") firstrow(vars) sheetreplace
+if ${run_backcheck} {
+  bcstats, ///
+      surveydata("`dedup'")  ///
+      bcdata("${bdataset}")  ///
+      id(${id})              ///
+      enumerator(${enum})    ///
+      enumteam(${enumteam})  ///
+      backchecker(${bcer})   ///
+      bcteam(${bcerteam})    ///
+      t1vars(${type1_17})    ///
+      t2vars(${type2_17})    ///
+      t3vars(${type3_17})    ///
+      ttest(${ttest17})      ///
+      keepbc(${bckeepbc})    ///
+      keepsurvey(${bckeepsurvey}) ///
+      reliability(${reliability17}) ///
+      filename("${bcoutfile}") ///
+      lower nosymbol trim showall ///
+      replace
 }
-restore
-
-*/

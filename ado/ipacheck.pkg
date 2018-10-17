@@ -19,6 +19,7 @@ f ipadoheader.ado
 f ipacheckimport.ado
 f ipacheckcomplete.ado
 f ipacheckdups.ado
+f ipacheckids.ado
 f ipacheckconsent.ado
 f ipachecknomiss.ado
 f ipacheckfollowup.ado
