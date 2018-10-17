@@ -345,6 +345,8 @@ if ${run_backcheck} {
       keepsurvey(${bckeepsurvey}) ///
       reliability(${reliability17}) ///
       filename("${bcoutfile}") ///
-      lower nosymbol trim showall ///
-      replace
+      exclude(${bcexclude}) ///
+      ${bclower} ${bcupper} ${bcnosymbols} ${bctrim} ///
+      ${bcshowall} ${bcshowrate} ${bcfull} ///
+      ${bcnolabel} ${bcreplace}
 }
