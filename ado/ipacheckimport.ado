@@ -317,44 +317,44 @@ program ipacheckimport, rclass
 						* okrange global
 						g okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) +  "], "
 						replace okrangestr = variable + " [" + trim(okrange_min) + "," + trim(okrange_max) + "]" if _n == _N
-					}
 
-					* initialize Stata global
-					mata: st_global("type1_`n'", "")
-					mata: st_global("type2_`n'", "")
-					mata: st_global("type3_`n'", "")
-					mata: st_global("ttest`n'", "")
-					mata: st_global("reliability`n'", "")
-					mata: st_global("okrangestr`n'", "")
-					mata: st_global("keepbc`n'", "")
-					mata: st_global("keepsurvey`n'", "")
-					mata: st_global("exclude`n'", "")
+						* initialize Stata global
+						mata: st_global("type1_`n'", "")
+						mata: st_global("type2_`n'", "")
+						mata: st_global("type3_`n'", "")
+						mata: st_global("ttest`n'", "")
+						mata: st_global("reliability`n'", "")
+						mata: st_global("okrangestr`n'", "")
+						mata: st_global("keepbc`n'", "")
+						mata: st_global("keepsurvey`n'", "")
+						mata: st_global("exclude`n'", "")
 
-					forval i = 1/`rows' {
-						if type[`i'] == "type 1" {
-							mata: st_global("type1_`n'", `"${type1_`n'} `=variable[`i']'"')
-						}
-						else if type[`i'] == "type 2" {
-							mata: st_global("type2_`n'", `"${type2_`n'} `=variable[`i']'"')
-						}
-						else if type[`i'] == "type 3" {
-							mata: st_global("type3_`n'", `"${type3_`n'} `=variable[`i']'"')
-						}
-						else {
-							di as error "Invalid type entry in back check sheet. Must be 1, 2, or 3."
-							exit 198
-						}
+						forval i = 1/`rows' {
+							if type[`i'] == "type 1" {
+								mata: st_global("type1_`n'", `"${type1_`n'} `=variable[`i']'"')
+							}
+							else if type[`i'] == "type 2" {
+								mata: st_global("type2_`n'", `"${type2_`n'} `=variable[`i']'"')
+							}
+							else if type[`i'] == "type 3" {
+								mata: st_global("type3_`n'", `"${type3_`n'} `=variable[`i']'"')
+							}
+							else {
+								di as error "Invalid type entry in back check sheet. Must be 1, 2, or 3."
+								exit 198
+							}
 
-						if ttest[`i'] == "Yes" {
-							mata: st_global("ttest`n'", `"${ttest`n'} `=variable[`i']'"')
-						}
-						
-						if reliability[`i'] == "Yes" {
-							mata: st_global("reliability`n'", `"${reliability`n'} `=variable[`i']'"')
-						}
+							if ttest[`i'] == "Yes" {
+								mata: st_global("ttest`n'", `"${ttest`n'} `=variable[`i']'"')
+							}
+							
+							if reliability[`i'] == "Yes" {
+								mata: st_global("reliability`n'", `"${reliability`n'} `=variable[`i']'"')
+							}
 
-						if okrange_min[`i'] != "" & okrange_max[`i'] != "" {
-							mata: st_global("okrangestr`n'", `"${okrangestr`n'} `=okrangestr[`i']'"')
+							if okrange_min[`i'] != "" & okrange_max[`i'] != "" {
+								mata: st_global("okrangestr`n'", `"${okrangestr`n'} `=okrangestr[`i']'"')
+							}
 						}
 					}
 
