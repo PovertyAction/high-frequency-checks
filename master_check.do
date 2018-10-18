@@ -14,14 +14,14 @@ ipadoheader, version(15.0)
    ================== Import globals from Excel  ================= 
    =============================================================== */
 
-ipacheckimport using "hfc_inputs.xlsm"
+ipacheckimport using "../04_checks/01_inputs/hfc_inputs.xlsm"
 
 
 /* =============================================================== 
    ==================== Replace existing files  ================== 
    =============================================================== */
 
-foreach file in "${outfile}" "${enumdb}" "${researchdb}" {
+foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}"{
   capture confirm file "`file'"
   if !_rc {
     rm "`file'"
@@ -58,16 +58,13 @@ if !mi("${repfile}") {
 /* =============================================================== 
    ================== Resolve survey duplicates ================== 
    =============================================================== */
-
+tempfile dedup
 ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
-  variable
-
-preserve
-duplicates drop ${id}, force
-save "`dedup'"
-restore
+  variable ///
+  force ///
+  save("`dedup'")
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================
@@ -99,7 +96,8 @@ progreport, ///
     ${pvariable} ///
     ${plabel} ///
     ${psummary} ///
-    ${pworkbooks} 
+    ${pworkbooks} ///
+	surveyok
 }
 
 
@@ -247,7 +245,6 @@ if ${run_specify} {
     sheetreplace ${nolabel}
 }
 
-  
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 
 if ${run_dates} {
@@ -355,7 +352,7 @@ if ${run_backcheck} {
       keepbc(${bckeepbc})    ///
       keepsurvey(${bckeepsurvey}) ///
       reliability(${reliability17}) ///
-      filename("${bcoutfile}") ///
+      filename("${bcfile}") ///
       exclude(${bcexclude}) ///
       ${bclower} ${bcupper} ${bcnosymbols} ${bctrim} ///
       ${bcshowall} ${bcshowrate} ${bcfull} ///

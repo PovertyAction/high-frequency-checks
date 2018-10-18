@@ -17,8 +17,10 @@ program progreport
 		[NOLabel]				/// default is to use value labels
 		[clear]					///	to show merged dataset; if not included, console remains the same
 		[summary]				/// if used, does not include individual observations
-		[WORKbooks]				// separates into workbooks instead of worksheets in one workbook
-	version 14.1
+		[WORKbooks]				/// separates into workbooks instead of worksheets in one workbook
+		[surveyok]				// allows people who are in survey data only
+		
+		version 14.1
 
 /* ------------------------------ Load Sample ------------------------------- */
 qui {
@@ -53,6 +55,21 @@ tempvar status
 
 	lab def _merge 1 "Not submitted" 2 "Only in Questionnaire Data" 3 "Submitted", modify
 	decode _merge, gen(`status')
+	qui count if _merge == 2
+	loc surveyonly `r(N)'
+	if `surveyonly' > 0 {
+
+		if "`surveyok'" == "" {
+			dis as err "`surveyonly' IDs appear in survey data only. Use -surveyok- option to allow or check for incorrect IDs."
+			error 198
+
+		}
+		else {
+			noi di ""
+			noi di "`surveyonly' IDs appear in the survey data only. These IDs are not counted in the totals."
+
+		}
+	}
 
 	local allvars `id' `keepmaster' `keepsurvey' questionnaire_date `status'
 	lab var `status' "Status"
@@ -66,6 +83,7 @@ tempvar status
 		gen completed = 1 if _merge == 3
 		gen total = 1 if _merge != 2
 		collapse (sum) completed total (min) first_submitted=questionnaire_date (max) last_submitted=questionnaire_date, by(`sortby')
+		drop if mi(`sortby') // so it doesn't show in the table
 		gen pct_completed = completed/total, after(total)
 		lab var completed "Submitted"
 		lab var total "Total"
@@ -102,6 +120,61 @@ tempvar status
 
 	/* --------------------------- Create Sheets ---------------------------- */
 
+if "`surveyok'" == "surveyok" & `surveyonly' > 0 {
+
+	if mi("`variable'") {
+		local variable = "varl"
+	}
+
+	*If want value labels, encode variable so those are used as colwidth
+	if "`nolabel'" == "" {
+		ds `allvars', has(vallab)
+		foreach var in `r(varlist)' {
+			cap decode `var', gen(`var'_new)
+			if _rc == 111 {
+				lab val `var' .
+			}
+			if !_rc {
+				drop `var'
+				ren `var'_new `var'
+			}
+		}
+	}
+
+	local check `:type `sortby''
+	if substr("`check'", 1, 3) != "str" {
+		loc labels : val l `sortby'
+		if mi("`labels'") {
+			tostring `sortby', replace
+		}
+		else {
+
+			loc upper = strproper("`sortby'")
+			decode `sortby', gen(`upper')
+			loc sortby `upper'
+
+		}
+	}
+	
+	preserve
+	
+	if "`variable'" == "variable" {
+		ds `status', not
+		foreach var in `r(varlist)' {
+			lab var `var' "`var'"
+		}
+	}
+	export excel `id' `keepsurvey' questionnaire_date `status' if mi(`sortby') using "`filename'.xlsx", ///
+	firstrow(varl) sheet("Only in Survey") sheetreplace `nolabel'
+	
+	restore
+	
+	qui count if mi(`sortby')
+	loc N = `r(N)' + 1
+	mata : create_progress_report("`filename'.xlsx", "Only in Survey", tokens("`id' `keepsurvey' questionnaire_date `status'"), `N')
+
+}
+	
 if "`summary'"	== "" {
 	
 	if mi("`variable'") {
@@ -165,6 +238,7 @@ if "`summary'"	== "" {
 			firstrow(varl) sheet("`sortval'") sheetreplace `nolabel'
 		
 		}
+		
 		qui count if `sortby' == "`sortval'"
 		local N = `r(N)' + 1
 		
@@ -278,6 +352,12 @@ void create_summary_sheet(string scalar filename, string matrix allvars, real sc
 		}
 		b.set_column_width(i, i, column_widths[i] + 2)
 	}
+	
+	if (st_local("surveyok") == "surveyok" & strtoreal(st_local("surveyonly")) > 0) {
+		b.put_string(N+2, 1, st_local("surveyonly") + " IDs did not appear in master dataset. Review 'Only in Survey' sheet.")
+	}
+	
+	
 	b.close_book()
 }
 void create_progress_report(string scalar filename, string scalar sortval, string matrix allvars, real scalar N) 

@@ -4,8 +4,9 @@ program ipacheckids
 	syntax varname [using/], ///
 		ENUMerator(varname)  ///
 		[NOLabel]			 ///
-		[VARiable]
-		
+		[VARiable]			 ///
+		[force]				 ///
+		[save(string)]
 version 14.1
 
 if mi("`using'") {
@@ -14,6 +15,12 @@ if mi("`using'") {
 
 if mi("`variable'") {
 	loc variable varl
+}
+
+if "`force'" == "" & "`save'" != "" {
+	dis as error "option {bf:save} not allowed"
+	dis as error "{col 5}option {bf:save} requires you also specify option {bf:force}, which changes the existing dataset."
+	error 198
 }
 
 qui {
@@ -28,6 +35,10 @@ save `survey_dta'
 keep if `touse'
 
 sort `varlist' submissiondate key
+cap confirm string variable `varlist' 
+if _rc {
+	tostring `varlist', replace
+	}
 duplicates tag `varlist', gen(dup)
 count if dup
 
@@ -50,18 +61,18 @@ if `r(N)' > 0 {
 	foreach id in `ids' {
 
 		preserve
-			keep if `varlist' == `id'  
+			keep if `varlist' == "`id'" 
 			keep if _n == 1 			
 			tempfile first
 			save "`first'"
 		restore
 
 		local pairdiff
-		count if `varlist' == `id' 
+		count if `varlist' == "`id'" 
 		forval i = 2/`r(N)' {
 
 			preserve
-				keep if `varlist' == `id' 
+				keep if `varlist' == "`id'" 
 				keep if _n == `i' 
 				cfout `cfvars' using "`first'", id(`varlist')
 				loc different`i' = `r(discrep)'
@@ -70,9 +81,9 @@ if `r(N)' > 0 {
 				local loc`i' `r(alldiff)'
 			restore
 
-			replace `prctdiff' = `prctdiff`i'' if n == `i' & `varlist' == `id' 
-			replace `differences' = `different`i'' if n == `i' & `varlist' == `id' 
-			replace `total' = `total`i'' if n == `i' & `varlist' == `id' 
+			replace `prctdiff' = `prctdiff`i'' if n == `i' & `varlist' == "`id'" 
+			replace `differences' = `different`i'' if n == `i' & `varlist' == "`id'"
+			replace `total' = `total`i'' if n == `i' & `varlist' == "`id'"
 			local pairdiff `pairdiff' `loc`i''
 		}
 		
@@ -111,11 +122,11 @@ levelsof `varlist', loc(original)
 
 foreach id in `id_ordered' {
 	loc count : list posof "`id'" in original
-	export excel `varlist' key `pairdiff`count'' using "`using'" if dup > 0 & `varlist' == `id' , ///
+	export excel `varlist' key `pairdiff`count'' using "`using'" if dup > 0 & `varlist' == "`id'", ///
 	sheet("Raw") firstrow(`variable') sheetmodify `nolabel' cell(A`start')
 	
 		
-	count if `varlist' == `id' 
+	count if `varlist' == "`id'"
 	loc counter `r(N)'
 	loc end = `start' + `counter'
 	loc column : word count `varlist' key `pairdiff`count''
@@ -148,10 +159,17 @@ foreach id in `id_ordered' {
 
 	use `survey_dta', clear
 
-	duplicates drop `varlist', force
 	noi di "`:word count `ids'' duplicate groups placed in `using'." 
-	noi di "One from each group is randomly kept in this dataset."
 
+	if "`force'" == "force" {
+		duplicates drop `varlist', force
+		noi di "One from each group is randomly kept in this dataset."
+		if "`save'" != "" {
+		save "`save'", replace
+		}
+	}
+	else noi di "All duplicates are kept. To randomly drop them, use -force- option." 
+	
 	}
 	else noi di "No duplicates found for `varlist'!"
 } // qui bracket
