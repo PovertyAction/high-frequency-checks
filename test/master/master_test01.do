@@ -59,15 +59,14 @@ if !mi("${repfile}") {
    ================== Resolve survey duplicates ================== 
    =============================================================== */
 
+tempfile dedup
 ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
-  variable
-
-preserve
-duplicates drop ${id}, force
-save "`dedup'"
-restore
+  variable ///
+  force ///
+  save("`dedup'")
+  
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================

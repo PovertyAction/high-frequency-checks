@@ -37,8 +37,13 @@ keep if `touse'
 sort `varlist' submissiondate key
 cap confirm string variable `varlist' 
 if _rc {
-	tostring `varlist', replace
+	summ `varlist'
+	if `r(max)' > 10^7 {
+		nois di as error "Warning: using large numeric IDs may result in loss of precision. Consider converting to string!"
 	}
+	
+	tostring `varlist', replace force usedisplayformat
+}
 duplicates tag `varlist', gen(dup)
 count if dup
 
