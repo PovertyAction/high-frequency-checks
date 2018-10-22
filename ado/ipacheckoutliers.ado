@@ -1,7 +1,4 @@
-*! version 2.0.2 Rosemarie Sandino 24aug2018
-*! version 2.0.1 Christopher Boyer 26jul2017
-*! version 1.1.0 Kelsey Larson 21feb2017
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipacheckoutliers, rclass
 	/* This program checks for outliers among 
