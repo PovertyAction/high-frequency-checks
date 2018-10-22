@@ -1,4 +1,4 @@
-*! version 2.0.0 Christopher Boyer 09apr2017
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipacheckresearch, rclass
 	/* This program creates oneway and twoway summaries 
