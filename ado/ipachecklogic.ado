@@ -1,5 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
-*! version 2.0.1 Christopher Boyer 26jul2017
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipachecklogic, rclass
 	/* This program checks skip patterns and logical constraints */
