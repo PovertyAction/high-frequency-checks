@@ -48,7 +48,7 @@ ipacheck version
 ```
 If you encounter a clear bug, please file a minimal reproducible example on [github](https://github.com/PovertyAction/high-frequency-checks/issues). For questions and other discussion, please email us at [researchsupport@poverty-action.org](mailto:researchsupport@poverty-action.org).
 
-## Authors:
+## Authors
  - Christopher Boyer
  - Caton Brewster
  - Kelsey Larson
