@@ -1,5 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
-*! version 2.0.0 Christopher Boyer/Caton Brewster 18mar2017
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipatracksummary, rclass
     /* Add a summary sheet to the output excel file detailing
