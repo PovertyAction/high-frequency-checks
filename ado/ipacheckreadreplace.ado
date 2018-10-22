@@ -1,5 +1,4 @@
-*! Vesrion 2.0.0 Ishmail Azindoo Baako, Jan 18
-*! Version 1.0.0 Kelsey Larson, March 16
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 prog ipacheckreadreplace, rclass
 	/* This program makes corrections to a database from a second database of 
