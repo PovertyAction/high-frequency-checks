@@ -1,5 +1,4 @@
-*! version 1.0.0 Christopher Boyer 04may2016
-*! version 1.0.1 Adjustments to ipachecknew by Isabel Onate 15Aug2018
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipacheck, rclass
 	/* This is a utility function to help update the ipacheck package
