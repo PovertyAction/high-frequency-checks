@@ -1,6 +1,4 @@
-*! version 1.1.0 Christopher Boyer 22feb2017
-*! version 1.0.1 Kelsey Larson 08jan2017
-*! version 1.0.0 Christopher Boyer 04may2016
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipacheckimport, rclass
 	/* This program imports high frequency check inputs
