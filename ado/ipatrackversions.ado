@@ -1,6 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 10oct2018
-*! version 2.0.1 ChristopherBoyer 25apr2017
-*! version 1.0.0 Caton brewster 10nov2016
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipatrackversions, rclass 
 	/* Create a sheet that shows the survey versions used for each day of surveying. 
