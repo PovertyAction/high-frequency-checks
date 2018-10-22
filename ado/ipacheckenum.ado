@@ -1,4 +1,4 @@
-*! version 2.1.2 Isabel Onate & Rosemarie Sandino 10oct018
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipacheckenum
 	/* This command constructs: 
