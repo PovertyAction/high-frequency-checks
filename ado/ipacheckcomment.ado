@@ -1,4 +1,4 @@
-*! version 1.0.0 Ishmail Azindoo Baako 12feb2018
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 * Stata program for merging and outputting field comments
 prog define ipacheckcomment, rclass
