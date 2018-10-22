@@ -1,4 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24uag2018
+*! version 2.0.2 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckdups, rclass
