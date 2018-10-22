@@ -61,18 +61,21 @@ program define ipacheckversion
 	    ipachecknomiss      ///
 	    ipacheckoutliers    ///
 	    ipacheckresearch    ///
-	    ipacheckskip        ///
+	    ipachecklogic       ///
 	    ipacheckspecify     ///
 	    ipadoheader         ///
 	    ipatracksummary     ///
-	    ipatracksurveys     ///     
+	    progreport          ///     
 	    ipatrackversions           
 
 	foreach prg in `programs' {
 		cap which `prg'
 		if !_rc {
 			local path = c(sysdir_plus)
+			if substr("`prg'", 1, 1) == "i" {
 			mata: get_version("`path'i/`prg'.ado")
+			}
+			else mata: get_version("`path'p/`prg'.ado")
 		}
 	}
 end
