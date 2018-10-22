@@ -1,4 +1,4 @@
-*! version 1.0.0 Rosemarie Sandino 09oct2018 
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipacheckids
 	syntax varname [using/], ///
