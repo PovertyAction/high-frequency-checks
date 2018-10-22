@@ -1,5 +1,4 @@
-*! version 2.0.1 Rosemarie Sandino 10oct2018
-*! version 1.0.1 Rosemarie Sandino 17jul2018
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program progreport
 	syntax, 	/// 
