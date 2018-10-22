@@ -1,4 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
+*! version 2.0.2 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckfollowup, rclass
@@ -52,10 +52,10 @@ program ipacheckfollowup, rclass
 
     local unique : list uniq lines
     local keeplist : list admin | unique
+
 	if !missing("`sctodb'") {
 		local keeplist `"`keeplist' scto_link"'
 	}
-
 	local master "`using'"
 
 	* initialize meta data variables
@@ -133,7 +133,8 @@ program ipacheckfollowup, rclass
 	export excel `all' using "`saving'" ,  ///
 		sheet("5. follow up") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
-	
+
+		unab keeplist : `keeplist'
 		mata: basic_formatting("`saving'", "5. follow up", tokens("`all'"), tokens("`colorcols'"), `=_N')	
 
 	*export scto links as links

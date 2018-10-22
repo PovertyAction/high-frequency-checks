@@ -177,6 +177,8 @@ program ipachecknomiss, rclass
 		sheet("4. no miss") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 
+	unab keeplist : `keeplist'
+
 	mata: basic_formatting("`saving'", "4. no miss", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 
 	*export scto links as links

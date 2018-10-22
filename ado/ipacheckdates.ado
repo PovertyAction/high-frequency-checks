@@ -1,4 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
+*! version 2.0.2 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckdates, rclass
@@ -95,6 +95,7 @@ program ipacheckdates, rclass
     local unique : list uniq lines
     local keeplist : list admin | meta
     local keeplist : list keeplist | unique
+
 	
 	* initialize locals
 	local missing = 0
@@ -247,7 +248,7 @@ program ipacheckdates, rclass
 	export excel `keeplist' using "`saving'" ,  ///
 		sheet("10. dates") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
-		
+	unab keeplist : `keeplist'	
 	mata: basic_formatting("`saving'", "10. dates", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 	
 	*export scto links as links

@@ -1,4 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
+*! version 2.0.2 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckcomplete, rclass
@@ -185,6 +185,7 @@ program ipacheckcomplete, rclass
 		sheet("1. incomplete") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel' 
 	
+	unab keeplist : `keeplist'	
 	mata: basic_formatting("`saving'", "1. incomplete", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 		
 	*export scto links as links

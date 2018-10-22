@@ -68,6 +68,7 @@ program ipacheckdups, rclass
     local keeplist : list admin | uniqueidvars
     local keeplist : list keeplist | meta
     local keeplist : list keeplist | uniquekeepvars
+
 	
     * define locals
 	local ndups1 = 0
@@ -184,7 +185,8 @@ program ipacheckdups, rclass
 	export excel `keeplist' using "`saving'" ,  ///
 		sheet("2. duplicates") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
-		
+
+	unab keeplist : `keeplist'		
 	mata: basic_formatting("`saving'", "2. duplicates", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 		
 	*export scto links as links
