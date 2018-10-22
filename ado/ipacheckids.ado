@@ -37,8 +37,16 @@ keep if `touse'
 sort `varlist' submissiondate key
 cap confirm string variable `varlist' 
 if _rc {
-	tostring `varlist', replace
+	summ `varlist'
+	if abs(floor(log10(`r(max)'))) + 1 > 20 {
+		nois di as error "Error: cannot reversibly convert `id' to string without loss of precision. Consider using a different ID or convert yourself."
+		error 198
 	}
+	else if abs(floor(log10(`r(max)'))) + 1 > 8 {
+		nois di as error "Warning: using large numeric IDs may result in loss of precision. Consider converting to string!"
+	}
+	tostring `varlist', replace force format("%20.0g")
+}
 duplicates tag `varlist', gen(dup)
 count if dup
 

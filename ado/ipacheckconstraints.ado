@@ -1,4 +1,4 @@
-*! version 3.0.0 Rosemarie Sandino 24aug2018
+*! version 2.0.2 Rosemarie Sandino 24aug2018
 *! version 2.0.1 Christopher Boyer 26jul2017
 
 program ipacheckconstraints, rclass
@@ -225,6 +225,7 @@ program ipacheckconstraints, rclass
 		sheet("8. constraints") `sheetreplace' `sheetmodify' ///
 		firstrow(variables) `nolabel'
 	
+	unab keeplist : `keeplist'	
 	mata: basic_formatting("`saving'", "8. constraints", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 
 	*export scto links as links

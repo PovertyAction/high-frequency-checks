@@ -1,12 +1,12 @@
 *! version 1.0.0 Christopher Boyer 04may2016
-*! version 1.0.1 Adjustments to ipachecnew by Isabel Onate 15Aug2018
+*! version 1.0.1 Adjustments to ipachecknew by Isabel Onate 15Aug2018
 
 program ipacheck, rclass
 	/* This is a utility function to help update the ipacheck package
 	   and initialize new projects. */
 	version 13
 	gettoken cmd 0 : 0, parse(" ,")
-	syntax [anything], [surveys(string)] [folder(string)] [SUBFOLDERS]
+	syntax [anything], [surveys(string)] [folder(string)] [SUBFOLDERS] [files]
 
 	if `"`cmd'"'=="" {
 		di as txt "ipacheck options are"
@@ -27,7 +27,7 @@ program ipacheck, rclass
 		exit
 	}
 	if `"`cmd'"' == substr("new", 1, max(1,`l')) {
-		ipachecknew, surveys(`surveys') folder(`folder') `subfolders'
+		ipachecknew, surveys(`surveys') folder(`folder') `subfolders' `files'
 		exit
 	}
 end
@@ -61,18 +61,21 @@ program define ipacheckversion
 	    ipachecknomiss      ///
 	    ipacheckoutliers    ///
 	    ipacheckresearch    ///
-	    ipacheckskip        ///
+	    ipachecklogic       ///
 	    ipacheckspecify     ///
 	    ipadoheader         ///
 	    ipatracksummary     ///
-	    ipatracksurveys     ///     
+	    progreport          ///     
 	    ipatrackversions           
 
 	foreach prg in `programs' {
 		cap which `prg'
 		if !_rc {
 			local path = c(sysdir_plus)
+			if substr("`prg'", 1, 1) == "i" {
 			mata: get_version("`path'i/`prg'.ado")
+			}
+			else mata: get_version("`path'p/`prg'.ado")
 		}
 	}
 end
@@ -89,14 +92,15 @@ void get_version(string scalar program) {
 end
 
 program define ipachecknew
-	syntax, [surveys(string)] [folder(string)] [SUBfolders]
+	syntax, [surveys(string)] [folder(string)] [SUBfolders] [files]
 	
 	// Set up URL
 	loc git "https://raw.githubusercontent.com/PovertyAction"
 	loc git_hfc "`git'/high-frequency-checks"
 	loc git_readme "https://raw.githubusercontent.com/PovertyAction/New_HFCs-Readmes"
-	loc branch develop
-
+	loc branch develop	
+	
+	
 	////////////////////
 	// ERROR MESSAGES
 	////////////////////
@@ -112,6 +116,10 @@ program define ipachecknew
 		exit 101 
 	}
 	
+	if "`files'" == "files" & "`surveys'" != "" {
+		noi disp as err "Option for files can only be used with the folders option"
+		exit 101 	
+	}
 	////////////////////
 	// SET UP FOLDER
 	////////////////////
@@ -141,6 +149,28 @@ program define ipachecknew
 			"08_field_manager""
 			;
 		#d cr
+		
+		if "`files'" == "files" {
+	
+		// HFC input file
+		di "Saving HFC input file"
+		loc output "`folder'//`hfc_input_loc'/hfc_inputs.xlsm"
+		copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
+		
+		// HFC replacements file
+		di "Saving HFC replacements file"
+		loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsm"
+		copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
+		
+		// HFC master do file
+		di "Saving master do file"
+		loc output "`folder'//`hfc_master_loc'/master_check.do"
+		copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+		
+		exit
+	}
+
+		
 		
 		// Create folders in local directory 
 		noi disp
