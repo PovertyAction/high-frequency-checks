@@ -360,7 +360,7 @@ cd "../check06"
 * Test 1
 use check06_test01, clear
 ipacheckimport using "check06_test01_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -373,7 +373,7 @@ ipacheckskip ${variable6}, ///
 * Test 2
 use check06_test02, clear
 ipacheckimport using "check06_test02_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -386,7 +386,7 @@ ipacheckskip ${variable6}, ///
 	* Test 3
 use check06_test03, clear
 ipacheckimport using "check06_test03_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(`"${assert6}"') ///
 	condition(`"${if_condition6}"') ///
 	keepvars(${keep_variable6}) ///
@@ -399,7 +399,7 @@ ipacheckskip ${variable6}, ///
 	/* Test 4
 use check06_test04, clear
 ipacheckimport using "check06_test04_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -412,7 +412,7 @@ ipacheckskip ${variable6}, ///
 	* Test 5
 use check06_test05, clear
 ipacheckimport using "check06_test05_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(`"${assert6}"') ///
 	condition(`"${if_condition6}"') ///
 	keepvars(${keep_variable6}) ///
@@ -425,7 +425,7 @@ ipacheckskip ${variable6}, ///
 * Test 6
 use check06_test06, clear
 ipacheckimport using "check06_test06_in.xlsx"
-ipacheckskip ${variable6}, ///
+ipachecklogic ${variable6}, ///
 	assert(${assert6}) ///
 	condition(${if_condition6}) ///
 	keepvars(${keep_variable6}) ///
@@ -785,13 +785,13 @@ rcof ipatrackversions form_version, id(id) ///
 	submit(submissiondate) ///
     saving("`outfile'") == 101 
 
-* Test 3
+/* Test 3
 use track03_test03, clear
 local outfile "track03_test03_out.xlsx"
 rcof ipatrackversions form_version, id(id) ///
 	enumerator(enum) ///
 	submit(submissiondate) ///
-    saving("`outfile'") == 122
+    saving("`outfile'") == 122*/
 
 * Test 4
 use track03_test04, clear
@@ -801,13 +801,43 @@ rcof ipatrackversions form_version, id(id) ///
 	submit(submissiondate) ///
     saving("`outfile'") == 101 
 
+
+/* =================================================
+   ========== Track 2 - Progress Report ============
+   ================================================= */
+
+cd "../progreport"
+use survey_data, clear
+
+* Test 1
+local outfile "progreport_test01_out.xlsx"
+rcof progreport, ///
+    master("sample.dta") ///
+    survey("survey_data.dta") ///
+    id("id") ///
+    sortby("ward") ///
+    keepmaster("gender age") ///
+    filename("`outfile'") == 134
+
+* Test 2
+local outfile "progreport_test02_out.xlsx"
+progreport, ///
+    master("sample.dta") ///
+    survey("survey_data.dta") ///
+    id("id") ///
+    sortby("ward") ///
+    keepmaster("gender age") ///
+    filename("`outfile'") ///
+    workbooks
+
+
 /* =================================================
    =========== Track 2 - Track Surveys =============
    ================================================= */
    
 cd "../track02"
 
-* Test 1
+/* Test 1
 use track02_test01, clear
 local outfile "track02_test01_out.xlsx"
 ipatracksurveys using "`outfile'", unit(region) ///
@@ -850,7 +880,7 @@ local outfile "track02_test06_out.xlsx"
 ipatracksurveys using "`outfile'", unit(region) ///
 	id(id) submit(submissiondate) ///
 	sample("track02_test06_sample.xlsx")
-
+*/
 
 /* =================================================
    =================== Enumerator ================== 
@@ -860,10 +890,12 @@ cd "../enumerator"
 * Test 1
 use enumerator_test01, clear
 ipacheckimport using "enumerator_test01_in.xlsx"
-ipacheckenum enumid using "enumerator_test01_out.xlsx", ///
+ipacheckenum enum using "enumerator_test01_out.xlsx", ///
    dkrfvars(${dkrf_variable12}) ///
    missvars(${missing_variable12}) ///
-   subdate(${submission_date12}) ///
+   othervars(dontknow) ///
+   statvars(age) ///
+   subdate(${submission_date12}) mean max min sd ///
    days(2000)
 
    
@@ -892,20 +924,48 @@ ipacheckresearch using "research_test02_out.xlsx", ///
 cd "../readreplace"
 *Test 1
 use readreplace_test01, clear
-ipacheckreadreplace using "readreplace_test01_corr.xlsx", ///
+ipacheckreadreplace using "readreplace_test01_corr.xlsm", ///
 	id(id) ///
 	variable(variable) ///
 	value(value) ///
-	oldvalue(oldvalue) ///
-	selectmultiple(selectmultiple) ///
-	excel ///
-	import(firstrow)
+	newvalue(newvalue) ///
+    action(action) ///
+    comments(comments) ///
+    sheet(replacements) ///
+    logusing("replog_out.xlsx")
    
+
+/* =================================================
+   ================== Back Checks ================== 
+   ================================================= */
+
+cd "../bcstats"
+
+ipacheckimport using "bcstats_test01_inputs.xlsx"
+bcstats, ///
+    surveydata(${dataset}) ///
+    bcdata(${bcdataset})   ///
+    id(${id})              ///
+    enumerator(${enum})    ///
+    enumteam(${enumteam})  ///
+    backchecker(${bcer})   ///
+    bcteam(${bcerteam})    ///
+    t1vars(${type1_15})    ///
+    t2vars(${type2_15})    ///
+    t3vars(${type3_15})    ///
+    ttest(${ttest15})     ///
+    keepbc(${bckeepbc})    ///
+    keepsurvey(${bckeepsurvey}) ///
+    reliability(${reliability15}) ///
+    filename("${bcoutfile}") ///
+    lower nosymbol trim showall ///
+    replace
+
 /* =================================================
    ==================== Master ===================== 
    ================================================= */
-  
+/*  
 cd "../master"
 
-* Test 1
+/* Test 1
 do "master_test01.do"

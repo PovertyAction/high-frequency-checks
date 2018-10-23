@@ -1,4 +1,4 @@
-*! version 1.0.1 Christopher Boyer 27jun2017
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 program ipadoheader , rclass
 	 * note this file is adapted from Kristoffer Bjärkefur's fantastic ieboilstart program
