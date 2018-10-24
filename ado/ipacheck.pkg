@@ -8,21 +8,23 @@ d KW: data management
 d KW: data quality
 d KW: data entry
 d
-d Requires: Stata version 13.0
+d Requires: Stata version 14.1
 d
 d Distribution-Date: 20170407
 d
 d Authors: Christopher Boyer, Innovations for Poverty Action
 d Support: researchsupport@poverty-action.org
 f ipacheck.ado
+f ipacheck.sthlp
 f ipadoheader.ado
 f ipacheckimport.ado
 f ipacheckcomplete.ado
 f ipacheckdups.ado
+f ipacheckids.ado
 f ipacheckconsent.ado
 f ipachecknomiss.ado
 f ipacheckfollowup.ado
-f ipacheckskip.ado
+f ipachecklogic.ado
 f ipacheckallmiss.ado
 f ipacheckconstraints.ado
 f ipacheckspecify.ado
@@ -32,9 +34,10 @@ f ipacheckenum.ado
 f ipacheckresearch.ado
 f ipacheckreadreplace.ado
 f ipatracksummary.ado
-f ipatracksurveys.ado
+f progreport.ado
 f ipatrackversions.ado
-f ../xlsx/hfc_enumerators.xlsx
-f ../xlsx/hfc_inputs.xlsx
-f ../xlsx/hfc_replacements.xlsx
+f ipachecktextaudit.ado
+f ipacheckcomment.ado
+f ../xlsx/hfc_inputs.xlsm
+f ../xlsx/hfc_replacements.xlsm
 f ../master_check.do
