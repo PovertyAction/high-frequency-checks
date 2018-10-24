@@ -15,6 +15,7 @@ d
 d Authors: Christopher Boyer, Innovations for Poverty Action
 d Support: researchsupport@poverty-action.org
 f ipacheck.ado
+f ipacheck.sthlp
 f ipadoheader.ado
 f ipacheckimport.ado
 f ipacheckcomplete.ado
