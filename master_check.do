@@ -58,13 +58,13 @@ if !mi("${repfile}") {
 /* =============================================================== 
    ================== Resolve survey duplicates ================== 
    =============================================================== */
-tempfile dedup
+
 ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
   variable ///
   force ///
-  save("`dedup'")
+  save("${dataset_f}_checked")
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================
@@ -85,7 +85,7 @@ ipatracksummary using "${progreport}", ///
 if ${run_progreport} {        
 progreport, ///
     master("${master}") /// 
-    survey("`dedup'") /// 
+    survey("${dataset_f}_checked") /// 
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
@@ -338,7 +338,7 @@ if ${run_research_twoway} {
 
 if ${run_backcheck} {
   bcstats, ///
-      surveydata("`dedup'")  ///
+      surveydata("${dataset_f}_checked")  ///
       bcdata("${bdataset}")  ///
       id(${id})              ///
       enumerator(${enum})    ///
