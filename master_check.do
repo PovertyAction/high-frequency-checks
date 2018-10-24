@@ -1,4 +1,4 @@
-*! version 2.0.0 Christopher Boyer 07apr2017
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 /* =============================================================== 
    ===============================================================
@@ -21,7 +21,7 @@ ipacheckimport using "../04_checks/01_inputs/hfc_inputs.xlsm"
    ==================== Replace existing files  ================== 
    =============================================================== */
 
-foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}"{
+foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}" "${progreport}" "${dupfile}"{
   capture confirm file "`file'"
   if !_rc {
     rm "`file'"
@@ -44,7 +44,7 @@ if !mi("${mv3}") recode `numeric' (${mv3} = .n)
 
 if !mi("${repfile}") {
   ipacheckreadreplace using "${repfile}", ///
-    id("${id}") ///
+    id("key") ///
     variable("variable") ///
     value("value") ///
     newvalue("newvalue") ///
