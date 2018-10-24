@@ -240,6 +240,7 @@ program ipacheckimport, rclass
 					mata: st_global("`global'", "")
 					mata: st_global("`global'", `"`value'"')
 				}
+				gl sdataset_f = subinstr("$sdataset", ".dta", "", .)
 			}
 			
 			else {
