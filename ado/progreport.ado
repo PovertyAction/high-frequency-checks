@@ -60,7 +60,7 @@ tempvar status
 
 		if "`surveyok'" == "" {
 			dis as err "`surveyonly' IDs appear in survey data only. Use -surveyok- option to allow or check for incorrect IDs."
-			error 198
+			exit 198
 
 		}
 		else {
@@ -163,14 +163,12 @@ if "`surveyok'" == "surveyok" & `surveyonly' > 0 {
 			lab var `var' "`var'"
 		}
 	}
-	export excel `id' `keepsurvey' questionnaire_date `status' if mi(`sortby') using "`filename'.xlsx", ///
+	export excel `id' `keepsurvey' questionnaire_date `status' if _merge == 2 using "`filename'.xlsx", ///
 	firstrow(varl) sheet("Only in Survey") sheetreplace `nolabel'
 	
 	restore
 	
-	qui count if mi(`sortby')
-	loc N = `r(N)' + 1
-	mata : create_progress_report("`filename'.xlsx", "Only in Survey", tokens("`id' `keepsurvey' questionnaire_date `status'"), `N')
+	mata : create_progress_report("`filename'.xlsx", "Only in Survey", tokens("`id' `keepsurvey' questionnaire_date `status'"), `=`surveyonly'+1')
 
 }
 	

@@ -208,13 +208,13 @@ program ipacheckconstraints, rclass
 	format `submitted' %tc
 	tempvar bot bottom lines
 
-	bysort `enumerator' (variable order) : gen `lines' = _n
-	egen `bot' = max(`lines'), by(`enumerator')
+	bysort variable (`enumerator' order) : gen `lines' = _n
+	egen `bot' = max(`lines'), by(variable)
 	gen `bottom' = cond(`bot' == `lines', 1, 0)
 	
 	
 	loc colorcols
-	foreach var in `enumerator' variable label  {
+	foreach var in variable label message {
 		loc pos : list posof "`var'" in keeplist
 		loc colorcols `colorcols' `pos'
 	}
@@ -342,7 +342,7 @@ for (i=1; i<=cols(column_widths); i++) {
 		column_widths[i] = varname_widths[i]
 	}
 
-	b.set_column_width(i, i, column_widths[i] + 2)
+	b.set_column_width(i, i, column_widths[i] + 4)
 }
 
 if (rows(bottomrows) > 1) {
