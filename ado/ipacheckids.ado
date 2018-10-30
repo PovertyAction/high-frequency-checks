@@ -36,7 +36,8 @@ keep if `touse'
 
 sort `varlist' submissiondate key
 cap confirm string variable `varlist' 
-if _rc {
+loc error : dis _rc
+if `error' != 0 {
 	summ `varlist'
 	if abs(floor(log10(`r(max)'))) + 1 > 20 {
 		nois di as error "Error: cannot reversibly convert `id' to string without loss of precision. Consider using a different ID or convert yourself."
@@ -172,15 +173,21 @@ foreach id in `id_ordered' {
 	if "`force'" == "force" {
 		duplicates drop `varlist', force
 		noi di "One from each group is randomly kept in this dataset."
-		if "`save'" != "" {
-		save "`save'", replace
-		}
+
 	}
+
 	else noi di "All duplicates are kept. To randomly drop them, use -force- option." 
 	
 	}
 	else noi di "No duplicates found for `varlist'!"
-} // qui bracket
+	if `error' != 0 {
+	destring `varlist', replace
+	}
+	if "`save'" != "" {
+		save "`save'", replace
+	}
+	
+	} // qui bracket
 
 end 
 
