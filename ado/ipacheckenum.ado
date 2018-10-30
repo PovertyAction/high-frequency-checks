@@ -20,7 +20,7 @@ program ipacheckenum
 	with mata defined programs located at the end of the ado file.
 	*/
 
-	version 15
+	cap version 15
 	
 	#d ;
 	syntax varname using/ ,
