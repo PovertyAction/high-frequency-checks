@@ -27,5 +27,8 @@ exercise/
 # ignore log files
 *.txt
 
+# ignore posthfc files
+*_posthfc.dta
+
 # Mac files
 .DS_Store
