@@ -16,6 +16,7 @@ ipadoheader, version(15.0)
 
 ipacheckimport using "04_checks/01_inputs/hfc_inputs.xlsm"
 
+
 /* =============================================================== 
    ==================== Replace existing files  ================== 
    =============================================================== */
@@ -57,6 +58,7 @@ if !mi("${repfile}") {
 loc posthfc = subinstr("${sdataset}", ".dta", "", .) + "_posthfc"
 save "`posthfc'", replace
 
+
 /* =============================================================== 
    ================== Resolve survey duplicates ================== 
    =============================================================== */
@@ -65,6 +67,10 @@ ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
   variable 
+  variable ///
+  force ///
+  save("`posthfc'")
+
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================
@@ -77,6 +83,7 @@ ipatracksummary using "${progreport}", ///
   submit(${date}) ///
   target(${pnumber}) 
 }
+
 
 /* <========== Track 2. Track surveys completed against planned ==========> */
 
@@ -98,6 +105,7 @@ progreport, ///
 	   surveyok
 }
 
+
  /* <======== Track 3. Track form versions used by submission date ========> */
       
 ipatrackversions ${formversion}, /// 
@@ -105,6 +113,7 @@ ipatrackversions ${formversion}, ///
   enumerator(${enum}) ///
   submit(${date}) ///
   saving("${outfile}") 
+
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
@@ -240,6 +249,7 @@ if ${run_specify} {
     sheetreplace ${nolabel}
 }
 
+
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 
 if ${run_dates} {
@@ -334,7 +344,7 @@ if ${run_research_twoway} {
 
 if ${run_backcheck} {
   bcstats, ///
-      surveydata("`dedup'")  ///
+      surveydata("`posthfc'")  ///
       bcdata("${bdataset}")  ///
       id(${id})              ///
       enumerator(${enum})    ///
