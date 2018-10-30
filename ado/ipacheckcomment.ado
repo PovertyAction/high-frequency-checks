@@ -1,4 +1,4 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 3.0.0 Innovations for Poverty Action 30oct2018
 
 * Stata program for merging and outputting field comments
 prog define ipacheckcomment, rclass
@@ -12,6 +12,10 @@ prog define ipacheckcomment, rclass
 					SHEETMODify SHEETREPlace NOLabel]
 		;	
 	#d cr	
+
+	* written in version 15
+	* requires version 14.2
+	version 14.2		
 	
 	qui {
 		* clean keepvars
@@ -40,7 +44,7 @@ prog define ipacheckcomment, rclass
 			* appending them to the prevously imported dataset
 			clear
 			save `commdata_long', emptyok
-			
+
 			* misscount will track number of ta files that could not be found in file
 			loc misscount 0
 			forval i = 1/`commcount' {
@@ -98,25 +102,20 @@ prog define ipacheckcomment, rclass
 			
 			* export data
 			export excel using "`saving'", first(var) ///
-				sheet("12. field comments") `sheetmodify' `sheetreplace'
+				sheet("12. field comments") cell(A2) `sheetmodify' `sheetreplace'
 				
-			* format output for stata 14.0 and above
-			if `c(version)' >= 14.0 {
-				d, s
-				alphacol `r(k)'
-				loc endcol "`r(alphacol)'"
-				putexcel set "`saving'", sheet("12. field comments") modify
-				putexcel A1:`endcol'1, bold border(bottom)
-			}
-			
+			* add_formatting
+			mata: add_formatting("`saving'")
+
 			return local comments = `=_N'
 		}
 		
 		else {
 			nois disp "{red:No text comments recorded}"
 			return local comments = 0
-			use `master', clear
 		}
+
+		use `master', clear
 	}
 end
 
@@ -133,5 +132,63 @@ program alphacol, rclass
 	}
 
 	return local alphacol = "`col'"
+end
+
+mata:
+mata clear
+
+void add_formatting(string scalar filename)
+{
+
+	class xl scalar b
+	real scalar column_width, columns, ncols, nrows, i, colmaxval
+
+	ncols = st_nvar()
+	nrows = st_nobs() + 2
+
+	b = xl()
+
+	b.load_book(filename)
+	b.set_sheet("12. field comments")
+	b.set_mode("open")
+
+	b.set_top_border(1, (1, ncols), "thick")
+	b.set_bottom_border((1,2), (1, ncols), "thick")
+	b.set_horizontal_align(1, (1, ncols), "merge")
+	b.put_string(1, 1, "Field Comments") 
+
+	b.set_font_bold((1,2), (1,ncols), "on")
+
+	b.set_right_border((1,nrows), ncols, "thick")
+	b.set_bottom_border(nrows, (1,ncols), "thick")
+
+	for (i = 1;i <= ncols;i ++) {
+		namelen = strlen(st_varname(i))
+		if (st_isnumvar(i)) {
+			colmaxval = colmax(st_data(., i))
+			if (colmaxval == 0) {
+				collen = 0
+			}
+			else {
+				collen = log(colmax(st_data(., i)))
+			}
+		}
+		else {
+			collen = colmax(strlen(st_sdata(., i)))
+		}
+		if (namelen > collen) {
+			column_width = namelen + 1
+		}
+		else {
+			column_width = collen + 1
+		}
+		if (column_width > 102) {
+			column_width = 102
+		}	
+		b.set_column_width(i, i, column_width)
+	}	
+
+	b.close_book()
+}
 end
 
