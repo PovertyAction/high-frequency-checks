@@ -1,4 +1,4 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 3.0.0 Innovations for Poverty Action 30oct2018
 
 program ipacheckimport, rclass
 	/* This program imports high frequency check inputs
@@ -79,13 +79,15 @@ program ipacheckimport, rclass
 				local boxes =                                 ///
 					`""Survey Dataset""' 	 				+ ///
 					`""Back Check Dataset""' 				+ ///
-					`""Master Tracking Dataset \(opt\.\)""' + ///
-					`""HFC \& BC Input file""' 				+ ///
-					`""Corrections Workbook \(opt\.\)""' 	+ ///
-					`""Corrections WorkSheet \(opt\.\)""' 	+ ///
-					`""HFC Output File""' 					+ ///
-					`""HFC Enumerator File""' 				+ ///
-					`""Progress Report Output""'            + ///
+					`""Master Tracking Dataset \(opt\.\)""' 	+ ///
+					`""SurveyCTO Media Directory \(opt\.\)""'	+ ///
+					`""HFC \& BC Input file""' 					+ ///
+					`""Corrections Workbook \(opt\.\)""' 		+ ///
+					`""Corrections WorkSheet \(opt\.\)""' 		+ ///
+					`""HFC Output File""' 						+ ///
+					`""HFC Enumerator File""' 					+ ///
+					`""HFC Text Audit File""' 					+ ///
+					`""Progress Report Output""'            	+ ///
 					`""Survey Duplicate Output File""' 	            + ///
 					`""Back Check Comparison Output \(opt\.\)""' 	+ ///
 					`""HFC Research File""' 						+ ///
@@ -96,11 +98,13 @@ program ipacheckimport, rclass
 					`""Enumerator Team ID""' 			+ ///
 					`""Back Checker ID""' 				+ ///
 					`""Back Checker Team ID""' 			+ ///
+					`""Field Comments""'				+ ///
+					`""Text Audits""'					+ ///
 					`""Form Version""' 					+ ///
 					`""Missing Value \(\.d\)""' 		+ ///
 					`""Missing Value \(\.r\)""' 		+ ///
 					`""Missing Value \(\.n\) \(opt\.\)""' 	+ ///
-					`""Total Number of Surveys Planned""' 		+ ///
+					`""Total Number of Surveys Planned""' 	+ ///
 					`""Statify Progress Report By""' 		+ ///
 				    `""Variables to keep in Master Data""' 	+ ///
 				    `""Variables to keep in Survey Data \(opt\.\)""' 	+ ///
@@ -152,11 +156,13 @@ program ipacheckimport, rclass
 					sdataset    ///
 					bdataset	///
 					master		///
+					sctomedia	///
 					infile      ///
 					repfile     ///
 					repsheet    ///
 					outfile     ///
 					enumdb      ///
+					textauditdb	///
 					progreport	///
 					dupfile     ///
 					bcfile		///
@@ -168,6 +174,8 @@ program ipacheckimport, rclass
 					enumteam	///
 					bcer		///
 					bcerteam	///
+					fieldcomments ///
+					textaudit   ///
 					formversion ///
 					mv1         ///
 					mv2         ///
@@ -225,7 +233,7 @@ program ipacheckimport, rclass
 
 				* loop through boxes and define the matching global 
 				forval i = 1/`nboxes' {
-					if `i' <= 60 {
+					if `i' <= 64 {
 						loc strCol "DataManagementSystem"
 						loc valCol "B"
 					}
@@ -240,13 +248,12 @@ program ipacheckimport, rclass
 					mata: st_global("`global'", "")
 					mata: st_global("`global'", `"`value'"')
 				}
-				gl sdataset_f = subinstr("$sdataset", ".dta", "", .)
 			}
 			
 			else {
 
 				* expand wild cards in variable list
-				if inlist(`n', 1, 3, 8, 11, 13, 15) & `rows' > 0 {
+				if inlist(`n', 1, 3, 8, 11) & `rows' > 0 {
 	    			mata: rv = st_sdata(., "variable")
 	    			mata: nrv = ""
 	    			mata: copies = .
