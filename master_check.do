@@ -21,7 +21,7 @@ ipacheckimport using "../04_checks/01_inputs/hfc_inputs.xlsm"
    ==================== Replace existing files  ================== 
    =============================================================== */
 
-foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}" "${progreport}" "${dupfile}"{
+foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}" "${progreport}" "${dupfile}" "${textauditdb}" {
   capture confirm file "`file'"
   if !_rc {
     rm "`file'"
@@ -279,7 +279,7 @@ if ${run_outliers} {
 /* <============= HFC 12. Check for and output field comments =============> */
 
 if ${run_field_comments} {
-  ipacheckcomment finalnotes, id(${id}) ///
+  ipacheckcomment ${fieldcomments}, id(${id}) ///
     media(${sctomedia}) ///
     enumerator(${enum}) ///
     submit(${date}) ///
@@ -292,10 +292,11 @@ if ${run_field_comments} {
 /* <=============== HFC 13. Output summaries for text audits ==============> */
 
 if ${run_text_audits} {
-  ipachecktextaudit ${textaudit} using "${textauditdb}",  ///
+  ipachecktextaudit ${textaudit} using "${infile}",  ///
+    saving("${textauditdb}")  ///
     media("${sctomedia}") ///
     enumerator(${enum}) ///
-    keepvars(${keep15})
+    keepvars(${keep13})
 }
 
 
