@@ -1,4 +1,4 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 2.0.0 Christopher Boyer 07apr2017
 
 /* =============================================================== 
    ===============================================================
@@ -14,14 +14,14 @@ ipadoheader, version(15.0)
    ================== Import globals from Excel  ================= 
    =============================================================== */
 
-ipacheckimport using "04_checks/01_inputs/hfc_inputs.xlsm"
+ipacheckimport using "../04_checks/01_inputs/hfc_inputs.xlsm"
 
 
 /* =============================================================== 
    ==================== Replace existing files  ================== 
    =============================================================== */
 
-foreach file in "${outfile}" "${enumdb}" "${textaudit}" "${researchdb}" "${bcfile}"{
+foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}" "${progreport}" "${dupfile}"{
   capture confirm file "`file'"
   if !_rc {
     rm "`file'"
@@ -44,7 +44,7 @@ if !mi("${mv3}") recode `numeric' (${mv3} = .n)
 
 if !mi("${repfile}") {
   ipacheckreadreplace using "${repfile}", ///
-    id("${id}") ///
+    id("key") ///
     variable("variable") ///
     value("value") ///
     newvalue("newvalue") ///
@@ -54,10 +54,6 @@ if !mi("${repfile}") {
     logusing("${replog}") 
 }
 
-* change name to save dataset
-loc posthfc = subinstr("${sdataset}", ".dta", "", .) + "_posthfc"
-save "`posthfc'", replace
-
 
 /* =============================================================== 
    ================== Resolve survey duplicates ================== 
@@ -66,15 +62,15 @@ save "`posthfc'", replace
 ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
-  variable 
   variable ///
   force ///
-  save("`posthfc'")
-
+  save("${sdataset_f}_checked")
+  
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================
    =============================================================== */
+
 
 /* <============ Track 1. Summarize completed surveys by date ============> */
 
@@ -90,7 +86,7 @@ ipatracksummary using "${progreport}", ///
 if ${run_progreport} {        
 progreport, ///
     master("${master}") /// 
-    survey("`posthfc'") /// 
+    survey("${sdataset_f}_checked") /// 
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
@@ -102,7 +98,7 @@ progreport, ///
     ${plabel} ///
     ${psummary} ///
     ${pworkbooks} ///
-	   surveyok
+	surveyok
 }
 
 
@@ -114,6 +110,7 @@ ipatrackversions ${formversion}, ///
   submit(${date}) ///
   saving("${outfile}") 
 
+   
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
@@ -249,7 +246,6 @@ if ${run_specify} {
     sheetreplace ${nolabel}
 }
 
-
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 
 if ${run_dates} {
@@ -283,7 +279,7 @@ if ${run_outliers} {
 /* <============= HFC 12. Check for and output field comments =============> */
 
 if ${run_field_comments} {
-  ipacheckcomment ${fieldcomments}, id(${id}) ///
+  ipacheckcomment finalnotes, id(${id}) ///
     media(${sctomedia}) ///
     enumerator(${enum}) ///
     submit(${date}) ///
@@ -296,11 +292,10 @@ if ${run_field_comments} {
 /* <=============== HFC 13. Output summaries for text audits ==============> */
 
 if ${run_text_audits} {
-  ipachecktextaudit ${textaudit} using "${infile}",  ///
-    saving("${textauditdb}")  ///
+  ipachecktextaudit ${textaudit} using "${textauditdb}",  ///
     media("${sctomedia}") ///
     enumerator(${enum}) ///
-    keepvars(${keep13})
+    keepvars(${keep15})
 }
 
 
@@ -344,7 +339,7 @@ if ${run_research_twoway} {
 
 if ${run_backcheck} {
   bcstats, ///
-      surveydata("`posthfc'")  ///
+      surveydata("${sdataset_f}_checked")  ///
       bcdata("${bdataset}")  ///
       id(${id})              ///
       enumerator(${enum})    ///
