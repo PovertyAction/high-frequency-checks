@@ -248,6 +248,7 @@ program ipacheckimport, rclass
 					mata: st_global("`global'", "")
 					mata: st_global("`global'", `"`value'"')
 				}
+				gl sdataset_f = subinstr("$sdataset", ".dta", "", .) //remove dta from sdataset to add suffix later
 			}
 			
 			else {
