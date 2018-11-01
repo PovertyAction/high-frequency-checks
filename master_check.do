@@ -1,4 +1,4 @@
-*! version 2.0.0 Christopher Boyer 07apr2017
+*! version 3.0.0 Innovations for Poverty Action 30oct2018
 
 /* =============================================================== 
    ===============================================================
@@ -21,7 +21,7 @@ ipacheckimport using "../04_checks/01_inputs/hfc_inputs.xlsm"
    ==================== Replace existing files  ================== 
    =============================================================== */
 
-foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}"{
+foreach file in "${outfile}" "${enumdb}" "${researchdb}" "${bcfile}" "${progreport}" "${dupfile}" "${textauditdb}" {
   capture confirm file "`file'"
   if !_rc {
     rm "`file'"
@@ -44,7 +44,7 @@ if !mi("${mv3}") recode `numeric' (${mv3} = .n)
 
 if !mi("${repfile}") {
   ipacheckreadreplace using "${repfile}", ///
-    id("${id}") ///
+    id("key") ///
     variable("variable") ///
     value("value") ///
     newvalue("newvalue") ///
@@ -58,13 +58,14 @@ if !mi("${repfile}") {
 /* =============================================================== 
    ================== Resolve survey duplicates ================== 
    =============================================================== */
-tempfile dedup
+
 ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
   variable ///
   force ///
-  save("`dedup'")
+  save("${sdataset_f}_checked")
+  
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================
@@ -85,7 +86,7 @@ ipatracksummary using "${progreport}", ///
 if ${run_progreport} {        
 progreport, ///
     master("${master}") /// 
-    survey("`dedup'") /// 
+    survey("${sdataset_f}_checked") /// 
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
@@ -291,10 +292,11 @@ if ${run_field_comments} {
 /* <=============== HFC 13. Output summaries for text audits ==============> */
 
 if ${run_text_audits} {
-  ipachecktextaudit ${textaudit} using "${textauditdb}",  ///
+  ipachecktextaudit ${textaudit} using "${infile}",  ///
+    saving("${textauditdb}")  ///
     media("${sctomedia}") ///
     enumerator(${enum}) ///
-    keepvars(${keep15})
+    keepvars(${keep13})
 }
 
 
@@ -338,7 +340,7 @@ if ${run_research_twoway} {
 
 if ${run_backcheck} {
   bcstats, ///
-      surveydata("`dedup'")  ///
+      surveydata("${sdataset_f}_checked")  ///
       bcdata("${bdataset}")  ///
       id(${id})              ///
       enumerator(${enum})    ///

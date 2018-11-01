@@ -23,6 +23,9 @@ program ipacheckallmiss, rclass
 
 	qui {
 
+	loc remove _hfcokayvar
+	loc varlist : list varlist - remove
+
 	* count nvars
 	unab vars : _all
 	local nvars : word count `vars'

@@ -1,4 +1,4 @@
-*! version 2.0.0 Christopher Boyer 07apr2017
+*! version 3.0.0 Innovations for Poverty Action 22oct2018
 
 /* =============================================================== 
    ===============================================================
@@ -14,14 +14,13 @@ ipadoheader, version(15.0)
    ================== Import globals from Excel  ================= 
    =============================================================== */
 
-ipacheckimport using "hfc_inputs.xlsm"
-
+ipacheckimport using "master_test01_in.xlsm"
 
 /* =============================================================== 
    ==================== Replace existing files  ================== 
    =============================================================== */
 
-foreach file in "${outfile}" "${enumdb}" "${researchdb}" {
+foreach file in "${outfile}" "${enumdb}" "${textaudit}" "${researchdb}" "${bcfile}"{
   capture confirm file "`file'"
   if !_rc {
     rm "`file'"
@@ -54,24 +53,24 @@ if !mi("${repfile}") {
     logusing("${replog}") 
 }
 
+* change name to save dataset
+loc posthfc = subinstr("${sdataset}", ".dta", "", .) + "_posthfc"
+save "`posthfc'", replace
 
 /* =============================================================== 
    ================== Resolve survey duplicates ================== 
    =============================================================== */
 
-tempfile dedup
 ipacheckids ${id} using "${dupfile}", ///
   enum(${enum}) ///
   nolabel ///
   variable ///
   force ///
-  save("`dedup'")
-  
+  save("`posthfc'")
 
 /* =============================================================== 
    ==================== Survey Tracking ==========================
    =============================================================== */
-
 
 /* <============ Track 1. Summarize completed surveys by date ============> */
 
@@ -81,13 +80,12 @@ ipatracksummary using "${progreport}", ///
   target(${pnumber}) 
 }
 
-
 /* <========== Track 2. Track surveys completed against planned ==========> */
 
 if ${run_progreport} {        
 progreport, ///
     master("${master}") /// 
-    survey("`dedup'") /// 
+    survey("`posthfc'") /// 
     id(${id}) /// 
     sortby(${psortby}) /// 
     keepmaster(${pkeepmaster}) /// 
@@ -98,9 +96,9 @@ progreport, ///
     ${pvariable} ///
     ${plabel} ///
     ${psummary} ///
-    ${pworkbooks} 
+    ${pworkbooks} ///
+     surveyok
 }
-
 
  /* <======== Track 3. Track form versions used by submission date ========> */
       
@@ -109,8 +107,6 @@ ipatrackversions ${formversion}, ///
   enumerator(${enum}) ///
   submit(${date}) ///
   saving("${outfile}") 
-
-   
 
 /* =============================================================== 
    ==================== High Frequency Checks ==================== 
@@ -246,7 +242,6 @@ if ${run_specify} {
     sheetreplace ${nolabel}
 }
 
-  
 /* <========== HFC 10. Check that dates fall within survey range ==========> */
 
 if ${run_dates} {
@@ -293,10 +288,11 @@ if ${run_field_comments} {
 /* <=============== HFC 13. Output summaries for text audits ==============> */
 
 if ${run_text_audits} {
-  ipachecktextaudit ${textaudit} using "${textauditdb}",  ///
+  ipachecktextaudit ${textaudit} using "${infile}",  ///
+    saving("${textauditdb}")  ///
     media("${sctomedia}") ///
     enumerator(${enum}) ///
-    keepvars(${keep15})
+    keepvars(${keep13})
 }
 
 
@@ -340,7 +336,7 @@ if ${run_research_twoway} {
 
 if ${run_backcheck} {
   bcstats, ///
-      surveydata("`dedup'")  ///
+      surveydata("`posthfc'")  ///
       bcdata("${bdataset}")  ///
       id(${id})              ///
       enumerator(${enum})    ///
@@ -354,7 +350,7 @@ if ${run_backcheck} {
       keepbc(${bckeepbc})    ///
       keepsurvey(${bckeepsurvey}) ///
       reliability(${reliability17}) ///
-      filename("${bcoutfile}") ///
+      filename("${bcfile}") ///
       exclude(${bcexclude}) ///
       ${bclower} ${bcupper} ${bcnosymbols} ${bctrim} ///
       ${bcshowall} ${bcshowrate} ${bcfull} ///

@@ -170,7 +170,7 @@ program ipacheckdups, rclass
 	format `submitted' %tc
 	tempvar bot bottom lines
 	
-	bysort value (variable) : gen `lines' = _n
+	bysort value (variable `enumerator') : gen `lines' = _n
 	egen `bot' = max(`lines'), by(value)
 	gen `bottom' = cond(`bot' == `lines', 1, 0)
 	
