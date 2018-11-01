@@ -300,12 +300,12 @@ program define ipachecknew
 			
 			if "`exercise'" == "exercise" {
 				//HFC input file ANSWERS
-				di "Saving HFC input file Answers"
+				di "Saving HFC input file answers"
 				loc output "`folder'/`hfc_input_loc'/hfc_inputs_ANSWERS.xlsm"
 				copy "`git_hfc'/`branch'/exercise/hfc_inputs_ANSWERS.xlsm" "`output'"
 				
 				//HFC replacements file ANSWERS
-				di "Saving HFC replacement file Answers"
+				di "Saving HFC replacement file answers"
 				loc output "`folder'/`hfc_input_loc'/hfc_replacements_ANSWERS.xlsm"
 				copy "`git_hfc'/`branch'/exercise/hfc_replacements_ANSWERS.xlsm" "`output'"
 								
@@ -323,6 +323,12 @@ program define ipachecknew
 				di "Saving HFC exercise back check data"
 				loc output "`folder'/05_data/03_bc/bc_survey_data.dta"
 				copy "`git_hfc'/`branch'/exercise/bc_survey_data.dta" "`output'"
+				
+				//HFC exercise instructions
+				di "Saving HFC exercise instructions"
+				loc output "`folder'/exercise_instructions.pdf"
+				copy "`git_hfc'/`branch'/exercise/exercise_instructions.pdf" "`output'"
+				
 				
 				}
 			
