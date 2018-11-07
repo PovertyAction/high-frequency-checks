@@ -123,7 +123,9 @@ prog define ipachecktextaudit, rclass
 				
 				* merge in enumerator and other data
 				loc keeplist: list keepvars - enumerator
-				loc keeplist = subinstr(subinstr("`keeplist'", ";", "", .), ".", "", .) 
+
+        loc keeplist = subinstr(subinstr("`keeplist'", ";", "", .), ".", "", .) 
+
 				merge m:1 `varlist' using `tadata', keepusing(`enumerator' `keeplist') ///
 					assert(match) nogen
 				order `enumerator' `keeplist' fieldname `pre' `varlist'
@@ -251,8 +253,9 @@ prog define ipachecktextaudit, rclass
 		else {
 			nois disp "{red:No text Audit Data Recorded}"
 		}
-
+    
 		use `master', clear
+
 	}
 end
 
