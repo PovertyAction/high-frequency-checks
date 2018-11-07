@@ -98,8 +98,7 @@ program define ipachecknew
 	loc git "https://raw.githubusercontent.com/PovertyAction"
 	loc git_hfc "`git'/high-frequency-checks"
 	loc git_readme "https://raw.githubusercontent.com/PovertyAction/New_HFCs-Readmes"
-	if "`exercise'" ~= "" loc branch exercise
-	else loc branch master	
+	loc branch master	
 	
 	
 	////////////////////
