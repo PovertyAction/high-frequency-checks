@@ -324,6 +324,11 @@ program define ipachecknew
 				loc output "`folder'/05_data/03_bc/bc_survey_data.dta"
 				copy "`git_hfc'/`branch'/exercise/bc_survey_data.dta" "`output'"
 				
+				//HFC media files
+				di "Saving HFC exercise media"
+				loc output "`folder'/06_media/survey_media.zip"
+				copy "`git_hfc'/`branch'/exercise/survey_media.zip" "`output'"
+
 				//HFC exercise instructions
 				di "Saving HFC exercise instructions"
 				loc output "`folder'/exercise_instructions.pdf"
