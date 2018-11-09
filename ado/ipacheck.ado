@@ -5,7 +5,7 @@ program ipacheck, rclass
 	   and initialize new projects. */
 	version 13
 	gettoken cmd 0 : 0, parse(" ,")
-	syntax [anything], [surveys(string)] [folder(string)] [SUBFOLDERS] [files]
+	syntax [anything], [surveys(string)] [folder(string)] [SUBFOLDERS] [files] [exercise]
 
 	if `"`cmd'"'=="" {
 		di as txt "ipacheck options are"
@@ -26,7 +26,7 @@ program ipacheck, rclass
 		exit
 	}
 	if `"`cmd'"' == substr("new", 1, max(1,`l')) {
-		ipachecknew, surveys(`surveys') folder(`folder') `subfolders' `files'
+		ipachecknew, surveys(`surveys') folder(`folder') `subfolders' `files' `exercise'
 		exit
 	}
 end
@@ -92,7 +92,7 @@ void get_version(string scalar program) {
 end
 
 program define ipachecknew
-	syntax, [surveys(string)] [folder(string)] [SUBfolders] [files]
+	syntax, [surveys(string)] [folder(string)] [SUBfolders] [files] [exercise]
 	
 	// Set up URL
 	loc git "https://raw.githubusercontent.com/PovertyAction"
@@ -120,6 +120,12 @@ program define ipachecknew
 		noi disp as err "Option for files can only be used with the folders option"
 		exit 101 	
 	}
+	
+	if "`exercise'" == "exercise" & "`surveys'" != "" {
+		noi disp as error "Option for exercise can only be used with the folders option"
+		exit 101
+	}
+	
 	////////////////////
 	// SET UP FOLDER
 	////////////////////
@@ -292,6 +298,47 @@ program define ipachecknew
 			loc output "`folder'//`hfc_master_loc'/master_check.do"
 			copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
 			
+			if "`exercise'" == "exercise" {
+				//HFC input file ANSWERS
+				di "Saving HFC input file answers"
+				loc output "`folder'/`hfc_input_loc'/hfc_inputs_ANSWERS.xlsm"
+				copy "`git_hfc'/`branch'/exercise/hfc_inputs_ANSWERS.xlsm" "`output'"
+				
+				//HFC replacements file ANSWERS
+				di "Saving HFC replacement file answers"
+				loc output "`folder'/`hfc_input_loc'/hfc_replacements_ANSWERS.xlsm"
+				copy "`git_hfc'/`branch'/exercise/hfc_replacements_ANSWERS.xlsm" "`output'"
+								
+				//HFC exercise survey data
+				di "Saving HFC exercise survey data"
+				loc output "`folder'/05_data/02_survey/survey_data.dta"
+				copy "`git_hfc'/`branch'/exercise/survey_data.dta" "`output'"
+
+				//HFC exercise sample data
+				di "Saving HFC exercise sample data"
+				loc output "`folder'/05_data/01_preloads/sample.dta"
+				copy "`git_hfc'/`branch'/exercise/sample.dta" "`output'"
+				
+				//HFC exercise bc data
+				di "Saving HFC exercise back check data"
+				loc output "`folder'/05_data/03_bc/bc_survey_data.dta"
+				copy "`git_hfc'/`branch'/exercise/bc_survey_data.dta" "`output'"
+				
+				//HFC media files
+				di "Saving HFC exercise media"
+				loc output "`folder'/06_media/survey_media.zip"
+				copy "`git_hfc'/`branch'/exercise/survey_media.zip" "`output'"
+
+				//HFC exercise instructions
+				di "Saving HFC exercise instructions"
+				loc output "`folder'/exercise_instructions.pdf"
+				copy "`git_hfc'/`branch'/exercise/exercise_instructions.pdf" "`output'"
+				
+				
+				}
+			
+		
+		
 		}
 		
 		// Multiple forms with subfolders

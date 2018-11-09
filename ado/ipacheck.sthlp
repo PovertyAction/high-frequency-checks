@@ -37,6 +37,7 @@ Display version for each ado file in ipacheck
 {syntab:Options}
 {synopt:{opt subfolders}}create subfolders for each survey listed in {cmd:surveys}{p_end}
 {synopt:{opt files}}only generates input files without folder structure {p_end}
+{synopt:{opt exercise}} generates folder structure with input files and exercise data {p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -74,8 +75,10 @@ the ipacheck package.
 {opt subfolders} creates individual sub-folders for each survey form and can only be used with multiple forms; if not specified but multiple survey forms are added, files with be saved with the form name.
 
 {phang}
-{opt files} saves only the input files for high-frequency checks (hfc_inputs.xlsm, hfc_replacements.xlsm, and master_check.do). 
-These will be saved in the location specified in the -folder- option or the current working directory if nothing is specified.
+{opt files} saves only the input files for high-frequency checks (hfc_inputs.xlsm, hfc_replacements.xlsm, and master_check.do). These will be saved in the location specified in the -folder- option or the current working directory if nothing is specified.
+
+{phang}
+{opt exercise} generates the folder structure and populates input files as well as exercise data to complete an exercise. These will be saved in the location specified in the -folder- option or the current working directory if nothing is specified.
 
 
 {title:Examples} 
@@ -99,6 +102,11 @@ These will be saved in the location specified in the -folder- option or the curr
 {txt}Setting up new HFC folder for a project with one single form and saving only files{p_end}
 {phang}
 {com}. ipacheck new, folder("My project") files {p_end}
+
+{phang}
+{txt}Learning how data flow works by running exercise {p_end}
+{phang}
+{com}. ipacheck new, folder("Exercise Project") exercise {p_end}
 {txt}
 
 {title:Remarks}
