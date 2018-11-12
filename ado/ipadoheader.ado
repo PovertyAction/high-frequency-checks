@@ -48,6 +48,7 @@ program ipadoheader , rclass
 		
 		if "`maxlocal'" == "matsize" {
 			if c(MP) | c(SE)	local max 11000
+			else 				local max 800
 								local min 10
 		}
 		
