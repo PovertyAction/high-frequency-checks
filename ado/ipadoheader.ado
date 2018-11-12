@@ -40,22 +40,21 @@ program ipadoheader , rclass
 	foreach maxlocal in maxvar matsize {
 		
 		if "`maxlocal'" == "maxvar" {
-			if c(MP) == 1	local max 120000
-			else 			local max 32767
+			if c(MP)		local max 120000
+			else if c(SE)	local max 32767
 
-			loc min 2,048
+							local min 2,048
 		}
 		
 		if "`maxlocal'" == "matsize" {
-			local max 11000
-			local min 10
+			if c(MP) | c(SE)	local max 11000
+								local min 10
 		}
 		
-		if c(MP) == 1 | c(SE) == 1 {
-			local vusing "Stata SE and Stata MP"
-		}		
+		if c(MP) | c(SE) local vusing "Stata SE and Stata MP"
+		else  			 local vusing "Stata IC"
 		
-		// Test if user set maxvar
+		// Test if user set maxvar or matsize
 		if "``maxlocal''" != "" {
 		
 			if ``maxlocal'' >= `min' & ``maxlocal'' <= `max' {
@@ -92,11 +91,11 @@ program ipadoheader , rclass
 	// set verison number 
 	
 	// set basic memory limits
-	if "`noclear'" == "" {
+	if "`noclear'" == "" & !c(MP) {
 		clear all
 		set maxvar 	`maxvar'
 	} 
-	else {
+	else if !c(MP) {
 		local maxvar_di ""
 	}
 	set matsize 	`matsize'
