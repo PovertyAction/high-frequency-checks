@@ -43,7 +43,7 @@ program ipadoheader , rclass
 			if c(MP)		local max 120000
 			else if c(SE)	local max 32767
 
-							local min 2,048
+							local min 2048
 		}
 		
 		if "`maxlocal'" == "matsize" {
@@ -55,7 +55,7 @@ program ipadoheader , rclass
 		else  			 local vusing "Stata IC"
 		
 		// Test if user set maxvar or matsize
-		if "``maxlocal''" != "" {
+		if "``maxlocal''" != "" & (c(MP) | c(SE) | "`maxlocal'" == "matsize") {
 		
 			if ``maxlocal'' >= `min' & ``maxlocal'' <= `max' {
 			di 2.1
@@ -91,13 +91,17 @@ program ipadoheader , rclass
 	// set verison number 
 	
 	// set basic memory limits
-	if "`noclear'" == "" & !c(MP) {
-		clear all
-		set maxvar 	`maxvar'
+	if c(MP) | c(SE) {
+		if "`noclear'" == "" {
+			clear all
+			set maxvar 	`maxvar'
+		}
+
+		else if {
+			local maxvar_di ""
+		}
 	} 
-	else if !c(MP) {
-		local maxvar_di ""
-	}
+	
 	set matsize 	`matsize'
 	
 	// set advanced memory limits
