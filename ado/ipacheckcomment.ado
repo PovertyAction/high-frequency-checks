@@ -48,7 +48,7 @@ prog define ipacheckcomment, rclass
 			* misscount will track number of ta files that could not be found in file
 			loc misscount 0
 			forval i = 1/`commcount' {
-				cap import delim using "`media'/`comm_`i''", clear varnames(1)
+				cap import delim using "`media'/`comm_`i''", clear varnames(1)  stringcols(_all)
 				if !_rc {
 					gen 	`varlist' = "media\\`comm_`i''"
 					append	using `commdata_long'
