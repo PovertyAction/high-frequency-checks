@@ -43,6 +43,9 @@ ipacheck new, surveys("SURVEY_NAME_1" "SURVEY_NAME_2") folder("path/to/project")
 * to obtain fresh copies of the master do-file and Excel inputs without creating the folder structure
 ipacheck new, files
 
+* to go through IPA's exercise with instructions, exercise data, and folder structure with input files
+ipacheck new, exercise 
+
 * to verify you have the latest versions of the commands
 ipacheck version
 ```

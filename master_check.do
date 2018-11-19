@@ -351,8 +351,8 @@ if ${run_backcheck} {
       t2vars(${type2_17})    ///
       t3vars(${type3_17})    ///
       ttest(${ttest17})      ///
-      keepbc(${bckeepbc})    ///
-      keepsurvey(${bckeepsurvey}) ///
+      keepbc(${keepbc17})    ///
+      keepsurvey(${keepsurvey17}) ///
       reliability(${reliability17}) ///
       filename("${bcfile}") ///
       exclude(${bcexclude}) ///

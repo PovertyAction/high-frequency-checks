@@ -20,7 +20,7 @@ program ipacheckenum
 	with mata defined programs located at the end of the ado file.
 	*/
 
-	cap version 15
+	version 14.1
 	
 	#d ;
 	syntax varname using/ ,
@@ -390,7 +390,6 @@ program ipacheckenum
 	}
 end
 
-capture program drop _updatesheet
 program _updatesheet, rclass
 	/* this subroutine updates the sub sheet temp files
 	   that capture per variable rates and stats */
@@ -424,7 +423,7 @@ end
 
 program define ipacheckenumvarstats 
 	/* this subprogram creates summary stats by enumerator */  
-	version 15
+	version 14.1
 	
 	#d ;
 	syntax varname using/ ,

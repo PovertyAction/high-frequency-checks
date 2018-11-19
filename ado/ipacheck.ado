@@ -160,19 +160,41 @@ program define ipachecknew
 	
 		// HFC input file
 		di "Saving HFC input file"
-		loc output "`folder'//`hfc_input_loc'/hfc_inputs.xlsm"
-		copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
+		cap confirm file "`folder'/hfc_inputs.xlsm"
+		if !_rc {
+			
+			noi disp "{red:Skipped}: hfc_inputs.xlsm already exists"
+			} 
+		else {
+			loc output "`folder'/hfc_inputs.xlsm"
+			copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
+		}
 		
 		// HFC replacements file
 		di "Saving HFC replacements file"
-		loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsm"
-		copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
 		
+		cap confirm file "`folder'/hfc_replacements.xlsm"
+		if !_rc {
+
+			noi disp "{red:Skipped}: hfc_replacements.xlsm already exists"
+			} 
+		else {
+		
+		loc output "`folder'/hfc_replacements.xlsm"
+		copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
+		}
 		// HFC master do file
 		di "Saving master do file"
-		loc output "`folder'//`hfc_master_loc'/master_check.do"
-		copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+		cap confirm file "`folder'/master_check.do"
+		if !_rc {
+			
+			noi disp "{red:Skipped}: master_check.do already exists"
+			} 
+		else {
 		
+		loc output "`folder'/master_check.do"
+		copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+		}
 		exit
 	}
 
@@ -188,7 +210,7 @@ program define ipachecknew
 			cap confirm file "`folder'/`f'/nul"
 			* If folder exist, return message that folder already exist, else create folder
 			if !_rc {
-				noi disp "{red:Skipped}: Folder `f' already exist"
+				noi disp "{red:Skipped}: Folder `f' already exists"
 			}
 			* else create folder
 			else {
@@ -198,7 +220,7 @@ program define ipachecknew
 		}
 		
 		
-		// Additional folders if multimple surveys
+		// Additional folders if multiple surveys
 		
 		if `:word count `surveys'' > 1 & "`subfolders'" != "" {
 			di
@@ -230,7 +252,7 @@ program define ipachecknew
 				cap confirm file "`folder'/`f'/nul"
 				* If folder exist, return message that folder already exist, else create folder
 				if !_rc {
-					noi disp "{red:Skipped}: Folder `f' already exist"
+					noi disp "{red:Skipped}: Folder `f' already exists"
 				}
 				* else create folder
 				else {
@@ -260,9 +282,17 @@ program define ipachecknew
 		forvalues i=1/`:word count `folders_names'' {
 			loc fol = "`:word `i' of `folders_main''"
 			loc name = "`:word `i' of `folders_names''"
-			di "Saving read me for `fol'"
 			loc output "`folder'/`fol'/`fol'_readme.txt"
+			cap confirm file "`output'"
+			if !_rc {
+				noi disp "{red:Skipped}: `fol'_readme.txt already exists"
+
+			}
+			else {
+			di "Saving readme for `fol'"
+
 			copy "`git_readme'/master/`fol'_readme.txt" "`output'", replace
+			}
 		}
 	}
 	
@@ -282,62 +312,50 @@ program define ipachecknew
 		
 		// Single form
 		if (`:word count `surveys'' == 1) | (`:word count `surveys'' == 0) {	
+
+			loc subfolders `" 04_checks/01_inputs 04_checks/01_inputs 02_dofiles "'
+			loc ex_folders `" 04_checks/01_inputs 04_checks/01_inputs 05_data/02_survey 05_data/01_preloads 05_data/03_bc 06_media "'
+
 			
-			// HFC input file
-			di "Saving HFC input file"
-			loc output "`folder'//`hfc_input_loc'/hfc_inputs.xlsm"
-			copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
-			
-			// HFC replacements file
-			di "Saving HFC replacements file"
-			loc output "`folder'//`hfc_replace_loc'/hfc_replacements.xlsm"
-			copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
-			
-			// HFC master do file
-			di "Saving master do file"
-			loc output "`folder'//`hfc_master_loc'/master_check.do"
-			copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+			loc outputs `" hfc_inputs.xlsm hfc_replacements.xlsm master_check.do "'
+			loc ex_outputs `" hfc_inputs_ANSWERS.xlsm hfc_replacements_ANSWERS.xlsm survey_data.dta sample.dta bc_survey_data.dta survey_media.zip exercise_instructions.pdf "'
+
 			
 			if "`exercise'" == "exercise" {
-				//HFC input file ANSWERS
-				di "Saving HFC input file answers"
-				loc output "`folder'/`hfc_input_loc'/hfc_inputs_ANSWERS.xlsm"
-				copy "`git_hfc'/`branch'/exercise/hfc_inputs_ANSWERS.xlsm" "`output'"
-				
-				//HFC replacements file ANSWERS
-				di "Saving HFC replacement file answers"
-				loc output "`folder'/`hfc_input_loc'/hfc_replacements_ANSWERS.xlsm"
-				copy "`git_hfc'/`branch'/exercise/hfc_replacements_ANSWERS.xlsm" "`output'"
-								
-				//HFC exercise survey data
-				di "Saving HFC exercise survey data"
-				loc output "`folder'/05_data/02_survey/survey_data.dta"
-				copy "`git_hfc'/`branch'/exercise/survey_data.dta" "`output'"
-
-				//HFC exercise sample data
-				di "Saving HFC exercise sample data"
-				loc output "`folder'/05_data/01_preloads/sample.dta"
-				copy "`git_hfc'/`branch'/exercise/sample.dta" "`output'"
-				
-				//HFC exercise bc data
-				di "Saving HFC exercise back check data"
-				loc output "`folder'/05_data/03_bc/bc_survey_data.dta"
-				copy "`git_hfc'/`branch'/exercise/bc_survey_data.dta" "`output'"
-				
-				//HFC media files
-				di "Saving HFC exercise media"
-				loc output "`folder'/06_media/survey_media.zip"
-				copy "`git_hfc'/`branch'/exercise/survey_media.zip" "`output'"
-
-				//HFC exercise instructions
-				di "Saving HFC exercise instructions"
-				loc output "`folder'/exercise_instructions.pdf"
-				copy "`git_hfc'/`branch'/exercise/exercise_instructions.pdf" "`output'"
-				
-				
-				}
+				loc subfolders `subfolders' `ex_folders'
+				loc outputs `outputs' `ex_outputs'
+			}
 			
+			forval i = 1/`:word count `outputs'' {
+			loc subfolder "`: word `i' of `subfolders''"
+			loc output "`: word `i' of `outputs''"
+
+			if "`output'" == "hfc_inputs.xlsm" | "`output'" == "hfc_replacements.xlsm" | "`output'" == "master_check.do" | "`output'" == "exercise_instructions.pdf" {
+				loc gitfolder "xlsx"
+				if "`output'" == "master_check.do" | {
+					loc gitfolder ""
+				}
+				if "`output'" == "exercise_instructions.pdf" {
+					loc subfolder ""
+					loc gitfolder "exercise"
+				}
+			}
+			
+			else loc gitfolder "exercise"
+	
+			cap confirm file "`folder'/`subfolder'/`output'"
+			if !_rc {
+				noi disp "{red:Skipped}: `output' already exists"
+			}
+			* else create folder
+			else {
+				copy "`git_hfc'/`branch'/`gitfolder'/`output'" "`folder'/`subfolder'/`output'"
+				di "`output' saved"
+
+		}
 		
+			}
+			
 		
 		}
 		
@@ -350,17 +368,39 @@ program define ipachecknew
 				// HFC input file
 				di "Saving HFC input file - `form'"
 				loc output "`folder'//`hfc_input_loc'//`n'_`form'/hfc_inputs_`form'.xlsm"
-				copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
+				cap confirm file "`output'"
+				if !_rc {
+					noi disp "{red:Skipped}: `output' already exists"
+				}
+				else {
+					copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
+					dis "`output' saved"
+				}
 				
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
 				loc output "`folder'//`hfc_replace_loc'//`n'_`form'/hfc_replacements_`form'.xlsm"
-				copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
+				cap confirm file "`output'"
+				if !_rc {
+					noi disp "{red:Skipped}: `output' already exists"
+				}
+				else {
+					copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
+					dis "`output' saved"
+				}
 				
 				// HFC master do file
 				di "Saving master do file - `form'"
 				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
-				copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+				cap confirm file "`output'"
+				if !_rc {
+					noi disp "{red:Skipped}: `output' already exists"
+				}
+				else {
+					copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+					dis "`output' saved"
+			}
+			
 			}	
 		}
 		
@@ -371,18 +411,38 @@ program define ipachecknew
 				// HFC input file
 				di "Saving HFC input file - `form'"
 				loc output "`folder'//`hfc_input_loc'//hfc_inputs_`form'.xlsm"
-				copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
-				
+				cap confirm file "`output'"
+				if !_rc {
+					noi disp "{red:Skipped}: `output' already exists"
+				}
+				else {
+					copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
+					dis "`output' saved"
+				}
 				// HFC replacements file
 				di "Saving HFC replacements file - `form'"
 				loc output "`folder'//`hfc_replace_loc'//hfc_replacements_`form'.xlsm"
-				copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
+				cap confirm file "`output'"
+				if !_rc {
+					noi disp "{red:Skipped}: `output' already exists"
+				}
+				else {
+					copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
+					dis "`output' saved"
+				}
 				
 				// HFC master do file
 				di "Saving master do file - `form'"
 				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
-				copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
-			}	
+				cap confirm file "`output'"
+				if !_rc {
+					noi disp "{red:Skipped}: `output' already exists"
+				}
+				else {
+					copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
+					dis "`output' saved"
+				}
+			}
 		}	
 	}
 	

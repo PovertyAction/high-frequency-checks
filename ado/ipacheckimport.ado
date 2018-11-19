@@ -18,24 +18,24 @@ program ipacheckimport, rclass
 		tempvar tmp
 		tempfile tmpsheet
 
-		local sheets =                  ///
-			`""0. setup""' +            ///
-			`""1. incomplete""' +       ///
-			`""2. duplicates""' +       ///
-			`""3. consent""' +          ///
-			`""4. no miss""' +          ///
-			`""5. follow up""' +        ///
-			`""6. logic""' +            ///
-			`""7. all miss""'  +        ///
-			`""8. constraints""' +      ///
-			`""9. specify""' +          ///
-			`""10. dates""' +           ///
-			`""11. outliers""'  +       ///
-			`""12. field comments""' +  ///
-			`""13. text audit""' 	 +  ///
-			`""enumdb""'  +             ///
-			`""research oneway""' +     ///
-			`""research twoway""' +     ///
+		local sheets 				 = ///
+			`""0. setup""' 			 + ///
+			`""1. incomplete""' 	 + ///
+			`""2. duplicates""' 	 + ///
+			`""3. consent""' 		 + ///
+			`""4. no miss""' 		 + ///
+			`""5. follow up""' 		 + ///
+			`""6. logic""' 			 + ///
+			`""7. all miss""'  		 + ///
+			`""8. constraints""' 	 + ///
+			`""9. specify""' 		 + ///
+			`""10. dates""' 		 + ///
+			`""11. outliers""'  	 + ///
+			`""12. field comments""' + ///
+			`""13. text audit""' 	 + ///
+			`""enumdb""'  			 + ///
+			`""research oneway""' 	 + ///
+			`""research twoway""' 	 + ///
 			`""backchecks""'
 		
 		* store number of sheets
@@ -62,11 +62,10 @@ program ipacheckimport, rclass
 	    	local --n
 					
 	    	* drop missing and/or incomplete rows
-			local col1 : word 1 of `colnames'
-	    	drop if mi(`col1')
+	    	if !inlist(`"`sheet'"', "0. setup") dropexcess
 
 	    	* count number of rows
-			local rows = _N
+			local rows = `=_N'
 
 			* add a temporary variable to check for matching boxes
 			g `tmp' = _n
@@ -238,6 +237,7 @@ program ipacheckimport, rclass
 						loc valCol "B"
 					}
 					else {
+						di 
 						loc strCol "C"
 						loc valCol "D"
 					}
@@ -332,36 +332,49 @@ program ipacheckimport, rclass
 						mata: st_global("ttest`n'", "")
 						mata: st_global("reliability`n'", "")
 						mata: st_global("okrangestr`n'", "")
-						mata: st_global("keepbc`n'", "")
 						mata: st_global("keepsurvey`n'", "")
-						mata: st_global("exclude`n'", "")
+						mata: st_global("keepbc`n'", "")
+
+						count if !missing(variable)
+						loc varcount `r(N)'
 
 						forval i = 1/`rows' {
-							if type[`i'] == "type 1" {
-								mata: st_global("type1_`n'", `"${type1_`n'} `=variable[`i']'"')
-							}
-							else if type[`i'] == "type 2" {
-								mata: st_global("type2_`n'", `"${type2_`n'} `=variable[`i']'"')
-							}
-							else if type[`i'] == "type 3" {
-								mata: st_global("type3_`n'", `"${type3_`n'} `=variable[`i']'"')
-							}
-							else {
-								di as error "Invalid type entry in back check sheet. Must be 1, 2, or 3."
-								exit 198
+							if `i' <= `varcount' {
+								if type[`i'] == "type 1" {
+									mata: st_global("type1_`n'", `"${type1_`n'} `=variable[`i']'"')
+								}
+								else if type[`i'] == "type 2" {
+									mata: st_global("type2_`n'", `"${type2_`n'} `=variable[`i']'"')
+								}
+								else if type[`i'] == "type 3" {
+									mata: st_global("type3_`n'", `"${type3_`n'} `=variable[`i']'"')
+								}
+								else {
+									di as error "Invalid type entry in back check sheet. Must be 1, 2, or 3."
+									exit 198
+								}
+
+								if ttest[`i'] == "Yes" {
+									mata: st_global("ttest`n'", `"${ttest`n'} `=variable[`i']'"')
+								}
+								
+								if reliability[`i'] == "Yes" {
+									mata: st_global("reliability`n'", `"${reliability`n'} `=variable[`i']'"')
+								}
+
+								if okrange_min[`i'] != "" & okrange_max[`i'] != "" {
+									mata: st_global("okrangestr`n'", `"${okrangestr`n'} `=okrangestr[`i']'"')
+								}
 							}
 
-							if ttest[`i'] == "Yes" {
-								mata: st_global("ttest`n'", `"${ttest`n'} `=variable[`i']'"')
-							}
-							
-							if reliability[`i'] == "Yes" {
-								mata: st_global("reliability`n'", `"${reliability`n'} `=variable[`i']'"')
+							if keepsurvey[`i'] != "" {
+								mata: st_global("keepsurvey`n'", `"${keepsurvey`n'} `=keepsurvey[`i']'"')
 							}
 
-							if okrange_min[`i'] != "" & okrange_max[`i'] != "" {
-								mata: st_global("okrangestr`n'", `"${okrangestr`n'} `=okrangestr[`i']'"')
+							if keepbc[`i'] != "" {
+								mata: st_global("keepbc`n'", `"${keepbc`n'} `=keepbc[`i']'"')
 							}
+
 						}
 					}
 
@@ -371,4 +384,19 @@ program ipacheckimport, rclass
 	    restore
 	}
 
+end
+
+* program to drop excess obs
+program define dropexcess
+	syntax
+
+	loc valid_obs 0
+	foreach var of varlist _all {
+		count if !missing(`var')
+		if `r(N)' > `valid_obs' {
+			loc valid_obs `r(N)'
+		}
+	}
+
+	drop if _n > `valid_obs'
 end
