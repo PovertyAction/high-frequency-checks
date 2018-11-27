@@ -92,6 +92,6 @@ hfc_inputs.xlsm are used as globals to fill in this command:
 {pstd}Innovations for Poverty Action{p_end}
 
 {pstd}For questions or suggestions, submit a
-{browse "https://github.com/PovertyAction/progreport/issues":GitHub issue}
+{browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}
 or e-mail researchsupport@poverty-action.org.{p_end}
 
