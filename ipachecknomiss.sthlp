@@ -3,14 +3,14 @@
 {title:Title}
 
 {phang}
-{cmd:ipacheckdups} {hline 2}
-Check for duplicate values of variables that should be unique. 
+{cmd:ipachecknomiss} {hline 2}
+Check for critical variables that should never have missing values. 
 
 {marker syntax}{...}
 {title:Syntax}
 
 {p 8 10 2}
-{cmd:ipacheckdups} {it:{help varlist}} {help if:[if]} {help in:[in]}{cmd:,}
+{cmd:ipachecknomiss} {it:{help varlist}}{cmd:,}
 {opth saving(filename)} 
 {opth id(varname)} 
 {opth enum:erator(varname)}
@@ -19,12 +19,12 @@ Check for duplicate values of variables that should be unique.
 
 {* Using -help readreplace- as a template.}{...}
 {* 20 is the position of the last character in the first column + 3.}{...}
-{synoptset 20 tabbed}{...}
+{synoptset 22 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
 {* Using -help heckman- as a template.}{...}
-{p2coldent:* {opth saving(filename)}}output filename where sheet "2. duplicates" will be saved {p_end}
+{p2coldent:* {opth saving(filename)}}output filename where sheet "4. no miss" will be saved {p_end}
 {p2coldent:* {opth id(varname)}}ID variable, automatically included in every flagged observation {p_end}
 {p2coldent:* {opth enum:erator(varname)}}enumerator variable, automatically included in every flagged observation {p_end}
 {p2coldent:* {opth submit:ted(varname)}}submission date variable (usually the SurveyCTO-created submissiondate), automatically included in every flagged observation {p_end}
@@ -46,16 +46,15 @@ Check for duplicate values of variables that should be unique.
 {title:Description}
 
 {pstd}
-{cmd:ipacheckdups} checks for duplicates of variables that should be unique, such as GPS points and other household indicators for enumerator monitoring. 
-Note this check should not be used for the ID variable when runnning within IPA's Data Management System, since
-other checks in the Data Management System require a unique ID variable. {help ipacheckids} is used to summarize duplicates
-and differences between interviews with the same value for the ID variable.
+{cmd:ipachecknomiss} checks that certain variables have no missing values, where missing indicates a skip. 
+Note that IPA's Data Management System changes values to missing as specified in the input sheet 
+(i.e. -999 = .d), which will also be considered missing in this check. 
 
 {marker remarks}{...}
 {title:Remarks}
 
 {pstd}
-{cmd:ipacheckdups} is one of the checks run in IPA's high frequency checks. 
+{cmd:ipachecknomiss} is one of the checks run in IPA's high frequency checks. 
 It can be run within IPA's Data Management System, where inputs are entered into an .xlsm file 
 and outputs are formatted in a .xlsx file. See {help ipacheck} for more details on how to use the Data Management System.
 
@@ -67,14 +66,17 @@ and outputs are formatted in a .xlsx file. See {help ipacheck} for more details 
 In IPA's master_check.do file created when using the Data Management System, the inputs you enter into
 hfc_inputs.xlsm are used as globals through {cmd:ipacheckimport} to fill in this command:
 {p_end}{cmd}{...}
-{phang2}.  ipacheckdups ${variable2}, 
-    id(${id}) 
-    enumerator(${enum}) 
-    submit(${date}) 
-    keepvars(${keep2}) 
-    saving("${outfile}") 
-    sctodb("${server}") 
+
+{phang2}
+.  ipachecknomiss ${variable4},
+    id(${id})
+    enumerator(${enum})
+    submit(${date})
+    keepvars(${keep4})
+    saving("${outfile}")
+    sctodb("${server}")
     sheetreplace ${nolabel}
+
 {txt}{...}
 	
  

@@ -3,14 +3,15 @@
 {title:Title}
 
 {phang}
-{cmd:ipacheckdups} {hline 2}
-Check for duplicate values of variables that should be unique. 
+{cmd:ipacheckconsent} {hline 2}
+Check for interviews where consent was not given. 
 
 {marker syntax}{...}
 {title:Syntax}
 
 {p 8 10 2}
-{cmd:ipacheckdups} {it:{help varlist}} {help if:[if]} {help in:[in]}{cmd:,}
+{cmd:ipacheckconsent} {it:{help varlist}}{cmd:,}
+{opth consentvalue(numlist)} 
 {opth saving(filename)} 
 {opth id(varname)} 
 {opth enum:erator(varname)}
@@ -19,18 +20,20 @@ Check for duplicate values of variables that should be unique.
 
 {* Using -help readreplace- as a template.}{...}
 {* 20 is the position of the last character in the first column + 3.}{...}
-{synoptset 20 tabbed}{...}
+{synoptset 22 tabbed}{...}
 {synopthdr}
 {synoptline}
 {syntab:Main}
 {* Using -help heckman- as a template.}{...}
-{p2coldent:* {opth saving(filename)}}output filename where sheet "2. duplicates" will be saved {p_end}
+{p2coldent:* {opth consentvalue(numlist)}}value for ID variable listed in varlist that signals consent. If multiple variables are listed, values should be separated by ";" {p_end}
+{p2coldent:* {opth saving(filename)}}output filename where sheet "3. consent" will be saved {p_end}
 {p2coldent:* {opth id(varname)}}ID variable, automatically included in every flagged observation {p_end}
 {p2coldent:* {opth enum:erator(varname)}}enumerator variable, automatically included in every flagged observation {p_end}
 {p2coldent:* {opth submit:ted(varname)}}submission date variable (usually the SurveyCTO-created submissiondate), automatically included in every flagged observation {p_end}
 
 
 {syntab:Specifications}
+{synopt:{opth cond:ition(string)}}condition for which lack of consent should not be flagged. If multiple conditions, expressions should be separated by ";"{p_end}
 {synopt:{opth keep:vars(varlist)}}variables that should also be included in output sheet{p_end}
 {synopt:{opth scto:db(string)}}SurveyCTO server name; when included, a column is created that links to the flagged observation on the SurveyCTO server monitoring tab.{p_end}
 {synopt:{opt nolab:el}}export variable values instead of value labels{p_end}
@@ -40,22 +43,21 @@ Check for duplicate values of variables that should be unique.
 {synoptline}
 {p2colreset}{...}
 {* Using -help heckman- as a template.}{...}
-{p 4 6 2}* {opt saving()}, {opt id()}, {opt enumerator()}, and {opt submitted()} are required.
+{p 4 6 2}* {opt consentvalue()}, {opt saving()}, {opt id()}, {opt enumerator()}, and {opt submitted()} are required.
 
 
 {title:Description}
 
 {pstd}
-{cmd:ipacheckdups} checks for duplicates of variables that should be unique, such as GPS points and other household indicators for enumerator monitoring. 
-Note this check should not be used for the ID variable when runnning within IPA's Data Management System, since
-other checks in the Data Management System require a unique ID variable. {help ipacheckids} is used to summarize duplicates
-and differences between interviews with the same value for the ID variable.
+{cmd:ipacheckconsent} exports the ID, enumerator, and any other variables specified
+when consent is not given, or the consent variable(s) specified does not equal the consent value(s) specified. 
+This check is meant to more quickly identify surveys where consent was not given.
 
 {marker remarks}{...}
 {title:Remarks}
 
 {pstd}
-{cmd:ipacheckdups} is one of the checks run in IPA's high frequency checks. 
+{cmd:ipacheckconsent} is one of the checks run in IPA's high frequency checks. 
 It can be run within IPA's Data Management System, where inputs are entered into an .xlsm file 
 and outputs are formatted in a .xlsx file. See {help ipacheck} for more details on how to use the Data Management System.
 
@@ -67,12 +69,13 @@ and outputs are formatted in a .xlsx file. See {help ipacheck} for more details 
 In IPA's master_check.do file created when using the Data Management System, the inputs you enter into
 hfc_inputs.xlsm are used as globals through {cmd:ipacheckimport} to fill in this command:
 {p_end}{cmd}{...}
-{phang2}.  ipacheckdups ${variable2}, 
-    id(${id}) 
-    enumerator(${enum}) 
-    submit(${date}) 
-    keepvars(${keep2}) 
-    saving("${outfile}") 
+{phang2}.  ipacheckconsent ${variable3},
+    consentvalue(${consent_value3})
+    id(${id})
+    enumerator(${enum})
+    submit(${date})
+    keepvars(${keep3})
+    saving("${outfile}")
     sctodb("${server}") 
     sheetreplace ${nolabel}
 {txt}{...}

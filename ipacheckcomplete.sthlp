@@ -3,14 +3,15 @@
 {title:Title}
 
 {phang}
-{cmd:ipacheckdups} {hline 2}
-Check for duplicate values of variables that should be unique. 
-
+{cmd:ipacheckcomplete} {hline 2}
+Check that all interviews were completed. 
 {marker syntax}{...}
 {title:Syntax}
 
 {p 8 10 2}
-{cmd:ipacheckdups} {it:{help varlist}} {help if:[if]} {help in:[in]}{cmd:,}
+{cmd:ipacheckcomplete} {it:{help varlist}}{cmd:,}
+{opth comp:lete(numlist)} 
+{opth p:ercent(numlist)} 
 {opth saving(filename)} 
 {opth id(varname)} 
 {opth enum:erator(varname)}
@@ -24,7 +25,9 @@ Check for duplicate values of variables that should be unique.
 {synoptline}
 {syntab:Main}
 {* Using -help heckman- as a template.}{...}
-{p2coldent:* {opth saving(filename)}}output filename where sheet "2. duplicates" will be saved {p_end}
+{p2coldent:* {opth comp:lete(numlist)}}the value that indicates a complete survey for the completion variable specified {p_end}
+{p2coldent:* {opth p:ercent(numlist)}}the percentage of questions (0 to 100) that is a threshold for an incomplete survey (i.e. flag surveys with only 40% of questions answered or not missing) {p_end}
+{p2coldent:* {opth saving(filename)}}output filename where sheet "1. incomplete" will be saved {p_end}
 {p2coldent:* {opth id(varname)}}ID variable, automatically included in every flagged observation {p_end}
 {p2coldent:* {opth enum:erator(varname)}}enumerator variable, automatically included in every flagged observation {p_end}
 {p2coldent:* {opth submit:ted(varname)}}submission date variable (usually the SurveyCTO-created submissiondate), automatically included in every flagged observation {p_end}
@@ -40,22 +43,24 @@ Check for duplicate values of variables that should be unique.
 {synoptline}
 {p2colreset}{...}
 {* Using -help heckman- as a template.}{...}
-{p 4 6 2}* {opt saving()}, {opt id()}, {opt enumerator()}, and {opt submitted()} are required.
+{p 4 6 2}* {opt complete()}, {opt percent()}, {opt saving()}, {opt id()}, {opt enumerator()}, and {opt submitted()} are required.
 
 
 {title:Description}
 
 {pstd}
-{cmd:ipacheckdups} checks for duplicates of variables that should be unique, such as GPS points and other household indicators for enumerator monitoring. 
-Note this check should not be used for the ID variable when runnning within IPA's Data Management System, since
-other checks in the Data Management System require a unique ID variable. {help ipacheckids} is used to summarize duplicates
-and differences between interviews with the same value for the ID variable.
+IPA best practice is generally to include a question at the end of a survey that asks the enumerator to document the completness of the interview. This command checks that 
+all survey values of the completeness variable are equal to the "completed" option. Incomplete surveys are listed  in the output. 
+
+{pstd}
+Optionally, users can also specify a minimum nonmissing response threshold and this check will output the surveys that have fewer nonmissing responses than the minimum.
+
 
 {marker remarks}{...}
 {title:Remarks}
 
 {pstd}
-{cmd:ipacheckdups} is one of the checks run in IPA's high frequency checks. 
+{cmd:ipacheckcomplete} is one of the checks run in IPA's high frequency checks. 
 It can be run within IPA's Data Management System, where inputs are entered into an .xlsm file 
 and outputs are formatted in a .xlsx file. See {help ipacheck} for more details on how to use the Data Management System.
 
@@ -65,15 +70,17 @@ and outputs are formatted in a .xlsx file. See {help ipacheck} for more details 
 
 {pstd}
 In IPA's master_check.do file created when using the Data Management System, the inputs you enter into
-hfc_inputs.xlsm are used as globals through {cmd:ipacheckimport} to fill in this command:
+hfc_inputs.xlsm are used as globals to fill in this command:
 {p_end}{cmd}{...}
-{phang2}.  ipacheckdups ${variable2}, 
-    id(${id}) 
-    enumerator(${enum}) 
-    submit(${date}) 
-    keepvars(${keep2}) 
-    saving("${outfile}") 
-    sctodb("${server}") 
+{phang2}. ipacheckcomplete ${variable1}, 
+    complete(${complete_value1})
+    percent(${complete_percent1})
+    id(${id})
+    enumerator(${enum})
+    submit(${date})
+    keepvars("${keep1}")
+    saving("${outfile}")
+    sctodb("${server}")
     sheetreplace ${nolabel}
 {txt}{...}
 	
@@ -85,6 +92,6 @@ hfc_inputs.xlsm are used as globals through {cmd:ipacheckimport} to fill in this
 {pstd}Innovations for Poverty Action{p_end}
 
 {pstd}For questions or suggestions, submit a
-{browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}
+{browse "https://github.com/PovertyAction/progreport/issues":GitHub issue}
 or e-mail researchsupport@poverty-action.org.{p_end}
 
