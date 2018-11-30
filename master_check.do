@@ -5,6 +5,25 @@
    ============== IPA HIGH FREQUENCY CHECK TEMPLATE  ============= 
    ===============================================================
    =============================================================== */
+ 
+ *These commands are required by ipacheck to already be installed
+ local required_cmds cfout bcstats2 readreplace
+ 
+ foreach command of local required_cmds {
+   cap which `command' //Test if a command with that name is installed
+   
+   *command does not exist, show which 
+   if _rc == 111 {
+     *Prepare installation instructions
+     if "`command'" == "cfout" 			local install_code "{stata ssc install cfout}"
+     if "`command'" == "bcstats2" 		local install_code `"{inp: net install bcstats, replace from("https://raw.githubusercontent.com/PovertyAction/bcstats/master/ado")}"' //This code cannot be made an active link due to the : after https
+     if "`command'" == "readreplace" 	local install_code "{stata ssc install readreplace}"
+     
+     *Display error message and provide installation instructions
+     di as error `"{pstd}The command {inp:`command'} that is required by ipacheck was not found, please install the command by running the folloqing code `install_code'{p_end}"'
+   }
+ }   
+
    
 * this line adds standard boilerplate headings
 ipadoheader, version(15.0)
