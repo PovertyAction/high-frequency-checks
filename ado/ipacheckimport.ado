@@ -367,11 +367,11 @@ program ipacheckimport, rclass
 								}
 							}
 
-							if keepsurvey[`i'] != "" {
+							if !mi(keepsurvey[`i']) {
 								mata: st_global("keepsurvey`n'", `"${keepsurvey`n'} `=keepsurvey[`i']'"')
 							}
 
-							if keepbc[`i'] != "" {
+							if !mi(keepbc[`i']) {
 								mata: st_global("keepbc`n'", `"${keepbc`n'} `=keepbc[`i']'"')
 							}
 
