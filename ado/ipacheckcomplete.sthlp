@@ -34,7 +34,7 @@ Check that all interviews were completed.
 
 
 {syntab:Specifications}
-{synopt:{opth keepvars(varlist)}}variables that should also be included in output sheet{p_end}
+{synopt:{opth keep:vars(varlist)}}variables that should also be included in output sheet{p_end}
 {synopt:{opth scto:db(string)}}SurveyCTO server name; when included, a column is created that links to the flagged observation on the SurveyCTO server monitoring tab.{p_end}
 {synopt:{opt nolab:el}}export variable values instead of value labels{p_end}
 {synopt:{opt sheetmod:ify}}export excel option to modify sheet instead of replacing sheet; cannot be used with sheetreplace{p_end}
@@ -92,6 +92,6 @@ hfc_inputs.xlsm are used as globals to fill in this command:
 {pstd}Innovations for Poverty Action{p_end}
 
 {pstd}For questions or suggestions, submit a
-{browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}
+{browse "https://github.com/PovertyAction/progreport/issues":GitHub issue}
 or e-mail researchsupport@poverty-action.org.{p_end}
 
