@@ -407,7 +407,7 @@ end
 * This program checks that the othere commands this package depends on are already installed, if not it provides installation instructions
 program define checkrequiredcommands
 
-	*These commands that ipacheck requires to already be installed, add t
+	*These commands that ipacheck requires to already be installed, add to list if more commands are required in the future
 	local required_cmds cfout bcstats readreplace
 
 	foreach command of local required_cmds {
