@@ -7,6 +7,9 @@ program ipacheckimport, rclass
 	   data quality assurance */
 	version 13
 
+	*Program that checks that required commands are installed (see definition below)
+	checkrequiredcommands
+
 	syntax using/
 	
 	di ""
@@ -399,4 +402,33 @@ program define dropexcess
 	}
 
 	drop if _n > `valid_obs'
+end
+
+* This program checks that the othere commands this package depends on are already installed, if not it provides installation instructions
+program define checkrequiredcommands
+
+	*These commands that ipacheck requires to already be installed, add t
+	local required_cmds cfout bcstats readreplace
+
+	foreach command of local required_cmds {
+
+		*Test if a command with that name is installed
+		cap which `command'
+
+		*command does not exist, show how to install
+		if _rc == 111 {
+
+			*Fall back string if conditions fails
+			local install_code "{stata findit `command'}"
+
+			*Prepare installation instructions
+			if "`command'" == "cfout" 			local install_code "{stata ssc install cfout}"
+			if "`command'" == "bcstats" 		local install_code `"{inp: net install bcstats, replace from("https://raw.githubusercontent.com/PovertyAction/bcstats/master/ado")}"' //This code cannot be made an active link due to the : after https, if bcstats are updated on ssc, change to ssc
+			if "`command'" == "readreplace" 	local install_code "{stata ssc install readreplace}"
+
+			*Display error message and provide installation instructions
+			noi di as error `"{pstd}The command {inp:`command'} that is required by ipacheck was not found, please install the command by running the following code `install_code'{p_end}"'
+			error 199
+		}
+	}
 end
