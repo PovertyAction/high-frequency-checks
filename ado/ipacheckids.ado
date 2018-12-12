@@ -10,7 +10,11 @@ program ipacheckids
 version 14.1
 
 if mi("`using'") {
-	loc using = "hfc_duplicates.xlsx"
+	loc using = "hfc_duplicates"
+}
+
+if regexm("`filename'", ".xls") {
+	local filename = substr("`filename'", 1, strpos("`filename'", ".xl")-1) 
 }	
 
 if mi("`variable'") {
@@ -48,8 +52,10 @@ if `error' != 0 {
 	}
 	tostring `varlist', replace force format("%20.0g")
 }
-duplicates tag `varlist', gen(dup)
-count if dup
+
+tempvar dup
+duplicates tag `varlist', gen(`dup')
+count if `dup'
 
 if `r(N)' > 0 {
 	tempvar prctdiff vardiff bot differences total sortavg
@@ -63,7 +69,7 @@ if `r(N)' > 0 {
 
 	qui ds `varlist' key `prctdiff' `vardiff', not
 	local cfvars `r(varlist)' 
-	drop if dup < 1	
+	drop if `dup' < 1	
 	levelsof `varlist', local(ids)
 	bysort `varlist' : gen n = _n
 	loc j 1
@@ -108,7 +114,7 @@ recode `prctdiff' (.=-999)
 sort `sortavg' `prctdiff'
 recode `prctdiff' (-999=.)
 
-	export excel `varlist' `enumerator' key `differences' `total' `prctdiff' using "`using'" if dup, ///
+	export excel `varlist' `enumerator' key `differences' `total' `prctdiff' using "`using'.xlsx" if `dup', ///
 	sheet("Diffs") firstrow(varl) replace missing(".")
 
 	
@@ -131,7 +137,7 @@ levelsof `varlist', loc(original)
 
 foreach id in `id_ordered' {
 	loc count : list posof "`id'" in original
-	export excel `varlist' key `pairdiff`count'' using "`using'" if dup > 0 & `varlist' == "`id'", ///
+	export excel `varlist' key `pairdiff`count'' using "`using'.xlsx" if `dup' > 0 & `varlist' == "`id'", ///
 	sheet("Raw") firstrow(`variable') sheetmodify `nolabel' cell(A`start')
 	
 		
@@ -139,7 +145,7 @@ foreach id in `id_ordered' {
 	loc counter `r(N)'
 	loc end = `start' + `counter'
 	loc column : word count `varlist' key `pairdiff`count''
-	mata: borders("`using'", "Raw", `start', `column', `counter')
+	mata: borders("`using'.xlsx", "Raw", `start', `column', `counter')
 	
 	loc start = `start' + `counter' + 2
 	loc ++count
@@ -149,14 +155,14 @@ foreach id in `id_ordered' {
 	* I need to find the number of rows and columns in the raw file to adjust column widths
 *use end as nrow, use last word count pairdiff`count-1'
 	
-	mata: col_widths("`using'", "Raw", `end', `=`:word count `pairdiff`=`count'-1'''+2')
+	mata: col_widths("`using'.xlsx", "Raw", `end', `=`:word count `pairdiff`=`count'-1'''+2')
 
 
 
 **********Formatting***********************
 	 // adding lines, bolding, and adjusting column widths
 	sort `varlist' key
-	keep `varlist' key dup
+	keep `varlist' key `dup'
 
 	by `varlist' : gen lines = _n
 	egen `bot' = max(lines), by(`varlist')
@@ -164,7 +170,7 @@ foreach id in `id_ordered' {
 
 	*add separating lines
 
-	mata: make_lines("`using'", "Diffs", 6, `=`=_N'+1')
+	mata: make_lines("`using'.xlsx", "Diffs", 6, `=`=_N'+1')
 
 	use `survey_dta', clear
 
@@ -271,6 +277,7 @@ void col_widths(string scalar filename, string scalar sheet, real scalar nrow, r
 	column_widths = colmax(strlen(cols))
 
 	for (j=1; j<=ncol; j++) {
+		if (column_widths[j] > 50) column_widths[j] == 50
 		b.set_column_width(j, j, column_widths[j]+2)		
 	}
 
