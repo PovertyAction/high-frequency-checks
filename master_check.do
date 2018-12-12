@@ -5,7 +5,7 @@
    ============== IPA HIGH FREQUENCY CHECK TEMPLATE  ============= 
    ===============================================================
    =============================================================== */
-   
+
 * this line adds standard boilerplate headings
 ipadoheader, version(15.0)
    
