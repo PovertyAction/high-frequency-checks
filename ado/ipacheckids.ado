@@ -190,7 +190,10 @@ foreach id in `id_ordered' {
 	destring `varlist', replace
 	}
 	if "`save'" != "" {
+		preserve
+		drop _hfc* __*
 		save "`save'", replace
+		restore
 	}
 	
 	} // qui bracket
