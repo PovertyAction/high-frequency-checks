@@ -6,10 +6,6 @@ This folder is designed to store the various input sheets that get called by the
 
 Before running the checks, look to the 01_inputs sub-folder to find templates for the different input spreadsheets:
 
-- hfc_enumerators
-
-This is a blank document that will serve as the template for the enumerator dashboard. You should not populate this spreadsheet with any information prior to running the checks.
-
 - hfc_inputs
 
 This is the main document where you will select which variables from your dataset you want to run in each check. Be selective with the variables you include. The more variables you have, the more comprehensive your checks become, but it also means more output that will likely become difficult to read and interpret quickly.
