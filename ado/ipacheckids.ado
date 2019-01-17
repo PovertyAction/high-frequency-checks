@@ -192,7 +192,7 @@ foreach id in `id_ordered' {
 	if "`save'" != "" {
 		preserve
 		qui cap ds _hfc* __*
-		foreach var in `r(varlist' {
+		foreach var in `r(varlist)' {
 		cap confirm `var'
 		if _rc {
 			drop `var'
