@@ -198,7 +198,7 @@ foreach id in `id_ordered' {
 			drop `var'
 		}
 		}
-		*drop _hfc* __*
+
 		save "`save'", replace
 		restore
 	}
