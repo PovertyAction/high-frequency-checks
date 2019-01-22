@@ -191,7 +191,14 @@ foreach id in `id_ordered' {
 	}
 	if "`save'" != "" {
 		preserve
-		drop _hfc* __*
+		qui cap ds _hfc* __*
+		foreach var in `r(varlist)' {
+		cap confirm `var'
+		if _rc {
+			drop `var'
+		}
+		}
+
 		save "`save'", replace
 		restore
 	}
