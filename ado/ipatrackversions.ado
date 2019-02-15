@@ -229,14 +229,26 @@ void v_formatting(string scalar filename, string scalar sheet, real scalar start
 	
 	b.set_font_bold((1,2), (startcol, column), "on")
 	b.set_font_bold((3, row + 1), startcol, "on")
-	b.set_horizontal_align( 1, (startcol + 1, column), "merge")
+	if (column == 2) {
+		b.set_horizontal_align(1, 2, "merge")	
+	} 
+	else b.set_horizontal_align( 1, (startcol + 1, column), "merge")
+	
 	
 	if (startcol == 1) {
 		b.set_column_width(startcol, column, 16)
 		b.set_left_border((1, 2), startcol + 1, "thick")
 		b.set_horizontal_align((1, row + 1), (startcol, column), "center")
-
-		lastrow = b.get_number(row+1, (startcol + 1, column))
+		
+		
+		if (column == 2) {
+			lastrow = b.get_number(row+1, 2)
+		}
+		else {
+			lastrow = b.get_number(row+1, (startcol + 1, column))
+		}
+		
+		
 		for (i=1; i<=length(lastrow)-1; i++) {
 			if (lastrow[i] != 0) {
 			b.set_fill_pattern(row+1, i+1, "solid", "pink")
