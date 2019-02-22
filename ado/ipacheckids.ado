@@ -38,7 +38,12 @@ save `survey_dta'
 
 keep if `touse'
 
-sort `varlist' submissiondate key
+cap confirm variable key
+if !_rc {
+loc key key
+}
+sort `varlist' $date `key'
+
 cap confirm string variable `varlist' 
 loc error : dis _rc
 if `error' != 0 {
@@ -66,8 +71,8 @@ if `r(N)' > 0 {
 	lab var `differences' "Differences"
 	gen `total' = .
 	lab var `total' "Total Compared"
-
-	qui ds `varlist' key `prctdiff' `vardiff', not
+	
+	qui ds `varlist' `key' `prctdiff' `vardiff', not
 	local cfvars `r(varlist)' 
 	drop if `dup' < 1	
 	levelsof `varlist', local(ids)
@@ -114,7 +119,7 @@ recode `prctdiff' (.=-999)
 sort `sortavg' `prctdiff'
 recode `prctdiff' (-999=.)
 
-	export excel `varlist' `enumerator' key `differences' `total' `prctdiff' using "`using'.xlsx" if `dup', ///
+	export excel `varlist' `enumerator' `key' `differences' `total' `prctdiff' using "`using'.xlsx" if `dup', ///
 	sheet("Diffs") firstrow(varl) replace missing(".")
 
 	
@@ -137,14 +142,14 @@ levelsof `varlist', loc(original)
 
 foreach id in `id_ordered' {
 	loc count : list posof "`id'" in original
-	export excel `varlist' key `pairdiff`count'' using "`using'.xlsx" if `dup' > 0 & `varlist' == "`id'", ///
+	export excel `varlist' `key' `pairdiff`count'' using "`using'.xlsx" if `dup' > 0 & `varlist' == "`id'", ///
 	sheet("Raw") firstrow(`variable') sheetmodify `nolabel' cell(A`start')
 	
 		
 	count if `varlist' == "`id'"
 	loc counter `r(N)'
 	loc end = `start' + `counter'
-	loc column : word count `varlist' key `pairdiff`count''
+	loc column : word count `varlist' `key' `pairdiff`count''
 	mata: borders("`using'.xlsx", "Raw", `start', `column', `counter')
 	
 	loc start = `start' + `counter' + 2
@@ -161,8 +166,8 @@ foreach id in `id_ordered' {
 
 **********Formatting***********************
 	 // adding lines, bolding, and adjusting column widths
-	sort `varlist' key
-	keep `varlist' key `dup'
+	sort `varlist' `key'
+	keep `varlist' `key' `dup'
 
 	by `varlist' : gen lines = _n
 	egen `bot' = max(lines), by(`varlist')
@@ -191,7 +196,14 @@ foreach id in `id_ordered' {
 	}
 	if "`save'" != "" {
 		preserve
-		qui cap ds _hfc* __*
+		qui cap ds __*
+		foreach var in `r(varlist)' {
+		cap confirm `var'
+		if _rc {
+			drop `var'
+		}
+		}
+		qui cap ds _hfc*
 		foreach var in `r(varlist)' {
 		cap confirm `var'
 		if _rc {
