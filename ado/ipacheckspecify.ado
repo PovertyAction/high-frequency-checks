@@ -80,37 +80,36 @@ program ipacheckspecify, rclass
 	   not included in the input file */
 
 	* loop through other specify variables in varlist and find nonmissing values
-	foreach var in `varlist' {  							// childvars
+	foreach var in `varlist' {
 		* get current other variable
-		local parent : word `i' of `parentvars'				// get parentvar that matched
+		local parent : word `i' of `parentvars'
 
-		
-		cap confirm string variable `var'					// is childvar string
+		cap confirm string variable `var'
 		if _rc {
 			cap tostring `var', replace
 			replace `var' = "" if `var' == "."
 		}		
 
-		cap confirm string variable `var'					// is childvar string
+		cap confirm string variable `var'
 
-		if !_rc {											// if childvar is a string
-			replace `specified' = `var' != ""				// specified == 1 when childvar has a value
+		if !_rc {
+			replace `specified' = `var' != ""
 
 			* count the number of specified other values
-			count if `specified' == 1						// count how many childvalues there are
+			count if `specified' == 1
 			local n = `r(N)'
-			local nother = `nother' + `n'					//nother starts at 0, adds how many childvalues there are
+			local nother = `nother' + `n'
 
 			* capture variable label
-			local pvarl : variable label `parent'			//variable label of parent
-			local cvarl : variable label `var'				// variable label of child
+			local pvarl : variable label `parent'
+			local cvarl : variable label `var'
 
 			* capture choices 
-			getlabel `parent' 								// get possible values of parent
+			getlabel `parent'
 			local vall = "`r(label)'"
 
 			* update values of meta data variables
-			replace parent = "`parent'"	
+			replace parent = "`parent'"
 			replace parent_label = "`pvarl'"
 			replace child = "`var'"
 			replace child_label = "`cvarl'"
