@@ -85,6 +85,13 @@ program ipacheckspecify, rclass
 		local parent : word `i' of `parentvars'
 
 		cap confirm string variable `var'
+		if _rc {
+			cap tostring `var', replace
+			replace `var' = "" if `var' == "."
+		}		
+
+		cap confirm string variable `var'
+
 		if !_rc {
 			replace `specified' = `var' != ""
 
@@ -119,9 +126,10 @@ program ipacheckspecify, rclass
 				keep("`keeplist'")
 
 			noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
+
+		}
 			local i = `i' + 1
 		}
-	}
 
 	* import compiled list of violations
 	use `tmp', clear
