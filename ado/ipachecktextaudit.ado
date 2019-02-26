@@ -124,7 +124,7 @@ prog define ipachecktextaudit, rclass
 				* merge in enumerator and other data
 				loc keeplist: list keepvars - enumerator
 
-        loc keeplist = subinstr(subinstr("`keeplist'", ";", "", .), ".", "", .) 
+       loc keeplist = ustrtrim(subinstr(subinstr("`keepvars'", ";", "", .), ".", "", .)) 
 
 				merge m:1 `varlist' using `tadata', keepusing(`enumerator' `keeplist') ///
 					assert(match) nogen
