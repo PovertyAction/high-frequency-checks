@@ -249,6 +249,7 @@ void make_lines(string scalar filename, string scalar sheet, real scalar N, real
 	column_widths = colmax(strlen(cols))
 
 	for (j=1; j<=N; j++) {
+		if (column_widths[j] > 50) column_widths[j] == 50
 		b.set_column_width(j, j, column_widths[j]+2)		
 	}
 	
