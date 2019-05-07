@@ -148,7 +148,7 @@ prog ipacheckreadreplace, rclass
 					 C2 = ("`value'") ///
 					 D2 = ("`newvalue'") ///
 					 E2 = ("`action'")	///
-					 F2 = ("`comments'")
+					 F2 = ("`comments'") ///
 					 G2 = ("Status")
 			}
 					
