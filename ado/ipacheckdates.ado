@@ -257,9 +257,10 @@ program ipacheckdates, rclass
 		mata: add_scto_link("`saving'", "10. dates", "scto_link", `pos')
 	}
 	
+	}	
 	* revert to original
 	use `org', clear
-	}
+
 	* return list
 	return scalar missing = `missing'
 	return scalar diff_end = `diff_end'
