@@ -13,8 +13,8 @@ prog define ipachecktextaudit, rclass
 							dta(string)]	
 
 	* written in version 15
-	* requires version 14.2
-	version 14.2				
+	* requires version 14.1
+	version 14.1				
 	
 	qui {
 		* add extension to using file
