@@ -13,8 +13,8 @@ if mi("`using'") {
 	loc using = "hfc_duplicates"
 }
 
-if regexm("`filename'", ".xls") {
-	local filename = substr("`filename'", 1, strpos("`filename'", ".xl")-1) 
+if regexm("`using'", ".xls") {
+	local using = substr("`using'", 1, strpos("`using'", ".xl")-1) 
 }	
 
 if mi("`variable'") {
