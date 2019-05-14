@@ -9,6 +9,8 @@ program progreport
 		KEEPMaster(string)		/// sample variables
 		[KEEPSurvey(string)]	/// keep from survey data
 		[MID(string)] 			/// id variable from master data
+		[TRACKing(string)]		/// tracking sheet ***
+		[TVar(string)]			/// tracking variable(s) ***
 		[FILEname(string)]		/// default is "Progress Report"
 		[Target(real 1)]		/// target rate
 		[DTA(string)] 			///	if you want an output file of those not interviewed yet
@@ -21,11 +23,35 @@ program progreport
 		
 		version 14.1
 
-/* ------------------------------ Load Sample ------------------------------- */
 qui {
+/* ------------------------------ Load Sample ------------------------------- */
+
 if "`clear'" == "" {
 	tempfile orig
 	save "`orig'", emptyok
+}
+
+* prepare tracking data
+if !mi("`tracking'") {
+	use "`tracking'", clear
+	
+	cap confirm double variable submissiondate
+	if _rc {
+		dis "There is no submissiondate variable in `tracking'. This commands requires a double variable named -submissiondate-."
+		exit 198
+	}
+	gsort -submissiondate
+	local val : value label `tvar'
+	local misslab : variable label `tvar'
+	collapse (firstnm) track_date = submissiondate `tvar' (count) pr_attempts = `tvar', by(`id')  
+	keep track_date `id' pr_attempts `tvar'
+	lab var track_date "Most Recent Track"
+	lab var pr_attempts "Attempts"
+	lab var `tvar' "`misslab'"
+	lab val `tvar' `val'
+
+	tempfile track
+	save "`track'"
 }
 
 * load the sample list
@@ -35,6 +61,8 @@ if !mi("`mid'") {
 	ren `mid' `id'
 }
 
+keep `id' `sortby' `keepmaster'
+
 if "`filename'" == "" {
 	local filename "Progress Report"
 }	
@@ -42,19 +70,22 @@ if "`filename'" == "" {
 if regexm("`filename'", ".xls") {
 	local filename = substr("`filename'", 1, strpos("`filename'", ".xl")-1) 
 }
-tempvar status
+
+tempvar  status tmerge tstatus
+
 /* -------------------------- Merge Questionnaire --------------------------- */
 
 	merge 1:1 `id' using "`survey'", ///
-		keepusing(submissiondate `keepsurvey')
+		keepusing(submissiondate `keepsurvey') gen(pr_merge)
 
 	ren submissiondate questionnaire_date
 	replace questionnaire_date = dofc(questionnaire_date)
-	format questionnaire_date %td	
+	format questionnaire_date %td
 
 	lab def _merge 1 "Not submitted" 2 "Only in Questionnaire Data" 3 "Submitted", modify
-	decode _merge, gen(`status')
-	qui count if _merge == 2
+
+	decode pr_merge, gen(`status')
+	qui count if pr_merge == 2
 	loc surveyonly `r(N)'
 	if `surveyonly' > 0 {
 
@@ -70,17 +101,18 @@ tempvar status
 		}
 	}
 
+
 	local allvars `id' `keepmaster' `keepsurvey' questionnaire_date `status'
 	lab var `status' "Status"
 	lab var questionnaire_date "Date Submitted"
 	order `allvars' 
-	gsort _merge -questionnaire_date `id' `keepmaster'
+	gsort pr_merge -questionnaire_date `id' `keepmaster'
 	
 	/* -------------------------- Create Summary Sheet -------------------------- */
 
 	preserve
-		gen completed = 1 if _merge == 3
-		gen total = 1 if _merge != 2
+		gen completed = 1 if pr_merge == 3
+		gen total = 1 if pr_merge != 2
 		collapse (sum) completed total (min) first_submitted=questionnaire_date (max) last_submitted=questionnaire_date, by(`sortby')
 		drop if mi(`sortby') // so it doesn't show in the table
 		gen pct_completed = completed/total, after(total)
@@ -118,6 +150,24 @@ tempvar status
 	restore
 
 	/* --------------------------- Create Sheets ---------------------------- */
+	*************Merge in tracking info
+	if !mi("`tracking'") {
+		merge 1:1 `id' using "`track'", gen(`tmerge')
+		replace `tvar' = . if pr_merge == 3 
+		replace pr_attempts = . if pr_merge == 3
+		replace track_date = . if pr_merge == 3
+		
+		decode `tvar', gen(`tstatus')
+		replace pr_merge = 2 if !mi(`tstatus')
+		replace `status' = `tstatus' if !mi(`tstatus')
+		lab def _merge 2 "Only Tracking Form", modify
+		
+		gsort pr_merge track_date pr_attempts -questionnaire_date `id' `keepmaster'
+		local allvars `allvars' track_date pr_attempts 
+		replace track_date = dofc(track_date)
+		format track_date %td
+	}
+
 
 if "`surveyok'" == "surveyok" & `surveyonly' > 0 {
 
@@ -203,11 +253,12 @@ if "`summary'"	== "" {
 
 			loc upper = strproper("`sortby'")
 			decode `sortby', gen(`upper')
+			loc old `sortby'
 			loc sortby `upper'
 
 		}
 	}
-
+	
 	levelsof `sortby', local(byvalues)
 	qui tab `sortby'
 	loc sortcount `r(r)'
@@ -233,11 +284,11 @@ if "`summary'"	== "" {
 		else {
 			export excel `allvars' if `sortby' == "`sortval'" using "`filename'.xlsx", ///
 			firstrow(varl) sheet("`sortval'") sheetreplace `nolabel'
-		
 		}
-		
-		qui count if `sortby' == "`sortval'"
-		local N = `r(N)' + 1
+			
+		count if `sortby' == "`sortval'"
+
+    local N = `r(N)' + 1
 		
 		if "`workbooks'" == "workbooks" {
 			mata : create_progress_report("`filename'_`sortval'.xlsx", "`sortval'", tokens("`allvars'"), `N')
@@ -248,27 +299,38 @@ if "`summary'"	== "" {
 
 		}
 		local den = `N' - 1
-		qui count if `sortby' == "`sortval'" & _merge == 3
+		count if `sortby' == "`sortval'" & pr_merge == 3
 		local num = `r(N)'
 		noi dis "Created sheet for `sortval': interviewed `num' out of `den'"
 	}
+	
 	restore
 }
+
 	if !mi("`dta'") {	
 		preserve
-			keep if _merge == 1
-			keep `sortby' `id' `keepmaster'
-			order `sortby' `id' `keepmaster'
+			keep if pr_merge <= 2
+			if !mi("`tracking'") {
+			keep `sortby' `id' `keepmaster' pr_merge track_date `tvar' pr_attempts
+			order `sortby' `id' `keepmaster' pr_merge track_date `tvar' pr_attempts
+			}
+			else {
+			keep `sortby' `id' `keepmaster' 
+			order `sortby' `id' `keepmaster' 
+			}
 			save "`dta'", replace
 			noi dis "Saved remaining respondents to `dta'."
 		restore
 
 	}
-	if "`clear'" == "" {
-		use "`orig'", clear
-	}
+
+	if !mi("`old'") loc sortby `old'
+	if !mi("`tracking'") order `sortby' `id' pr_merge track_date `tvar' pr_attempts
+	else order `sortby' `id' pr_merge
 	
-}
+	if "`clear'" == "" use "`orig'", clear
+	
+} //qui bracket
 end
 
 mata: 
@@ -300,10 +362,10 @@ void create_summary_sheet(string scalar filename, string matrix allvars, real sc
 	b.set_left_border((1, N), 7, "thick")
 	b.set_font_bold((1,2), (1,6), "on")
 	b.set_horizontal_align((1, N),(1,6), "center")	
-	b.put_string(1, 1, "Summary by " + st_local("sortby") + ": " + st_local("d"))
+	b.put_string(1, 1, "Tracking Summary: " + st_local("d"))
 	b.set_horizontal_align(1, (1,6), "merge")
-		
 	b.set_number_format((3,N), 4, "percent")
+	
 	b.set_font_bold(N, (1,6), "on")
 	b.set_bottom_border(N, (1,6), "thick")
 	
@@ -312,19 +374,22 @@ void create_summary_sheet(string scalar filename, string matrix allvars, real sc
 	for (i=1; i<=length(stat); i++) {
 		
 		if (stat[i] == 0) {
-			b.set_fill_pattern(i + 2, (4), "solid", "red")
+			b.set_fill_pattern(i + 2, 4, "solid", "red")
 		}
+
+
 		else if (stat[i] >= target) {
-			b.set_fill_pattern(i + 2, (4), "solid", "green")
+			b.set_fill_pattern(i + 2, 4, "solid", "green")
+
 		}
 		else {
-			b.set_fill_pattern(i + 2, (4), "solid", "yellow")
+			b.set_fill_pattern(i + 2, 4, "solid", "yellow")
 		}
 		
 	}
 	
 	per = strtoreal(st_local("comp"))/strtoreal(st_local("tot"))
-	
+
 	if (per == 0) {
 		b.set_fill_pattern(N, 4, "solid", "red")
 	}
@@ -360,7 +425,7 @@ void create_summary_sheet(string scalar filename, string matrix allvars, real sc
 void create_progress_report(string scalar filename, string scalar sortval, string matrix allvars, real scalar N) 
 {
 	class xl scalar b
-	real scalar i
+	real scalar i, count
 	real vector rows, status
 	real vector column_widths, varname_widths
 	string matrix sortvar
@@ -394,18 +459,25 @@ void create_progress_report(string scalar filename, string scalar sortval, strin
 	b.set_font_bold((1), (1,length(varname_widths)), "on")
 	b.set_horizontal_align((1,N), (1,length(varname_widths)), "center")
 	
+	
+	if (st_local("tracking") != "") {
+		count = length(varname_widths)-2
+		b.set_left_border((1,N), length(varname_widths)-2, "thick")
+	}
+	else count = length(varname_widths)
+	
 	sortvar = st_sdata(., st_local("sortby"))
 	rows = selectindex(sortvar :== sortval)
-	status = st_data(rows, "_merge")
+	status = st_data(rows, "pr_merge")
 	for (i=1; i<=length(rows); i++) {
 		if (status[i] == 1) {
-			b.set_fill_pattern(i + 1, (length(varname_widths)), "solid", "red")
+			b.set_fill_pattern(i + 1, count, "solid", "red")
 		}
 		else if (status[i] == 2) {
-			b.set_fill_pattern(i + 1, (length(varname_widths)), "solid", "yellow")
+			b.set_fill_pattern(i + 1, count, "solid", "yellow")
 		}
 		else if (status[i] == 3) {
-			b.set_fill_pattern(i + 1, (length(varname_widths)), "solid", "green")
+			b.set_fill_pattern(i + 1, count, "solid", "green")
 		}
 	}
 	b.close_book()
