@@ -315,7 +315,9 @@ program ipacheckimport, rclass
 							}
 			    		}
 			    	}
-		    	}
+				
+				}
+				
 				if inlist(`"`sheet'"', "backchecks") {
 					if `rows' > 0 {
 						foreach var in okrange_min okrange_max {
@@ -387,6 +389,8 @@ program ipacheckimport, rclass
 	    restore
 	}
 
+global exclude_variable14 : subinstr global exclude_variable14 "." "", all
+global exclude_variable14 : subinstr global exclude_variable14 " " "", all
 end
 
 * program to drop excess obs
