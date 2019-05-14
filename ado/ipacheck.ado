@@ -152,7 +152,8 @@ program define ipachecknew
 				"05_data/04_monitoring"
 			"06_media"
 			"07_documentation"
-			"08_field_manager""
+			"08_field_manager"
+			"09_reports""
 			;
 		#d cr
 		
@@ -272,8 +273,8 @@ program define ipachecknew
 		noi di "Saving readme files..."
 		noi di
 		// List of main folders and names for read me files
-		loc folders_main ""00_archive" "01_instruments" "02_dofiles" "03_tracking" "04_checks" "05_data" "06_media" "07_documentation" "08_field_manager""
-		loc folders_names archive instruments dofiles tracking checks data media documentation field_manager
+		loc folders_main ""00_archive" "01_instruments" "02_dofiles" "03_tracking" "04_checks" "05_data" "06_media" "07_documentation" "08_field_manager" "09_reports""
+		loc folders_names archive instruments dofiles tracking checks data media documentation field_manager reports
 		assert `:word count `folders_main'' == `:word count `folders_names''
 		
 		// Saving read me content in locals

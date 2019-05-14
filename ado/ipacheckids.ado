@@ -13,8 +13,8 @@ if mi("`using'") {
 	loc using = "hfc_duplicates"
 }
 
-if regexm("`filename'", ".xls") {
-	local filename = substr("`filename'", 1, strpos("`filename'", ".xl")-1) 
+if regexm("`using'", ".xls") {
+	local using = substr("`using'", 1, strpos("`using'", ".xl")-1) 
 }	
 
 if mi("`variable'") {
@@ -63,7 +63,7 @@ duplicates tag `varlist', gen(`dup')
 count if `dup'
 
 if `r(N)' > 0 {
-	tempvar prctdiff vardiff bot differences total sortavg
+	tempvar prctdiff vardiff bot differences total sortavg varcount
 	gen `prctdiff' = .
 	lab var `prctdiff' "Percent Difference"
 	gen `vardiff' = .
@@ -72,12 +72,24 @@ if `r(N)' > 0 {
 	gen `total' = .
 	lab var `total' "Total Compared"
 	
-	qui ds `varlist' `key' `prctdiff' `vardiff', not
-	local cfvars `r(varlist)' 
+	if `c(k)' > 1000 {
+		noi dis "Too many variables. Using variables in input file for comparisons."
+		loc cfvars $variable1 $variable2 $variable3 $variable4 $variable5 $variable6 $variable8 $parent9 $variable11 $dkrf_variable14 $variable15 $variable16
+		local cfvars : subinstr local cfvars ";" "", all
+		local cfvars = stritrim("`cfvars'")
+		ds `cfvars'
+		loc cfvars `r(varlist)'
+		local cfvars : list uniq cfvars
+		}
+	else{
+		qui ds `varlist' `key' `prctdiff' `vardiff', not
+		local cfvars `r(varlist)' 
+	 }
 	drop if `dup' < 1	
 	levelsof `varlist', local(ids)
 	bysort `varlist' : gen n = _n
 	loc j 1
+	gen `varcount' = 0
 	foreach id in `ids' {
 
 		preserve
@@ -113,10 +125,10 @@ if `r(N)' > 0 {
 
 	}
 	
-by `varlist' : egen `sortavg' = mean(`prctdiff')
+bysort `varlist' : egen `sortavg' = mean(`prctdiff')
 
 recode `prctdiff' (.=-999)
-sort `sortavg' `prctdiff'
+sort `varlist' `sortavg' `prctdiff' 
 recode `prctdiff' (-999=.)
 
 	export excel `varlist' `enumerator' `key' `differences' `total' `prctdiff' using "`using'.xlsx" if `dup', ///
@@ -144,7 +156,7 @@ foreach id in `id_ordered' {
 	loc count : list posof "`id'" in original
 	export excel `varlist' `key' `pairdiff`count'' using "`using'.xlsx" if `dup' > 0 & `varlist' == "`id'", ///
 	sheet("Raw") firstrow(`variable') sheetmodify `nolabel' cell(A`start')
-	
+	replace `varcount' = `: word count `pairdiff`count''' if `varlist' == "`id'"
 		
 	count if `varlist' == "`id'"
 	loc counter `r(N)'
@@ -159,8 +171,10 @@ foreach id in `id_ordered' {
 
 	* I need to find the number of rows and columns in the raw file to adjust column widths
 *use end as nrow, use last word count pairdiff`count-1'
+	sum `varcount'
 	
-	mata: col_widths("`using'.xlsx", "Raw", `end', `=`:word count `pairdiff`=`count'-1'''+2')
+*	mata: col_widths("`using'.xlsx", "Raw", `end', `=`:word count `pairdiff`=`count'-1'''+2')
+	mata: col_widths("`using'.xlsx", "Raw", `end', `r(max)')
 
 
 
@@ -237,28 +251,30 @@ void make_lines(string scalar filename, string scalar sheet, real scalar N, real
 	bottom = st_data(., "bottom")
 	bottomrows = selectindex(bottom :== 1)
 	for (i=1; i<=rows(bottomrows); i++) {
-		b.set_bottom_border(bottomrows[i]+1, (1, N), "thick")
+		b.set_bottom_border(bottomrows[i]+1, (1, N), "thin")
 	}
 	
 	b.set_bottom_border(1, (1,N), "thick")
 	b.set_font_bold(1, (1,N), "on")
 
 	
-	//adjust col widths
+	/*adjust col widths
 	cols = b.get_string((1,nrow), (1,N))
-	column_widths = colmax(strlen(cols))
+	column_widths = colmax(strlen(cols))*/
 
+	column_widths = (20\30\45\13\15\20)
+	
 	for (j=1; j<=N; j++) {
-		if (column_widths[j] > 50) column_widths[j] == 50
-		b.set_column_width(j, j, column_widths[j]+2)		
+		/*if (column_widths[j] > 50) column_widths[j] == 50*/
+		b.set_column_width(j, j, column_widths[j])		
 	}
 	
-	if (sheet == "Raw") b.set_right_border((1, nrow), 2, "thick")
+/*	if (sheet == "Raw") b.set_right_border((1, nrow), 2, "thick")
 	else {
-		b.set_right_border((1, nrow), N, "thick")
+		b.set_right_border((1, nrow), N, "thick")*/
 		b.set_number_format((2, nrow), N, "percent_d2")
 		b.set_horizontal_align((1, nrow), (1, N), "center")
-	}
+	/*}*/
 	
 	b.close_book()
 }
@@ -300,8 +316,8 @@ void col_widths(string scalar filename, string scalar sheet, real scalar nrow, r
 	column_widths = colmax(strlen(cols))
 
 	for (j=1; j<=ncol; j++) {
-		if (column_widths[j] > 50) column_widths[j] == 50
-		b.set_column_width(j, j, column_widths[j]+2)		
+		if (column_widths[j] > 30) column_widths[j] == 30
+		b.set_column_width(j, j, column_widths[j])		
 	}
 
 	b.close_book()

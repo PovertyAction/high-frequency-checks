@@ -122,7 +122,13 @@ program define table1
 			* check that input is valid
 			* does variable exist?
 			confirm variable `varname'
+			qui count if !mi(`varname')
 			
+			if `r(N)' == 0 {
+				dis as err "The variable `varname' has no values. This will not be included in the output file."
+			}
+			
+			else {
 			* is vartype supported?
 			if !inlist("`vartype'", "contn", "conts", "cat", "cate", "bin", "bine") {
 				di in re "-`varname' `vartype'- not allowed in vars() option"
@@ -391,8 +397,10 @@ program define table1
 				restore
 			}			
 		}
+  }
 		gettoken arg rest : rest, parse("\")
-    }
+ 
+   }
 	
 	* get value labels for group if available
 	local vallab: value label `groupnum'

@@ -39,7 +39,7 @@ program ipacheckdates, rclass
 			error 198
 		}
 	}
-	nois di "`start' `end'"
+
 	cap assert lower("`fmt_`start''") == lower("`fmt_`end''")
 	if _rc {
 		di as err "invalid syntax: `start' and `end' are different date types."
@@ -257,9 +257,10 @@ program ipacheckdates, rclass
 		mata: add_scto_link("`saving'", "10. dates", "scto_link", `pos')
 	}
 	
+	}	
 	* revert to original
 	use `org', clear
-	}
+
 	* return list
 	return scalar missing = `missing'
 	return scalar diff_end = `diff_end'
