@@ -390,7 +390,6 @@ program ipacheckimport, rclass
 	}
 
 global exclude_variable14 : subinstr global exclude_variable14 "." "", all
-global exclude_variable14 : subinstr global exclude_variable14 " " "", all
 end
 
 * program to drop excess obs
