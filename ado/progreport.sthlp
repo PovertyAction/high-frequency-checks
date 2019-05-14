@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.0 Rosemarie Sandino 12jun2018}{...}
+{* *! version 1.0.2 Rosemarie Sandino 20jul2018}{...}
 {title:Title}
 
 {phang}
@@ -41,6 +41,10 @@ survey dataset ID variable name {p_end}
 ID variable and sortby variable already included {p_end}
 {synopt:{opth dta(filename)}}creates a dta file of those who have 
 not been interviewed from master dataset {p_end}
+{synopt:{opth track:ing(filename)}}tracking form dataset {p_end}
+{synopt:{opth tvar(varname)}}categorical variable from tracking form dataset 
+that specifies reason respondent has not been interviewed {p_end}
+
 {synopt:{opth file:name(filename)}}specifies the name of the 
 progress report file; default is {it:Progress Report.xlsx}{p_end}
 {synopt:{opt t:arget(#)}}target completion rate between 0 and 1; default is 1 
@@ -79,6 +83,32 @@ create a dataset only including those who have not been interviewed.
 {pstd}
 {cmd:progreport} reduces time spent tracking survey progress by clearly 
 reporting progress across all data collection and broken down by a sorting variable.  
+
+{marker remarks}{...}
+{title:Remarks for options tracking() and tvar()}
+
+{pstd}
+{cmd:tracking()} and {cmd:tvar()} are used when the data collection also includes 
+a tracking form that enumerators use when they cannot interview a respondent.{cmd:tracking()} 
+is the location of the tracking dataset, and {cmd:tvar()} is the 
+categorical variable in the tracking dataset that specifies the reason why the respondent
+could not be interviewed at that time. This tracking dataset should also have an 
+observation for each attempt to interview a respondent. 
+
+{pstd}
+When {cmd:tracking()} and {cmd:tvar()} are included, each sheet's output will 
+also include columns "track_date" and "pr_attempts". For each observation, "track_date"
+will show the most recent tracking form submission date (if any)and "pr_attempts" 
+will show the number of attempts, calculated by collapsing the tracking dataset
+by observation.
+
+{pstd}
+The "status" output column will still appear green and will say "Submitted" if the
+respondent has a survey submitted in the survey dataset, even if they had a previous
+tracking form entry. The "status" column will appear yellow and read "Only Tracking Form"
+ if the respondent does not appear in the survey dataset but has at least one 
+ tracking dataset observation, and will appear red and read "Not Submitted" if the 
+ respondent only appears in the master dataset.
 
 
 {marker examples}{...}
