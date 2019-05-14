@@ -340,7 +340,7 @@ program ipacheckimport, rclass
 
 						count if !missing(variable)
 						loc varcount `r(N)'
-
+						tostring type ttest reliability, replace
 						forval i = 1/`rows' {
 							if `i' <= `varcount' {
 								if type[`i'] == "type 1" {
