@@ -31,13 +31,18 @@ if "`clear'" == "" {
 	save "`orig'", emptyok
 }
 
+if (!mi("`tracking'") & mi("`tvar'")) | (mi("`tracking'") & !mi("`tvar'")) {
+	dis as error "-tracking- option and -tvar- option must be used together."
+	exit 198
+}
+	
 * prepare tracking data
 if !mi("`tracking'") {
 	use "`tracking'", clear
 	
 	cap confirm double variable submissiondate
 	if _rc {
-		dis "There is no submissiondate variable in `tracking'. This commands requires a double variable named -submissiondate-."
+		dis as error "There is no submissiondate variable in `tracking'. This commands requires a double variable named -submissiondate-."
 		exit 198
 	}
 	gsort -submissiondate
