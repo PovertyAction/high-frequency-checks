@@ -218,7 +218,7 @@ if "`surveyok'" == "surveyok" & `surveyonly' > 0 {
 			lab var `var' "`var'"
 		}
 	}
-	export excel `id' `keepsurvey' questionnaire_date `status' if _merge == 2 using "`filename'.xlsx", ///
+	export excel `id' `keepsurvey' questionnaire_date `status' if pr_merge == 2 using "`filename'.xlsx", ///
 	firstrow(varl) sheet("Only in Survey") sheetreplace `nolabel'
 	
 	restore
