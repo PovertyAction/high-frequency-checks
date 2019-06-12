@@ -20,6 +20,7 @@ ipacheck is a Stata package for running high-frequency checks on research data a
  - `ipacheckenum` - aggregates data by enumerator to assess performance.
  - `ipacheckresearch` - produces one- and two-way summaries of research variables.
  - `ipacheckids` - creates a formatted output sheet to compare differences between duplicate observations.
+ - `ipachecktextaudit` - produces summaries of duration of survey questions by variable, enumerator, and group.
   
  
 ipacheck comes with a folder structure for your project including a master do-file and Excel-based inputs sheets. Results of checks can be exported as nicely formatted Excel spreadsheets for distribution among field teams.
