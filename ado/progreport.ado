@@ -268,8 +268,8 @@ if "`summary'"	== "" {
 	qui tab `sortby'
 	loc sortcount `r(r)'
 	
-	if `sortcount' > 20 & "`workbooks'" == "" {
-	dis as error "`sortby' has more than 20 unique values. Please use the -workbooks- option to create workbooks instead of worksheets."
+	if `sortcount' > 30 & "`workbooks'" == "" {
+	dis as error "`sortby' has more than 30 unique values. Please use the -workbooks- option to create workbooks instead of worksheets."
 	error 134
 	}
 

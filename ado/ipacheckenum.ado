@@ -524,7 +524,9 @@ program define ipacheckenumvarstats
 		// local for order of variables
 		loc order 
 		foreach var in `statvars' {
-			loc order `order' `var'*
+			foreach stat in `stats' {
+				loc order `order' `var'_`stat'
+			}
 		}
 
 		// Collapse dataset
