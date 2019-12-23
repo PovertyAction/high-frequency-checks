@@ -550,7 +550,7 @@ program define ipacheckenumvarstats
 		}
 	
 		order `enum' survey `order'
-		pause
+
 		// Save 
 		save `enums_stats'
 
