@@ -320,7 +320,7 @@ program ipacheckimport, rclass
 				
 				if inlist(`"`sheet'"', "backchecks") {
 					if `rows' > 0 {
-						foreach var in okrange_min okrange_max {
+						foreach var in variable okrange_min okrange_max {
 							cap confirm string variable `var' 
 							if _rc {
 								tostring `var', replace

@@ -98,7 +98,7 @@ program ipachecklogic, rclass
 		gettoken cond1 assert : assert, p(";")
 		gettoken cond2 condition : condition, p(";")
 		local assert : subinstr local assert ";" ""
-		local condition : subinstr local condition ";" ""
+		*local condition : subinstr local condition ";" ""
 
 		replace `test' = .
 		replace message = ""
