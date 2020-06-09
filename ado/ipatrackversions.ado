@@ -191,7 +191,8 @@ program ipatrackversions, rclass
  	
 	* export header 
 	loc columns `:word count `submit' `enumerator' `id' `starttime' `endtime' `keepvars''
-	local col = char(`c' + 66)
+	*local col = char(`c' + 66)
+	mata: st_local("col", invtokens(numtobase26(`c' + 2)))
 	if _N > 0 {
 		export excel `submit' `enumerator' `id' `starttime' `endtime' `keepvars'  using "`saving'", /// this is for the outdated versions
 			sheet("Version Control") sheetmodify cell(`col'2) firstrow(var) missing("") //added starttime and endtime
