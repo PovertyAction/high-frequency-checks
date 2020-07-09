@@ -72,7 +72,7 @@ program ipacheckimport, rclass
 
 			* add a temporary variable to check for matching boxes
 			g `tmp' = _n
-			save `tmpsheet', replace
+			save "`tmpsheet'", replace
 
 			* the set up sheet is different from all others
 			if `"`sheet'"' == "0. setup" {
