@@ -273,7 +273,7 @@ program ipacheckimport, rclass
 						}
 						mata: copies = (`i' == 1 ? `length' : copies \ `length')
 	    			}
-	    			use `tmpsheet', clear
+	    			use "`tmpsheet'", clear
 	    			mata: st_store(., st_addvar("float", "copies"), copies)
 	    			expand copies
 	    			sort `tmp'
