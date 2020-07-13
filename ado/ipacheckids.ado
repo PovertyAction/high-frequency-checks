@@ -34,7 +34,7 @@ noi di "Searching for duplicates in `varlist'..."
 marksample touse, strok novarlist
 
 tempfile survey_dta
-save `survey_dta'
+save "`survey_dta'"
 
 keep if `touse'
 
