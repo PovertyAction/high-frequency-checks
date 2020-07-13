@@ -50,7 +50,7 @@ program ipacheckcomplete, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar comp nonmiss
@@ -120,7 +120,7 @@ program ipacheckcomplete, rclass
 			replace message = "Interview is marked as incomplete."
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if `comp' == 0, ///
+			saveappend using "`tmp'" if `comp' == 0, ///
 			    keep("`keeplist'") sort(`id')
 		}
 		else {
@@ -150,12 +150,12 @@ program ipacheckcomplete, rclass
 		local nonmissviol = `r(N)'	
 		
 		* append violation list to output file
-		saveappend using `tmp' if `nonmiss' < `percent' / 100 , ///
+		saveappend using "`tmp'" if `nonmiss' < `percent' / 100 , ///
 		    keep("`keeplist'")
 	} 
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -194,7 +194,7 @@ program ipacheckcomplete, rclass
 		mata: add_scto_link("`saving'", "1. incomplete", "scto_link", `pos')
 	}
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 	}
 
 	* display stats and return 
@@ -216,14 +216,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

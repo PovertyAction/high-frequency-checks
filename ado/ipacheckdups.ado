@@ -28,7 +28,7 @@ program ipacheckdups, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar dup1
@@ -145,7 +145,7 @@ program ipacheckdups, rclass
 			replace value = strtrim(value) // removes extra spaces
 
 				* append violations to the temporary data set
-				saveappend using `tmp' if `dup1' != 0, ///
+				saveappend using "`tmp'" if `dup1' != 0, ///
 					keep("`keeplist'")
 		}
 		else {
@@ -157,7 +157,7 @@ program ipacheckdups, rclass
 	
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -196,7 +196,7 @@ program ipacheckdups, rclass
 	}
 	
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 	}
 	
 	return scalar ndups1 = `ndups1'
@@ -216,14 +216,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

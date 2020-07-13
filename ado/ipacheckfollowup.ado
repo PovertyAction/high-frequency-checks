@@ -35,7 +35,7 @@ program ipacheckfollowup, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar viol
@@ -103,7 +103,7 @@ program ipacheckfollowup, rclass
 	local nonlyu = `r(Nonlyu)'
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 *	replace message = "Current value does not match master."
 	* if there are no violations
@@ -144,7 +144,7 @@ program ipacheckfollowup, rclass
 	}	
 	
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 	}
 	
 	* display check statistics to output screen

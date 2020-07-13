@@ -24,25 +24,25 @@ program ipacheckresearch, rclass
 	if mi("`by'") {
 		* calculate one-way summaries
 		table1, vars("`variables'") clear onecol format(`format') plusminus `missing'
-		qui save `oway'
+		qui save "`oway'"
 	}
 	else {
 		* calculate two-way summaries
 		table1, vars("`variables'") by(`by') clear onecol format(`format') plusminus `missing'
-		qui save `tway'
+		qui save "`tway'"
 	}
 
 	local sheets oneway twoway
 	local i = 0
 
-	foreach file in `oway' `tway' {
+	foreach file in "`oway'" "`tway'" {
 		local ++i
 		local sheet : word `i' of `sheets'
 
 		cap confirm file `file'
 		if !_rc {
 			if !mi("`replace'") & `i' == 1  local opt replace
-			use `file', clear
+			use "`file'", clear
 			export excel using "`using'", sheet("`sheet'") `opt' sheetreplace
 		}
 	}
@@ -108,7 +108,7 @@ program define table1
 	qui reshape wide n, i(factor) j(`groupnum')
 	rename n* `groupnum'*
 	gen sort1=`sortorder++'
-	qui save `resultstable', replace
+	qui save "`resultstable'", replace
 	restore
 
 	* step through the variables
@@ -184,8 +184,8 @@ program define table1
 					else gen test="ANOVA"
 				}
 				gen sort1=`sortorder++'
-				qui append using `resultstable'
-				qui save `resultstable', replace
+				qui append using "`resultstable'"
+				qui save "`resultstable'", replace
 				restore
 			}
 			
@@ -238,8 +238,8 @@ program define table1
 					else gen test="Kruskal-Wallis"
 				}
 				gen sort1=`sortorder++'
-				qui append using `resultstable'
-				qui save `resultstable', replace
+				qui append using "`resultstable'"
+				qui save "`resultstable'", replace
 				restore
 			}
 			
@@ -330,8 +330,8 @@ program define table1
 				gen sort1=`sortorder++'
 				qui gen sort2=_n
 				qui drop `varnum'
-				qui append using `resultstable'
-				qui save `resultstable', replace
+				qui append using "`resultstable'"
+				qui save "`resultstable'", replace
 				restore
 			}
 	
@@ -392,8 +392,8 @@ program define table1
 					else qui gen test="Fisher's exact"
 				}
 				gen sort1=`sortorder++'
-				qui append using `resultstable'
-				qui save `resultstable', replace
+				qui append using "`resultstable'"
+				qui save "`resultstable'", replace
 				restore
 			}			
 		}
@@ -406,7 +406,7 @@ program define table1
 	local vallab: value label `groupnum'
 	if "`vallab'"!="" {
 		tempfile labels
-		qui label save `vallab' using `labels'
+		qui label save `vallab' using "`labels'"
 	}
 
 	* levels of group variable, for subsequent labelling
@@ -414,7 +414,7 @@ program define table1
 
 	* load results table
 	preserve
-	qui use `resultstable', clear
+	qui use "`resultstable'", clear
 	
 	* restore value labels if available
 	capture do `labels'
@@ -485,7 +485,7 @@ program define table1
 	drop factor_sep
 	
 	* if -saving- was specified then we'll save the table as an Excel spreadsheet
-	if `"`saving'"'!="" export excel using `saving', `replace'
+	if `"`saving'"'!="" export excel using "`saving'", `replace'
 
 	* restore original data unless told not to
 	if "`clear'"=="clear" restore, not

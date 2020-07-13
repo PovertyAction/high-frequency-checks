@@ -191,7 +191,7 @@ foreach id in `id_ordered' {
 
 	mata: make_lines("`using'.xlsx", "Diffs", 6, `=`=_N'+1')
 
-	use `survey_dta', clear
+	use "`survey_dta'", clear
 
 	noi di "`:word count `ids'' duplicate groups placed in `using'." 
 

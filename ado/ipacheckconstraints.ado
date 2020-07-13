@@ -42,7 +42,7 @@ program ipacheckconstraints, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar viol
@@ -134,7 +134,7 @@ program ipacheckconstraints, rclass
 		local nhard = `nhard' + `r(N)'
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			    keep("`keeplist'") sort(`id')
 
 		/* =======================
@@ -150,7 +150,7 @@ program ipacheckconstraints, rclass
 		local nhard = `nhard' + `r(N)'
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			    keep("`keeplist'") sort(`id')
 
 	    /* =======================
@@ -167,7 +167,7 @@ program ipacheckconstraints, rclass
 		local nsoft = `nsoft' + `r(N)'
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			    keep("`keeplist'") sort(`id')
 
 		/* =======================
@@ -184,7 +184,7 @@ program ipacheckconstraints, rclass
 		local nsoft = `nsoft' + `r(N)'
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			    keep("`keeplist'") sort(`id')
 
 		if `npvar' > 0 {
@@ -194,7 +194,7 @@ program ipacheckconstraints, rclass
 	}
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -236,7 +236,7 @@ program ipacheckconstraints, rclass
 	}
 
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 	}
 	* display check statistics to output screen
 	di ""
@@ -260,14 +260,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

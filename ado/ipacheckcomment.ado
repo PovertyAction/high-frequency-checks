@@ -24,11 +24,11 @@ prog define ipacheckcomment, rclass
 		* temporary files
 		tempfile 	master commdata commdata_long
 		
-		save `master', replace
+		save "`master'", replace
 		
 		* keep only data with text audits
 		drop if missing(`varlist')
-		save `commdata', emptyok
+		save "`commdata'", emptyok
 		loc commcount `=_N'
 	
 		if `commcount' > 0 {
@@ -43,7 +43,7 @@ prog define ipacheckcomment, rclass
 			* Loop through scto media folder and import comm csvs one at a time 
 			* appending them to the prevously imported dataset
 			clear
-			save `commdata_long', emptyok
+			save "`commdata_long'", emptyok
 
 			* misscount will track number of ta files that could not be found in file
 			loc misscount 0
@@ -51,8 +51,8 @@ prog define ipacheckcomment, rclass
 				cap import delim using "`media'/`comm_`i''", clear varnames(1)  stringcols(_all)
 				if !_rc {
 					gen 	`varlist' = "media\\`comm_`i''"
-					append	using `commdata_long'
-					save 	`commdata_long', replace
+					append	using "`commdata_long'"
+					save 	"`commdata_long'", replace
 				}
 				else if _rc == 601 loc ++misscount
 				
@@ -60,7 +60,7 @@ prog define ipacheckcomment, rclass
 			
 			* drop observations with missing comments
 			drop if missing(comment) 
-			save 	`commdata_long', replace
+			save 	"`commdata_long'", replace
 			
 			* Compares the number of missing ta files to the number of files expected
 			* STOP: If all files are missing from folder	
@@ -87,7 +87,7 @@ prog define ipacheckcomment, rclass
 			
 			* Merge in additional variables from dataset
 			loc keeplist: list enumerator | keepvars
-			merge m:1 `varlist' using `commdata', keepusing(`id' `submitted' `keeplist') ///
+			merge m:1 `varlist' using "`commdata'", keepusing(`id' `submitted' `keeplist') ///
 					assert(match master) keep(match) nogen
 			* format submissiondate
 			gen 	`submitted'_fmt = dofc(`submitted') 
@@ -115,7 +115,7 @@ prog define ipacheckcomment, rclass
 			return local comments = 0
 		}
 
-		use `master', clear
+		use "`master'", clear
 	}
 end
 

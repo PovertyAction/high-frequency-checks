@@ -39,7 +39,7 @@ program ipacheckconsent, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar consent
@@ -119,7 +119,7 @@ program ipacheckconsent, rclass
 			*replace message = "Interview does not have valid consent."
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if `consent' == 0, ///
+			saveappend using "`tmp'" if `consent' == 0, ///
 			    keep("`keeplist'") sort(`id')
 		}
 		else {
@@ -132,7 +132,7 @@ program ipacheckconsent, rclass
 	}
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -173,7 +173,7 @@ program ipacheckconsent, rclass
 	}
 	
 	* revert to original 
-	use `org', clear
+	use "`org'", clear
 	}
 
 	* display stats and return
@@ -195,14 +195,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

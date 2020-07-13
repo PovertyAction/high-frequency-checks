@@ -169,10 +169,10 @@ program ipacheckenum
 		   or refusal variables update respective sub sheets */
 		local inlist : list var in dkrfvars
 		if `inlist' {
-			_updatesheet `col_sub_dkrate' using `dontknow_sheet', by(`enum') rename(`var')
+			_updatesheet `col_sub_dkrate' using "`dontknow_sheet'", by(`enum') rename(`var')
 			loc dk`var'low = `r(low)' 
 			loc dk`var'hi = `r(high)'
-			_updatesheet `col_sub_rfrate' using `refusal_sheet', by(`enum') rename(`var')
+			_updatesheet `col_sub_rfrate' using "`refusal_sheet'", by(`enum') rename(`var')
 			loc rf`var'low = `r(low)' 
 			loc rf`var'hi = `r(high)'
 
@@ -182,7 +182,7 @@ program ipacheckenum
 		   variables update respective sub sheets */
 		local inlist : list var in missvars
 		if `inlist' {
-			_updatesheet `col_sub_missrate' using `missing_sheet', by(`enum') rename(`var')
+			_updatesheet `col_sub_missrate' using "`missing_sheet'", by(`enum') rename(`var')
 			local mi`var'low = `r(low)' 
 			local mi`var'hi = `r(high)'
 
@@ -192,7 +192,7 @@ program ipacheckenum
 		   variables update respective sub sheets */
 		local inlist : list var in othervars
 		if `inlist' {
-			_updatesheet `col_sub_othrate' using `other_sheet', by(`enum') rename(`var')
+			_updatesheet `col_sub_othrate' using "`other_sheet'", by(`enum') rename(`var')
 			loc oth`var'low = `r(low)' 
 			loc oth`var'hi = `r(high)'
 		}
@@ -216,7 +216,7 @@ program ipacheckenum
 		foreach var of varlist `durvars' {
 			replace `var' = 0 if `var' < 0 & !mi(`var')
 			bysort `enum': egen `col_sub_dur' = mean(`var')
-			_updatesheet `col_sub_dur' using `duration_sheet', by(`enum') rename(`var')
+			_updatesheet `col_sub_dur' using "`duration_sheet'", by(`enum') rename(`var')
 			loc dur`var'low = `r(low)' //Rosemarie
 			loc dur`var'hi = `r(high)'
 			drop `col_sub_dur'
@@ -288,7 +288,7 @@ program ipacheckenum
 	
 	loc cols 
 	
-	save `summary_sheet', replace
+	save "`summary_sheet'", replace
 	restore
 
 	preserve 
@@ -306,7 +306,7 @@ program ipacheckenum
 	drop `row_miss' `row_nonmiss' `row_dk' `row_rf' `row_oth'
 
 	// merge with overall totals
-	merge 1:1 `enum' using `summary_sheet', nogenerate
+	merge 1:1 `enum' using "`summary_sheet'", nogenerate
 
 	// order and save 
 	 order 		`enum'              ///
@@ -328,7 +328,7 @@ program ipacheckenum
 
     ds, has(type numeric)
 	format `r(varlist)' %9.2f
-	save `summary_sheet', replace
+	save "`summary_sheet'", replace
 
 	// Calculate lower an upper 10 percent
 	foreach var of local vars_order {
@@ -363,7 +363,7 @@ program ipacheckenum
 		// confirm the tempfile exist before writing
 		cap confirm file `sheet'	
 		if !_rc {
-			use `sheet', clear
+			use "`sheet'", clear
 			if _N > 0 {
 				if "`name'" == "summary" {
 					// summary sheet conditions
@@ -406,7 +406,7 @@ program _updatesheet, rclass
 	noi summ `rename', detail
 	return local low = `r(p10)'
 	return local high = `r(p90)'
-	save `tmp', replace 
+	save "`tmp'", replace 
 
 	cap confirm file "`using'"
 	if _rc {
@@ -414,7 +414,7 @@ program _updatesheet, rclass
 	}
 	else {
 		use "`using'", clear
-		merge 1:1 `by' using `tmp', nogenerate
+		merge 1:1 `by' using "`tmp'", nogenerate
 		save "`using'", replace
 	}
 	restore
@@ -491,7 +491,7 @@ program define ipacheckenumvarstats
 		order `enum' survey `order'
 
 		// Save 
-		save `total_stats'
+		save "`total_stats'"
 		
 	restore
 
@@ -552,10 +552,10 @@ program define ipacheckenumvarstats
 		order `enum' survey `order'
 
 		// Save 
-		save `enums_stats'
+		save "`enums_stats'"
 
 		// Append with total stats
-		append using `total_stats'
+		append using "`total_stats'"
 		loc n = _N
 		
 		////////////////////

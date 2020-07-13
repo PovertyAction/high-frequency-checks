@@ -47,7 +47,7 @@ program ipatrackversions, rclass
 
 	
 	tempfile org tmp
-	save `org'
+	save "`org'"
 
 	* initialize tempvars  
 	tempvar wrong_form submit_td
@@ -107,7 +107,7 @@ program ipatrackversions, rclass
 	}
 
 	tempfile org tmp
-	save `org'
+	save "`org'"
 
 	* initialize tempvars  
 	tempvar wrong_form submit_td
@@ -138,7 +138,7 @@ program ipatrackversions, rclass
 		error 122
 	}
 
-	save `tmp'
+	save "`tmp'"
 
 	clear
 	set obs `r'
@@ -166,7 +166,7 @@ program ipatrackversions, rclass
 		
 	mata: v_formatting("`saving'", "Version Control", 1, `c', 1, `r') 
 	
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* save most recent submission date
 	sum `submit_td'
@@ -200,7 +200,7 @@ program ipatrackversions, rclass
 		mata: v_formatting("`saving'", "Version Control", `=`c' + 2', `= `columns' + `c' + 1', 1, `=`=_N' + 1' )  
 	}
 	
-	use `org', clear
+	use "`org'", clear
 
 	} // qui bracket
 	

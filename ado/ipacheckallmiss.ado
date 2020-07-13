@@ -32,7 +32,7 @@ program ipacheckallmiss, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar viol
@@ -109,7 +109,7 @@ program ipacheckallmiss, rclass
 		}
 	}
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -129,7 +129,7 @@ program ipacheckallmiss, rclass
 	mata: basic_formatting("`saving'", "7. all missing", tokens("`meta'"), tokens("`colorcols'"), `=_N')	
 
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 
 	}
 	di ""
@@ -158,7 +158,7 @@ program saveappend
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end
