@@ -54,7 +54,7 @@ program ipacheckallmiss, rclass
 	}
 
 	* initialize temporary output file
-	poke `tmp', var(`keeplist')
+	poke "`tmp'", var(`keeplist')
 	
 	/* Due to the way Stata handles missing values, 
 	   we check numeric and string variables separately. */
@@ -151,7 +151,7 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
