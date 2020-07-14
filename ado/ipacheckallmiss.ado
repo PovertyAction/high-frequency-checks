@@ -76,7 +76,7 @@ program ipacheckallmiss, rclass
 			replace label = "`varl'"
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if _n == 1, ///
+			saveappend using "`tmp'" if _n == 1, ///
 				keep("`meta'")
 
 			noi di "  Variable `var' has ALL missing values"
@@ -101,7 +101,7 @@ program ipacheckallmiss, rclass
 			replace label = "`varl'"
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if _n == 1, ///
+			saveappend using "`tmp'" if _n == 1, ///
 				keep("`meta'")
 
 			noi di "  Variable `var' has ALL missing values"
