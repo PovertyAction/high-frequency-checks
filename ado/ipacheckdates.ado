@@ -74,7 +74,7 @@ program ipacheckdates, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar viol
@@ -144,7 +144,7 @@ program ipacheckdates, rclass
  		replace message = "Interview has missing start or end date."
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			keep("`keeplist'")
 	}
 
@@ -161,7 +161,7 @@ program ipacheckdates, rclass
  		replace message = "Interview has unequal start and end dates."
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			keep("`keeplist'")
 	}
 
@@ -179,7 +179,7 @@ program ipacheckdates, rclass
  		    " data collection (`surveystart_f')."
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			keep("`keeplist'")
 	}
 	
@@ -197,7 +197,7 @@ program ipacheckdates, rclass
  		    "system date (`today_f')."
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp' "if `viol' == 1, ///
 			keep("`keeplist'")
 	}
 
@@ -220,13 +220,13 @@ program ipacheckdates, rclass
 	 		    "apart from others in the same enumeration area."
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if `viol' == 1, ///
+			saveappend using "`tmp'" if `viol' == 1, ///
 				keep("`keeplist'")
 		}
 	}	
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -259,7 +259,7 @@ program ipacheckdates, rclass
 	
 	}	
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 
 	* return list
 	return scalar missing = `missing'
@@ -296,14 +296,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

@@ -52,7 +52,7 @@ program ipacheckoutliers, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar outlier min max use
@@ -169,7 +169,7 @@ program ipacheckoutliers, rclass
 		local noutliers = `noutliers' + `n'
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `outlier' == 1, ///
+		saveappend using "`tmp'" if `outlier' == 1, ///
 		    keep("`keeplist'") sort(`id')
 
 		* alert user
@@ -177,7 +177,7 @@ program ipacheckoutliers, rclass
 	}
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -218,7 +218,7 @@ program ipacheckoutliers, rclass
 	}
 	
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 	}
 
 	* return scalars
@@ -240,14 +240,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

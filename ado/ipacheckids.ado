@@ -34,7 +34,7 @@ noi di "Searching for duplicates in `varlist'..."
 marksample touse, strok novarlist
 
 tempfile survey_dta
-save `survey_dta'
+save "`survey_dta'"
 
 keep if `touse'
 
@@ -191,7 +191,7 @@ foreach id in `id_ordered' {
 
 	mata: make_lines("`using'.xlsx", "Diffs", 6, `=`=_N'+1')
 
-	use `survey_dta', clear
+	use "`survey_dta'", clear
 
 	noi di "`:word count `ids'' duplicate groups placed in `using'." 
 
@@ -302,10 +302,10 @@ void borders(string scalar filename, string scalar sheet, real scalar row, real 
 
 void col_widths(string scalar filename, string scalar sheet, real scalar nrow, real scalar ncol)
 {
-	class xl scalar b
-	string matrix cols
-	real matrix column_widths
-	b = xl()
+		class xl scalar b
+		string matrix cols
+		real matrix column_widths, colmatrix
+		b = xl()
 	
 	b.load_book(filename)
 	b.set_sheet(sheet)
@@ -314,10 +314,11 @@ void col_widths(string scalar filename, string scalar sheet, real scalar nrow, r
 	//adjust col widths
 	cols = b.get_string((1, nrow), (1, ncol))
 	column_widths = colmax(strlen(cols))
+	
+	colmatrix = 30 *  (column_widths :>= 30) + 1 * (column_widths :<= 1) + (column_widths :> 1 :& column_widths:< 30) :* column_widths
 
 	for (j=1; j<=ncol; j++) {
-		if (column_widths[j] > 30) column_widths[j] == 30
-		b.set_column_width(j, j, column_widths[j])		
+		b.set_column_width(j, j, colmatrix[j])		
 	}
 
 	b.close_book()
@@ -325,5 +326,4 @@ void col_widths(string scalar filename, string scalar sheet, real scalar nrow, r
 
 
 end
-
 

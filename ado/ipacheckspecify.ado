@@ -29,7 +29,7 @@ program ipacheckspecify, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar specified
@@ -122,7 +122,7 @@ program ipacheckspecify, rclass
 	 		}
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if `specified' == 1, ///
+			saveappend using "`tmp'" if `specified' == 1, ///
 				keep("`keeplist'")
 
 			noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
@@ -132,7 +132,7 @@ program ipacheckspecify, rclass
 		}
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -173,7 +173,7 @@ program ipacheckspecify, rclass
 	}
 	
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 	
 	} //qui bracket
 	di ""
@@ -196,14 +196,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

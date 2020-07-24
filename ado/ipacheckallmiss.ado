@@ -32,7 +32,7 @@ program ipacheckallmiss, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar viol
@@ -54,7 +54,7 @@ program ipacheckallmiss, rclass
 	}
 
 	* initialize temporary output file
-	poke `tmp', var(`keeplist')
+	poke "`tmp'", var(`keeplist')
 	
 	/* Due to the way Stata handles missing values, 
 	   we check numeric and string variables separately. */
@@ -76,7 +76,7 @@ program ipacheckallmiss, rclass
 			replace label = "`varl'"
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if _n == 1, ///
+			saveappend using "`tmp'" if _n == 1, ///
 				keep("`meta'")
 
 			noi di "  Variable `var' has ALL missing values"
@@ -101,7 +101,7 @@ program ipacheckallmiss, rclass
 			replace label = "`varl'"
 
 			* append violations to the temporary data set
-			saveappend using `tmp' if _n == 1, ///
+			saveappend using "`tmp'" if _n == 1, ///
 				keep("`meta'")
 
 			noi di "  Variable `var' has ALL missing values"
@@ -109,7 +109,7 @@ program ipacheckallmiss, rclass
 		}
 	}
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -129,7 +129,7 @@ program ipacheckallmiss, rclass
 	mata: basic_formatting("`saving'", "7. all missing", tokens("`meta'"), tokens("`colorcols'"), `=_N')	
 
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 
 	}
 	di ""
@@ -151,14 +151,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end

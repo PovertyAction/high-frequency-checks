@@ -60,7 +60,7 @@ prog ipacheckreadreplace, rclass
 		label var _hfcokay 		"Generated During HFC: 1 if HFC violation was marked as okay"
 		label var _hfcokayvar 	"Generated During HFC: Contains variables marked as okay"
 		
-		save `_data'
+		save "`_data'"
 		
 		* Get file extension
 		loc ext = substr("`using'", -(strpos(reverse("`using'"), ".")), .)
@@ -91,7 +91,7 @@ prog ipacheckreadreplace, rclass
 		* End program if there are no replacements
 		if `=_N' == 0 {
 			noi disp "{red}No observations in replacement file. Skipping readreplace ..."
-			use `_data', clear
+			use "`_data'", clear
 			ex
 		}
 		
@@ -103,7 +103,7 @@ prog ipacheckreadreplace, rclass
 			if _rc == 9 {
 				di as err "The following row(s) in replacement sheet have missing values for `var'"
 				noi list row `var' if missing(`var')
-				use `_data', clear
+				use "`_data'", clear
 				ex 9
 			}
 		}
@@ -113,7 +113,7 @@ prog ipacheckreadreplace, rclass
 		if _rc == 9 {
 			di as err "{p} The following row(s) in replacement sheet have invalid values for column `action'. Expected Values are okay, replace, drop {p_end}"
 			noi list row action if !inlist(action, "okay", "replace", "drop")
-			use `_data', clear
+			use "`_data'", clear
 			ex 9
 		}
 				
@@ -160,7 +160,7 @@ prog ipacheckreadreplace, rclass
 		}
 		
 		* import main dataset and begin replacements
-		use `_data', clear
+		use "`_data'", clear
 		
 		* check if id var is str or numeric
 		cap conf str var `id'

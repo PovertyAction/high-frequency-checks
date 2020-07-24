@@ -31,7 +31,7 @@ prog define ipachecktextaudit, rclass
 			if "`viol'" ~= "" {
 				loc all_stats = subinstr("`all_stats'", "p50", "p50 (median)", 1)
 				nois disp as err "{p}" as res "`viol'" as txt " invalid statistic. " ///
-					"Allowed stats inlcude " as res "`all_stats' {p_end}" 
+					"Allowed stats include " as res "`all_stats' {p_end}" 
 				ex 198
 			}
 		}
@@ -52,11 +52,11 @@ prog define ipachecktextaudit, rclass
 			;
 		#d cr
 		
-		save `master', replace
+		save "`master'", replace
 		
 		* keep only data with text audits
 		drop if missing(`varlist')
-		save `tadata', emptyok
+		save "`tadata'", emptyok
 		loc tacount `=_N'
 	
 		if `tacount' > 0 {
@@ -71,7 +71,7 @@ prog define ipachecktextaudit, rclass
 			* Loop through scto media folder and import ta csvs on at a time 
 			* appending them to the prevously imported dataset
 			clear
-			save `tadata_long', emptyok
+			save "`tadata_long'", emptyok
 			
 			* miss_count will track number of ta files that could not be found in file
 			loc misscount 0
@@ -79,8 +79,8 @@ prog define ipachecktextaudit, rclass
 				cap import delim using "`media'/`taf_`i''", clear
 				if !_rc {
 					gen 	`varlist' = "media\\`taf_`i''"
-					append	using `tadata_long'
-					save 	`tadata_long', replace
+					append	using "`tadata_long'"
+					save 	"`tadata_long'", replace
 				}
 				else if _rc == 601 loc ++misscount
 				
@@ -126,7 +126,7 @@ prog define ipachecktextaudit, rclass
 
        loc keeplist = ustrtrim(subinstr(subinstr("`keeplist'", ";", "", .), ".", "", .)) 
 
-				merge m:1 `varlist' using `tadata', keepusing(`enumerator' `keeplist') ///
+				merge m:1 `varlist' using "`tadata'", keepusing(`enumerator' `keeplist') ///
 					assert(match) nogen
 				order `enumerator' `keeplist' fieldname `pre' `varlist'
 				
@@ -134,7 +134,7 @@ prog define ipachecktextaudit, rclass
 				if "`dta'" ~= "" save "`dta'", replace
 				
 				* save long data in long format
-				save `tadata_long', replace
+				save "`tadata_long'", replace
 				
 				* PREPARE GROUP DATA
 				* import input data from input survey
@@ -155,7 +155,7 @@ prog define ipachecktextaudit, rclass
 					}
 					
 					* re-import dataset and form group data
-					use `tadata_long', clear
+					use "`tadata_long'", clear
 					* save variables list for each group removing exclude_variable vars when needed
 					
 					forval i = 1/`groupcount' {
@@ -172,7 +172,7 @@ prog define ipachecktextaudit, rclass
 				order `enumerator' `keeplist'
 				
 				* save wide format of dataset
-				save `tadata_wide'
+				save "`tadata_wide'"
 				
 				* sum variables into groups
 				loc keepgroups ""
@@ -183,11 +183,11 @@ prog define ipachecktextaudit, rclass
 				
 				* save group data in wide format
 				keep `enumerator' `keeplist' `keepgroups' `varlist'
-				save `tagroup_wide', replace
+				save "`tagroup_wide'", replace
 				
 				* save group data in long format
 				reshape long tg_, i(`varlist') j(groupname) str
-				save `tagroup_long'
+				save "`tagroup_long'"
 				
 				* Define Statistics
 				if "`stats'" == "" loc stats "count mean median sd min max"
@@ -195,7 +195,7 @@ prog define ipachecktextaudit, rclass
 				
 				* export statistics on durations per field(fields)
 				* export field stats for vars
-				use `tadata_long', clear
+				use "`tadata_long'", clear
 				
 				collapse_long `pre', stats(`stats') by(fieldname)
 				replace fieldname = subinstr(fieldname, "`pre'", "", 1)
@@ -206,7 +206,7 @@ prog define ipachecktextaudit, rclass
 				
 				* export summary statistics by group
 				if `groupcount' > 0 {
-					use `tagroup_long', clear
+					use "`tagroup_long'", clear
 					collapse_long tg_, stats(`stats') by(groupname)
 					replace groupname = subinstr(groupname, "tg_", "", 1)
 					* export field stats for groups
@@ -217,7 +217,7 @@ prog define ipachecktextaudit, rclass
 				}
 
 				* Export average time in seconds by enumerator(enumerator-fields)
-				use `tadata_wide', clear
+				use "`tadata_wide'", clear
 				
 				if "`keeplist'" ~= "" collapse (first) `keeplist' (mean) `pre'*, by(`enumerator')
 				else collapse (mean) `pre'*, by(`enumerator')
@@ -233,7 +233,7 @@ prog define ipachecktextaudit, rclass
 				mata: add_formatting("`saving'", "enumerators-fields", "FIELD DURATION SUMMARIES BY ENUMERATOR (in seconds)", `startcount')
 
 				* Export average time in seconds by group(group-fields)
-				use `tagroup_wide', clear
+				use "`tagroup_wide'", clear
 				
 				if "`keeplist'" ~= "" collapse (first) `keeplist' (mean) tg_*, by(`enumerator')
 				else collapse (mean) tg_*, by(`enumerator')
@@ -254,7 +254,7 @@ prog define ipachecktextaudit, rclass
 			nois disp "{red:No text Audit Data Recorded}"
 		}
     
-		use `master', clear
+		use "`master'", clear
 
 	}
 end

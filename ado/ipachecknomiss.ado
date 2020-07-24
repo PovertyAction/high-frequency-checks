@@ -38,7 +38,7 @@ program ipachecknomiss, rclass
 
 	* define temporary files 
 	tempfile tmp org
-	save `org'
+	save "`org'"
 
 	* define temporary variable
 	tempvar viol
@@ -108,7 +108,7 @@ program ipachecknomiss, rclass
 		replace label = "`varl'"
  
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			keep("`keeplist'")
 
 		noi di "  Variable `var' has `npvar' missing values"
@@ -137,7 +137,7 @@ program ipachecknomiss, rclass
 		replace label = "`varl'"
 
 		* append violations to the temporary data set
-		saveappend using `tmp' if `viol' == 1, ///
+		saveappend using "`tmp'" if `viol' == 1, ///
 			keep("`keeplist'")
 
 		noi di "  Variable `var' has `npvar' missing values"
@@ -147,7 +147,7 @@ program ipachecknomiss, rclass
 	}
 
 	* import compiled list of violations
-	use `tmp', clear
+	use "`tmp'", clear
 
 	* if there are no violations
 	if `=_N' == 0 {
@@ -189,7 +189,7 @@ program ipachecknomiss, rclass
 
 	
 	* revert to original
-	use `org', clear
+	use "`org'", clear
 
 	}
 	* display check statistics to output screen
@@ -213,14 +213,14 @@ program saveappend
 		keep `keep' `touse'
 	}
 
-	append using `using'
+	append using "`using'"
 
 	if "`sort'" != "" {
 		sort `sort'
 	}
 
 	drop `touse'
-	save `using', replace
+	save "`using'", replace
 
 	restore
 end
