@@ -342,8 +342,8 @@ for (i=1; i<=cols(column_widths); i++) {
 		column_widths[i] = varname_widths[i]
 	}
 
-	if (column_widths > 250) {
-		column_widths = 250
+	if (column_widths[i] > 250) {
+		column_widths[i] = 250
 	}	
 
 	b.set_column_width(i, i, column_widths[i] + 4)
