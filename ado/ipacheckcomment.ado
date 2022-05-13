@@ -88,7 +88,7 @@ prog define ipacheckcomment, rclass
 			* Merge in additional variables from dataset
 			loc keeplist: list enumerator | keepvars
 			merge m:1 `varlist' using "`commdata'", keepusing(`id' `submitted' `keeplist') ///
-					assert(match master) keep(match) nogen
+					keep(match) nogen
 			* format submissiondate
 			gen 	`submitted'_fmt = dofc(`submitted') 
 			format %td `submitted'_fmt
