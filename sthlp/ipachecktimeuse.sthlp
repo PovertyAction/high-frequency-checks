@@ -92,8 +92,8 @@ and outputs are formatted in a .xlsx file or used directly from the command wind
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
-	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/media.zip", replace{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/media.zip", replace{p_end}
 	
   {text:Collate text audit comments}
 	{phang}{com}   . ipasctocollate textaudit text_audit, folder("./media") save("textaudit_data.dta") replace{p_end}

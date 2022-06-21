@@ -186,7 +186,7 @@ and outputs are formatted in a .xlsx file or used directly from the command wind
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
 	{phang}{com}   . destring duration, replace
 		
   {text:Run ipacheckenumdb without enumstats}
@@ -194,7 +194,7 @@ and outputs are formatted in a .xlsx file or used directly from the command wind
 	
   {text:Run ipacheckenumdb with enumstats}
   	{phang}{com}   . destring f_hr_rpt_count, replace{p_end}
-	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/excel/hfc_inputs_example.xlsm" "hfc_inputs_example.xlsm", replace{p_end}
+	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/excel/hfc_inputs_example.xlsm" "hfc_inputs_example.xlsm", replace{p_end}
     {phang}{com}   . ipacheckenumdb using "hfc_inputs_example.xlsm", formv(formdef_version) dur(duration) cons(c_consent, 1) dontk(-999, "-999") ref(-888, "888") other(*_osp*) enum(a_enum_name) team(a_team_name) date(starttime) outf("enumdb_enumstats.xlsx") sheetrep{p_end}
 	
 {synoptline}

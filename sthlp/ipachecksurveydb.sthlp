@@ -148,7 +148,7 @@ how to use the Data Management System.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
 	{phang}{com}   . destring duration, replace
 		
   {text:Run ipachecksurveydb}

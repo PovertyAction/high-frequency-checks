@@ -19,6 +19,7 @@ ipacheck is Innovations for Poverty Action's Stata package for running high-freq
  - `ipachecksurveydb` - export general statistics about dataset.
  - `ipacheckenumdb` - export general statistics about enumerator performance.
  - `ipatracksurvey` - export dashboard for tracking survey progress.
+ - `ipabcstats` - compare survey and back check data.
   
  ### Ancilliary programs
 
@@ -46,7 +47,7 @@ ipacheck comes with a folder structure for your project including a master do-fi
 
 ```Stata
 * ipacheck may be installed directly from GitHub
-net install ipacheck, all replace from("https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/master")
+net install ipacheck, all replace from("https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master")
 ipacheck update
 
 * after initial installation ipacheck can be updated at any time via

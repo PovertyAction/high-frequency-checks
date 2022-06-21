@@ -89,7 +89,7 @@ or other do-files. See {help ipacheck} for more details on how to use the Data M
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
 
   {text:Check missingness of all variables}
 	{phang}{com}   . ipacheckmissing _all, outf("hfc_outputs.xlsx") sheetrep{p_end}

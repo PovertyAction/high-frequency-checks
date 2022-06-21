@@ -173,6 +173,7 @@ The {cmd:ipacheck} package contains the following commands:
 {synopt:{help ipachecksurveydb}}export general statistics about dataset{p_end}
 {synopt:{help ipacheckenumdb}}export general statistics about enumerator performance{p_end}
 {synopt:{help ipatracksurvey}}export dashboard for tracking survey progress{p_end}
+{synopt:{help ipabcstats}}compare survey and back check data{p_end}
 
 {syntab:Ancilliary programs}
 {synopt:{help ipacodebook}}export codebook to excel{p_end}

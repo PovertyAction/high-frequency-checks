@@ -185,8 +185,8 @@ a longer {cmd:str}{it:#} type or to {cmd:strL}.{p_end}
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
-	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/excel/corrections_example.xlsm" "corrections_example.xlsm", replace{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/excel/corrections_example.xlsm" "corrections_example.xlsm", replace{p_end}
 
   {text:Apply changes in duplicates sheet}
 	{phang}{com}   .ipacheckcorrections using "corrections_example.xlsm", sheet("duplicates") id(key) logf("corrections_log.xlsx") logs("duplicates"){p_end}

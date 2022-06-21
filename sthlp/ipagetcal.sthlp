@@ -27,7 +27,7 @@ date/datetime variable of %td, %tc or %tC format.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
 
   {text:create a calendar dataset from submissiondate}
 	{phang}{com}   . ipagetcal submissiondate{p_end}

@@ -143,7 +143,7 @@ to use the Data Management System.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
 
   {text:Flag and export duplicates in hhid}
 	{phang}{com}   . ipacheckids hhid, enum(a_enum_id) date(starttime) key(key) keep(a_enum_name a_pl_hhh_fn submissiondate endtime) outfile("hfc_outputs.xlsx") save("household_survey_checked.dta"){p_end}

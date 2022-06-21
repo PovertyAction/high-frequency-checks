@@ -64,7 +64,7 @@ program ipacheck, rclass
 			}
 		}
 		
-		loc url 	= "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0"
+		loc url 	= "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks"
 
 		if "`subcmd'" == "new" {
 			noi ipacheck_new, surveys(`surveys') folder("`folder'") `subfolders' `filesonly' url("`url'") branch(`branch') `exercise'
