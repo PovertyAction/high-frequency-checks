@@ -1,3 +1,0 @@
-v 3
-d IPA stata programs
-p ipacheck IPA stata modules for running high frequency data quality checks

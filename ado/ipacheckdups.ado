@@ -1,342 +1,171 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 4.0.0 11may2022
+*! Innovations for Poverty Action
+* ipacheckdups: check for duplicates in other variables
 
 program ipacheckdups, rclass
-	/* This program checks that there are no duplicate interviews.
-
-	    */
-	version 14.1
-
-	#d ;
-	syntax anything [if] [in], 	
-		/* consent options */
-	    [UNIQUEvars(string)]
-		/* output filename */
-	    saving(string) 
-	    /* output options */
-        id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
-
-		/* other options */
-		[SHEETMODify SHEETREPlace NOLabel];	
+	
+	#d;
+	syntax varlist, 
+		id(varname) 
+		ENUMerator(varname) 
+		date(varname) 
+		OUTFile(string) 
+		[OUTSHeet(string)]
+		[keep(varlist)]
+		[SHEETMODify SHEETREPlace]
+		[NOLabel]
+		;
 	#d cr
 
-	marksample touse, novarlist
-
-	di ""
-	di "HFC 2 => Checking that there are no duplicates..."
 	qui {
-
-	* define temporary files 
-	tempfile tmp org
-	save "`org'"
-
-	* define temporary variable
-	tempvar dup1
-	
-	* merge the variable lists in uniquevars and anything
-	loc n = 0
-	while strpos("`anything'", ";") > 0 {
-		local ++n
-		gettoken varlista`n' anything : anything, p(";")
-		local anything : subinstr loc anything ";" ""
+	    
+		preserve
+				
+		tempfile tmf_main_data
 		
-		if strpos("`uniquevars'", ";") != 1 {
-			gettoken varlistb`n' uniquevars : uniquevars, p(";")
-		}
-		local uniquevars: subinstr loc uniquevars ";" ""
-		local varlistb`n': subinstr loc varlistb`n' ";" ""
-		
-		loc varlist`n' `varlista`n'' `varlistb`n''
-		
-	}
-	loc checksneeded `n'
-
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
-	
-	* add user-specified keep vars to output list
-    local keeprows : subinstr local keepvars ";" "", all
-    local keeprows : subinstr local keeprows "." "", all
-
-    local uniquekeepvars : list uniq keeprows
-    local uniqueidvars: list uniq uniquevars
-    local keeplist : list admin | uniqueidvars
-    local keeplist : list keeplist | meta
-    local keeplist : list keeplist | uniquekeepvars
-
-	
-    * define locals
-	local ndups1 = 0
-	local i = 1
-
-	* initialize meta data variables
-	foreach var in `meta' {
-		g `var' = ""
-	}
-	
-	* Create scto_link variable
-	if !missing("`sctodb'") {
-		local bad_chars `"":" "%" " " "?" "&" "=" "{" "}" "[" "]""'
-		local new_chars `""%3A" "%25" "%20" "%3F" "%26" "%3D" "%7B" "%7D" "%5B" "%5D""'
-		local url "https://`sctodb'.surveycto.com/view/submission.html?uuid="
-		local url_redirect "https://`sctodb'.surveycto.com/officelink.html?url="
-
-		foreach bad_char in `bad_chars' {
-			gettoken new_char new_chars : new_chars
-			replace scto_link = subinstr(key, "`bad_char'", "`new_char'", .)
-		}
-		replace scto_link = `"HYPERLINK("`url_redirect'`url'"' + scto_link + `"", "View Submission")"'
-	}
-
-	* keep only subset of data relevant to command
-	keep if `touse'
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	forval x = 1 / `checksneeded' {
-
-		* tag duplicates of id variable 
-		duplicates tag `varlist`x'', gen(`dup1')
-
-		* sort data set
-		if "`varlist`x''" != "" {
-			sort `varlist`x''
+		tempvar tmv_dv_check tmv_dv_flag tmv_serial
+		tempvar tmv_max_serial tmv_index tmv_variable tmv_label
+	   
+		* check that ID var is unique
+		cap isid `id'
+		if _rc == 459 {
+		    disp as err "id() variable `id' does not uniquely identify the observations"
+			exit 459
 		}
 		
-		* if there are any duplicates
-		cap assert `dup1' == 0 
-		if _rc {
-
-			* count the duplicates for id var
-			count if `dup1' != 0
-			local ndups1 = `r(N)'
-
-			* alert the user
-			loc length : word count "`varlist`x'"
-			if `length' == 1 {
-				nois di "  Variable `varlist`x'' has `ndups1' duplicate observations."
+		* set default outsheet
+		if "`outsheet'" == "" loc outsheet "duplicates"
+		
+		* keep variables of interest
+		keep `date' `varlist' `id' `enumerator' `date' `keep'
+		
+		ipagettd `date'
+		
+		* check for duplicates 
+		gen `tmv_dv_check' = 0
+		foreach var in `varlist' {
+			duplicates tag `var' if !mi(`var'), gen(`tmv_dv_flag')
+			replace `tmv_dv_check' = 1 if `tmv_dv_flag' & !mi(`tmv_dv_flag')
+			drop `tmv_dv_flag'
+		}
+		
+		* keep only observations with at least one duplicate
+		drop if !`tmv_dv_check'
+		
+		if `c(N)' > 0 {
+			* save variable information in locals
+			loc i 1
+			foreach var of varlist `varlist' {
+				loc var`i' 		"`var'"
+				loc varlab`i'		"`:var lab `var''"
+				
+				cap confirm numeric var `var'
+				if !_rc {
+					gen _v`i' 	= string(`var')
+				}
+				else gen _v`i' = `var'
+				drop `var'
+				
+				loc ++i
+			}
+			
+			loc vl_cnt = `i' - 1
+			loc obs_cnt `c(N)'
+			
+			* reshape data to long
+			expand `vl_cnt'
+			bys `id': gen `tmv_index' = _n
+			cap confirm string var `id'
+			if !_rc {
+				mata: ids = st_sdata(., "`id'")
+				gen _v = ""
+				forval i = 1/`obs_cnt' {
+					mata: st_local("instanceid", ids[`i'])
+					forval j = 1/`vl_cnt' {
+						replace _v = _v`j' if `id' == "`instanceid'" & `tmv_index' == `j'
+					}
+				}
 			}
 			else {
-				nois di "  The variable combination `varlist`x'' has `ndups1' duplicate observations"
-			}
-			
-			* update values of meta data variables 
-			replace value = ""
-			replace variable = "`varlist`x''"
-			
-			loc n = 0
-			foreach var in `varlist`x'' {
-				loc ++n
-				local varl : variable label `var'
-				replace label = "`varl'" if label == ""
-				cap confirm numeric variable `var' 
-				if !_rc {
-					replace value = value + " " + string(`var')
-				}
-				else {
-					replace value = value + " " + `var'
+				mata: ids = st_data(., "`id'")
+				gen _v = ""
+				forval i = 1/`obs_cnt' {
+					mata: st_local("instanceid", ids[`i'])
+					forval j = 1/`vl_cnt' {
+						replace _v = _v`j' if `id' == `instanceid' & `tmv_index' == `j'
+					}
 				}
 			}
-			replace value = strtrim(value) // removes extra spaces
-
-				* append violations to the temporary data set
-				saveappend using "`tmp'" if `dup1' != 0, ///
-					keep("`keeplist'")
+			
+			drop _v?*
+			drop if missing(_v)
+		
+			gen `tmv_variable' = "", before(_v)
+			gen `tmv_label' = "", after(_v)
+			forval i = 1/`vl_cnt' {
+				replace `tmv_variable' 	= "`var`i''" 	if `tmv_index' == `i'
+				replace `tmv_label' 	= "`varlab`i''" if `tmv_index' == `i'
+			}
+			
+			drop `tmv_index'
+			sort `tmv_variable' _v `id'
+			
+			bys `tmv_variable' _v (`id')			: gen `tmv_serial' 		= _n
+			bys `tmv_variable' _v (`tmv_serial')	: gen `tmv_max_serial' 	= _N
+			
+			* remove variable labels from all vars
+			foreach var of varlist _all {
+				lab var `var' ""
+			}
+			
+			* label tmp vars
+			foreach var in variable label serial {
+				lab var `tmv_`var'' "`var'"
+			}
+			
+			lab var _v "variable"
+			
+			* check for duplicates again and drop any non duplicate values
+			duplicates tag `tmv_variable' _v, gen (`tmv_dv_flag')
+			drop if !`tmv_dv_flag'
+			drop `tmv_dv_flag'
+			
+			* get row numbers for seperator line
+			cap drop frm_subset
+			frame put `tmv_serial' `tmv_max_serial', into(frm_subset)
+			frame frm_subset {
+				gen _dp_row = _n + 1
+				keep if `tmv_serial' == `tmv_max_serial'
+				mata: rows = st_data(., st_varindex("_dp_row"))
+			}
+			frame drop frm_subset
+			
+			keep `tmv_serial' `date' `id' `enumerator' `tmv_variable' `tmv_label' _v `keep'
+			order `tmv_serial' `date' `id' `enumerator' `tmv_variable' `tmv_label' _v `keep'
+			
+			if "`keep'" ~= "" ipalabels `keep', `nolabel'
+			ipalabels `id' `enumerator', `nolabel'
+						
+			export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetmodify' `sheetreplace'
+			mata: colwidths("`outfile'", "`outsheet'")
+			mata: setheader("`outfile'", "`outsheet'")
+			mata: addlines("`outfile'", "`outsheet'", rows, "thin")
+			
+			tab `tmv_variable'
+			loc var_cnt `r(r)'
+			loc obs_cnt `r(N)'
+			
+			noi disp "Found {cmd:`obs_cnt'} duplicates in `var_cnt' variable(s)."
+		
 		}
 		else {
-			* alert the user
-			nois di "  No duplicates found for ID variable `var'."
+		    loc var_cnt 0
+			loc obs_cnt 0
+			
+			noi disp "Found {cmd:0} duplicates."
 		}
-		drop `dup1'
-	}
-	
-
-	* import compiled list of violations
-	use "`tmp'", clear
-
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
-
-	order `keeplist'
-    gsort -`submitted', gen(order)
-	
-	format `submitted' %tc
-	tempvar bot bottom lines
-	
-	bysort value (variable `enumerator') : gen `lines' = _n
-	egen `bot' = max(`lines'), by(value)
-	gen `bottom' = cond(`bot' == `lines', 1, 0)
-	
-	loc colorcols
-	foreach var in variable label value {
-		loc pos : list posof "`var'" in keeplist
-		loc colorcols `colorcols' `pos'
-	}
-	
-	* export compiled list to excel
-	export excel `keeplist' using "`saving'" ,  ///
-		sheet("2. duplicates") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
-
-	unab keeplist : `keeplist'		
-	mata: basic_formatting("`saving'", "2. duplicates", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
 		
-	*export scto links as links
-	if !missing("`sctodb'") {
-		unab allvars : _all
-		local pos : list posof "scto_link" in allvars
-		mata: add_scto_link("`saving'", "2. duplicates", "scto_link", `pos')
+		return local N_obs = `obs_cnt'
+		return local N_vars = `var_cnt'
 	}
-	
-	* revert to original
-	use "`org'", clear
-	}
-	
-	return scalar ndups1 = `ndups1'
-end
-
-program saveappend
-	/* this program appends the data in memory, or a subset 
-	   of that data, to a stata file on disk. */
-	syntax using/ [if] [in] [, keep(varlist) sort(varlist)]
-
-	marksample touse 
-	preserve
-
-	keep if `touse'
-
-	if "`keep'" != "" {
-		keep `keep' `touse'
-	}
-
-	append using "`using'"
-
-	if "`sort'" != "" {
-		sort `sort'
-	}
-
-	drop `touse'
-	save "`using'", replace
-
-	restore
-end
-
-program poke
-	syntax [anything], [var(varlist)] [replace] 
-
-	* remove quotes from filename, if present
-	local file = `"`=subinstr(`"`anything'"', `"""', "", .)'"'
-
-	* test fatal conditions
-	cap assert "`file'" != "" 
-	if _rc {
-		di as err "must specify valid filename."
-		error 100
-	}
-
-	preserve 
-
-	if "`var'" != "" {
-		keep `var'
-		drop if _n > 0
-	}
-	else {
-		drop _all
-		g var = 1
-		drop var
-	}
-	* save 
-	save "`file'", emptyok `replace'
-
-	restore
-
-end
-
-
-mata: 
-mata clear
-void basic_formatting(string scalar filename, string scalar sheet, string matrix vars, string matrix colors, real scalar nrow) 
-{
-
-class xl scalar b
-real scalar i, ncol
-real vector column_widths, varname_widths, bottomrows
-real matrix bottom
-
-
-b = xl()
-ncol = length(vars)
-
-b.load_book(filename)
-b.set_sheet(sheet)
-b.set_mode("open")
-
-b.set_bottom_border(1, (1, ncol), "thin")
-b.set_font_bold(1, (1, ncol), "on")
-b.set_horizontal_align(1, (1, ncol), "center")
-	
-if (length(colors) > 1 & nrow > 2) {	
-for (j=1; j<=length(colors); j++) {
-	b.set_font((3, nrow+1), strtoreal(colors[j]), "Calibri", 11, "lightgray")
-}
-}
-
-
-// Add separating bottom lines : figure out which columns to gray out	
-bottom = st_data(., st_local("bottom"))
-bottomrows = selectindex(bottom :== 1)
-column_widths = colmax(strlen(st_sdata(., vars)))	
-varname_widths = strlen(vars)
-
-for (i=1; i<=cols(column_widths); i++) {
-	if	(column_widths[i] < varname_widths[i]) {
-		column_widths[i] = varname_widths[i]
-	}
-
-	b.set_column_width(i, i, column_widths[i] + 2)
-}
-for (i=1; i<=rows(bottomrows); i++) {
-	b.set_bottom_border(bottomrows[i]+1, (1, ncol), "thin")
-	if (length(colors) > 1) {
-	for (k=1; k<=length(colors); k++) {
-	b.set_font(bottomrows[i]+2, strtoreal(colors[k]), "Calibri", 11, "black")
-	}
-	}
-}
-
-
-
-
-b.close_book()
-}
-
-void add_scto_link(string scalar filename, string scalar sheetname, string scalar variable, real scalar col)
-{
-	class xl scalar b
-	string matrix links
-	real scalar N
-
-	b = xl()
-	links = st_sdata(., variable)
-	N = length(links) + 1
-
-	b.load_book(filename)
-	b.set_sheet(sheetname)
-	b.set_mode("open")
-	b.put_formula(2, col, links)
-	b.set_font((2, N), col, "Calibri", 11, "5 99 193")
-	b.set_font_underline((2, N), col, "on")
-	b.set_column_width(col, col, 17)
-	
-	b.close_book()
-	}
-
-end
-
+end 

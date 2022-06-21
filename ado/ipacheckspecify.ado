@@ -1,351 +1,331 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 4.0.0 11may2022
+*! Innovations for Poverty Action
+*! ipacheckspecify: This program collates and list other specify values.
 
-program ipacheckspecify, rclass
-	/* This program checks for recodes of specify other variables 
-	   by listing all other values specified. */
-	version 14.1
+program ipacheckspecify, rclass sortpreserve
+	
+
+	version 17
 
 	#d ;
-	syntax varlist, 
-		/* parent variables */
-		PARENTvars(varlist)
-		/* output filename */
-	    saving(string) 
-	    /* output options */
-        id(varname) ENUMerator(varname) SUBMITted(varname) 
-		[KEEPvars(string) SCTOdb(string)] 
+	syntax 	using/,
+			[SHeet(string)]
+			id(varname)
+			ENUMerator(varname)
+			date(varname)
+	    	OUTFile(string) 
+			[outsheet1(string)]
+			[outsheet2(string)]
+			[SHEETMODify SHEETREPlace] 
+			[NOLabel]
+		;	
+	#d cr
 
-		/* other options */
-		[SHEETMODify SHEETREPlace NOLabel];	
-	#d cr	
-
-	di ""
-	di "HFC 9 => Checking specify other variables for misscodes and new categories..."
 	qui {
-
-	* count nvars
-	unab vars : _all
-	local nvars : word count `vars'
-
-	* define temporary files 
-	tempfile tmp org
-	save "`org'"
-
-	* define temporary variable
-	tempvar specified
-	g `specified' = .
-
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator' 
-	local meta `"parent parent_label parent_value child child_label child_value choices"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
-
-	* add user-specified keep vars to output list
-    local lines : subinstr local keepvars ";" "", all
-    local lines : subinstr local lines "." "", all
-
-    local unique : list uniq lines
-    local keeplist : list admin | meta
-    local keeplist : list keeplist | unique
-
-    * initialize local counters
-	local nother = 0
-	local i = 1
-
-	* initialize meta data variables
-	foreach var in `meta' {
-		g `var' = ""
-	}
-	
-	* Create scto_link variable
-	if !missing("`sctodb'") {
-		local bad_chars `"":" "%" " " "?" "&" "=" "{" "}" "[" "]""'
-		local new_chars `""%3A" "%25" "%20" "%3F" "%26" "%3D" "%7B" "%7D" "%5B" "%5D""'
-		local url "https://`sctodb'.surveycto.com/view/submission.html?uuid="
-		local url_redirect "https://`sctodb'.surveycto.com/officelink.html?url="
-
-		foreach bad_char in `bad_chars' {
-			gettoken new_char new_chars : new_chars
-			replace scto_link = subinstr(key, "`bad_char'", "`new_char'", .)
-		}
-		replace scto_link = `"HYPERLINK("`url_redirect'`url'"' + scto_link + `"", "View Submission")"'
-	}
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	/* idea - could add check here for additional specify other variables
-	   not included in the input file */
-
-	* loop through other specify variables in varlist and find nonmissing values
-	foreach var in `varlist' {
-		* get current other variable
-		local parent : word `i' of `parentvars'
-
-		cap confirm string variable `var'
-		if _rc {
-			cap tostring `var', replace
-			replace `var' = "" if `var' == "."
-		}		
-
-		cap confirm string variable `var'
-
-		if !_rc {
-			replace `specified' = `var' != ""
-
-			* count the number of specified other values
-			count if `specified' == 1
-			local n = `r(N)'
-			local nother = `nother' + `n'
-
-			* capture variable label
-			local pvarl : variable label `parent'
-			local cvarl : variable label `var'
-
-			* capture choices 
-			getlabel `parent'
-			local vall = "`r(label)'"
-
-			* update values of meta data variables
-			replace parent = "`parent'"
-			replace parent_label = "`pvarl'"
-			replace child = "`var'"
-			replace child_label = "`cvarl'"
-			replace child_value = `var'
-			replace choices = "`vall'"
-
-	 		cap confirm numeric variable `parent'
-	 		if !_rc {
-	 			replace parent_value = string(`parent')
-	 		}
-
-			* append violations to the temporary data set
-			saveappend using "`tmp'" if `specified' == 1, ///
-				keep("`keeplist'")
-
-			noisily di "  Variable {cmd:`var'} has {cmd:`n'} other values specified."
-
-		}
-			local i = `i' + 1
-		}
-
-	* import compiled list of violations
-	use "`tmp'", clear
-
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
-
-	order `keeplist'
-    gsort -`submitted', gen(order)
-
-	format `submitted' %tc
-	tempvar bot bottom lines
-
-	bysort parent : gen `lines' = _n
-	egen `bot' = max(`lines'), by(parent)
-	gen `bottom' = cond(`bot' == `lines', 1, 0)
-	
-	loc colorcols
-	foreach var in parent parent_label parent_value child child_label choices  {
-		loc pos : list posof "`var'" in keeplist
-		loc colorcols `colorcols' `pos'
-	}
-	
-	* export compiled list to excel
+	    
+		preserve
 		
-	export excel `keeplist' using "`saving'" ,  ///
-		sheet("9. specify") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
+		tempfile tmf_choices
+		
+		* set default insheet
+		if "`sheet'" == "" loc sheet "other specify"
+		
+		* check that output sheet is specified. If not assume "other specify"
+		if "`outsheet1'" == "" loc outsheet1 "other specify"
+		if "`outsheet2'" == "" loc outsheet2 "other specify (choices)"
+		
+		* create frame for choice_list
+		cap frame drop frm_choice_list
+		#d;
+		frames create 	 frm_choice_list
+			   str32 	 (variable vartype choice_label) 
+			   str80     (value label)
+			   double    (frequency percentage)
+			   ;
+		#d cr	
+		
+		* get inputs from inputs sheet if using is specified	
+		import excel using "`using'", sheet("`sheet'") first clear allstr case(l)
+		drop if missing(child) & missing(parent)
+		levelsof keepvars, loc(keep) clean
 
-	unab keeplist : `keeplist'
-	mata: basic_formatting("`saving'", "9. specify", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
+		* get child and parent vars
+		keep child parent
+		keep if !missing(child) | !missing(parent)
 
+		* save number of pairs to check
+		loc osp_N `=_N'
+
+		*** check for missing child or parent ***
+		count if mi(child) | mi(parent)
+		if `r(N)' > 0 {
+			disp as err "missing child or parent in input sheet"
+			gen row = _n + 1
+
+			noi list if mi(child) | mi(parent)
+			ex 198
+		}
+		
+		* save input data into frame and import survey data
+		cap frame drop frm_inputs
+		frame copy default frm_inputs
+			
+		* change to main data
+		restore, preserve
 	
-	*export scto links as links
-	if !missing("`sctodb'") {
-		unab allvars : _all
-		local pos : list posof "scto_link" in allvars
-		mata: add_scto_link("`saving'", "9. specify", "scto_link", `pos')
-	}
-	
-	* revert to original
-	use "`org'", clear
-	
-	} //qui bracket
-	di ""
-	di "  Found {cmd:`nother'} total specified values."
-	return scalar nspecify = `nother'
+		* expand keep
+		if "`keep'" == "" unab keep: `keep'
 
-end
+		* For each pair, check that # of children and parents match after expansion
+		forval i = 1/`osp_N' {
 
-program saveappend
-	/* this program appends the data in memory, or a subset 
-	   of that data, to a stata file on disk. */
-	syntax using/ [if] [in] [, keep(varlist) sort(varlist)]
+			* save and expand locals
+			frame frm_inputs: loc child = child[`i']
+			unab child : `child'
+			
+			frame frm_inputs: loc parent = parent[`i']
+			unab parent: `parent'
 
-	marksample touse 
-	preserve
-
-	keep if `touse'
-
-	if "`keep'" != "" {
-		keep `keep' `touse'
-	}
-
-	append using "`using'"
-
-	if "`sort'" != "" {
-		sort `sort'
-	}
-
-	drop `touse'
-	save "`using'", replace
-
-	restore
-end
-
-program poke
-	syntax [anything], [var(varlist)] [replace] 
-
-	* remove quotes from filename, if present
-	local file = `"`=subinstr(`"`anything'"', `"""', "", .)'"'
-
-	* test fatal conditions
-	cap assert "`file'" != "" 
-	if _rc {
-		di as err "must specify valid filename."
-		error 100
-	}
-
-	preserve 
-
-	if "`var'" != "" {
-		keep `var'
-		drop if _n > 0
-	}
-	else {
-		drop _all
-		g var = 1
-		drop var
-	}
-	* save 
-	save "`file'", emptyok `replace'
-
-	restore
-
-end
-cap program drop getlabel
-program getlabel, rclass
-
-	syntax varname
-
-	qui levelsof `varlist', local(levels)
-	local lab: value label `varlist'
-
-	local out ""
-	local i = 1
-	if "`lab'" != "" {
-		foreach l of local levels {
-			if `l' < 0 {
-				local levels : subinstr local levels "`l'" ""
-				local levels : list levels | l
+			if wordcount("`child'") ~= wordcount("`parent'") {
+				disp as err "number of vars specified in child (`child') does not" , ///
+							"does not match the number of vars specified in parent", ///
+							"(`parent') on row `=`i'+1'"
+				ex 198
 			}
+
+			* save full child and parent varlist in local
+			loc unab_child  "`unab_child' `child'"
+			loc unab_parent "`unab_parent' `parent'"
 		}
-		foreach l of local levels {
-			local l`i' : label `lab' `l'
-			local out "`out'(`l') `l`i'' "
-			local i = `i' + 1
-		}
-	}
-
-	return local label "`out'"
-end
-
-
-mata: 
-mata clear
-void basic_formatting(string scalar filename, string scalar sheet, string matrix vars, string matrix colors, real scalar nrow) 
-{
-
-class xl scalar b
-real scalar i, ncol
-real vector column_widths, varname_widths, bottomrows
-real matrix bottom
-
-b = xl()
-ncol = length(vars)
-
-b.load_book(filename)
-b.set_sheet(sheet)
-b.set_mode("open")
-
-b.set_bottom_border(1, (1, ncol), "thin")
-b.set_font_bold(1, (1, ncol), "on")
-b.set_horizontal_align(1, (1, ncol), "center")
-
-if (length(colors) > 1 & nrow > 2) {	
-for (j=1; j<=length(colors); j++) {
-	b.set_font((3, nrow+1), strtoreal(colors[j]), "Calibri", 11, "lightgray")
-	}
-}
-
-
-// Add separating bottom lines : figure out which columns to gray out	
-bottom = st_data(., st_local("bottom"))
-bottomrows = selectindex(bottom :== 1)
-column_widths = colmax(strlen(st_sdata(., vars)))	
-varname_widths = strlen(vars)
-
-for (i=1; i<=cols(column_widths); i++) {
-	if	(column_widths[i] < varname_widths[i]) {
-		column_widths[i] = varname_widths[i]
-	}
-	if (column_widths[i] > 78) {
-	column_widths[i] = 78
-	}
-	b.set_column_width(i, i, column_widths[i] + 2)
-}
-
-
-if (rows(bottomrows) > 0) {
-for (i=1; i<=rows(bottomrows); i++) {
-	b.set_bottom_border(bottomrows[i]+1, (1, ncol), "thin")
-	if (length(colors) > 1) {
-		for (k=1; k<=length(colors); k++) {
-			b.set_font(bottomrows[i]+2, strtoreal(colors[k]), "Calibri", 11, "black")
-		}
-	}
-}
-}
-else b.set_bottom_border(2, (1, ncol), "thin")
-
-b.close_book()
-
-}
-
-void add_scto_link(string scalar filename, string scalar sheetname, string scalar variable, real scalar col)
-{
-	class xl scalar b
-	string matrix links
-	real scalar N
-
-	b = xl()
-	links = st_sdata(., variable)
-	N = length(links) + 1
-
-	b.load_book(filename)
-	b.set_sheet(sheetname)
-	b.set_mode("open")
-	b.put_formula(2, col, links)
-	b.set_font((2, N), col, "Calibri", 11, "5 99 193")
-	b.set_font_underline((2, N), col, "on")
-	b.set_column_width(col, col, 17)
+		
+		frame drop frm_inputs
 	
-	b.close_book()
+		* keep only variables that are needed for check
+		keep `id' `enumerator' `date' `keep' `unab_child' `unab_parent'
+		
+		loc child_cnt = wordcount("`unab_child'")
+
+		forval i = 1/`child_cnt' {
+			
+			* get child and parent vars
+			loc p_var = word("`unab_parent'", `i')
+			loc c_var = word("`unab_child'", `i')
+			
+			* check that child variable has values. If not skip current iteration
+			qui count if !missing(`c_var')
+			if `r(N)' == 0 {
+				drop `p_var' `c_var'
+				continue
+			}
+
+			* reset list_vals to empty
+			loc list_vals ""
+
+			* get levels of parent var.
+			* This is to account for values with missing label codes
+			
+			qui levelsof `p_var', loc (vals) clean
+			loc vals: list uniq vals
+			
+			* get parent label
+			loc p_var_vallab "`:val lab `p_var''"
+
+			if !mi("`p_var_vallab'") {
+				* get values in actual label.
+				qui lab list 		`p_var_vallab'
+					loc list_min  	`r(min)'
+					loc list_max  	`r(max)'
+					loc list_miss 	`r(hasemiss)'
+
+				* check labels
+				if `r(k)' > 2 {
+					loc list_vals ""
+					forval j = `list_min'/`list_max' {
+						if !mi("`:lab `p_var_vallab' `j', strict'") loc list_vals = "`list_vals' `j'"
+					}
+				}
+				else {
+					loc list_vals: list list_min | list_max
+				}
+
+				* check for possible extended missing values
+				if `list_miss' {
+					foreach letter in `c(alpha)' {
+						count if `p_var' == .`letter'
+						if `r(N)' > 0 loc list_vals = "`list_vals' `i'"
+					}
+				}
+
+				loc list_vals: list vals | list_vals
+				loc list_vals: list uniq list_vals
+
+			}
+
+			if mi("`list_vals'") loc list_vals "`vals'"
+
+			cap confirm string var `p_var'
+			if !_rc {
+				loc p_var_type "str"
+			}
+			else loc p_var_type "num"
+			
+			foreach val in `list_vals' {
+		
+				if "`p_var_type'" == "str" {
+					
+					qui count if regexm("_" + subinstr(`p_var', " ", "_", .) + "_", "_`val'_")
+					loc val_cnt `r(N)'
+
+					loc val_lab ""
+					
+				}
+				else {
+					qui count if `p_var' == `val'
+					loc val_cnt `r(N)'
+					
+					if !mi("`p_var_vallab'") {
+						loc val_lab "`:lab `p_var_vallab' `val''"
+					}
+					else loc val_lab ""
+
+				}
+		
+				qui count if !missing(`p_var')
+				loc nm_cnt `r(N)'
+			
+				#d;
+				frames post frm_choice_list 
+							("`p_var'") 
+							("`:type `p_var''")
+							("`p_var_vallab'")
+							("`val'")
+							("`val_lab'") 
+							(`val_cnt')
+							(`=`val_cnt'/`nm_cnt'')
+					;
+				#d cr
+				
+			}
+
+			* save meta information
+			loc p_var_name`i' 	"`p_var'"
+			loc p_var_lab`i' 	"`:var lab `p_var''"
+			loc c_var_name`i' 	"`c_var'"
+			loc c_var_lab`i' 	"`:var lab `c_var''"
+
+			* change vars to string vars
+			cap confirm numeric var `p_var'
+			if !_rc {
+			    gen parent_value`i' = string(`p_var'), after(`p_var')
+			}
+			else ren `p_var' parent_value`i'
+			
+			cap confirm numeric var `c_var'
+			if !_rc {
+			    gen child_value`i' = string(`c_var'), after(`c_var')
+			}
+			else ren `c_var' child_value`i'
+		}
+		
+		* drop rows that contain no osp
+		egen noosp = rownonmiss(child*), strok
+		drop if !noosp
+		drop noosp
+		
+		if `c(N)' > 0 {
+		    gen reshape_id = _n
+			reshape long parent_value child_value, i(reshape_id) j(index)
+
+			keep if !missing(child_value)
+
+			gen parent_label = "", before(parent_value)
+			gen parent 		 = "", before(parent_label)
+			gen child_label  = "", before(child_value)
+			gen child 		 = "", before(child_label)
+
+			forval i = 1/`child_cnt' {
+				replace parent 			= "`p_var_name`i''" if index == `i'
+				replace parent_label 	= "`p_var_lab`i''" if index == `i'
+				replace child 			= "`c_var_name`i''" if index == `i'
+				replace child_label 	= "`c_var_lab`i''" if index == `i'
+			}
+
+			sort parent child child_value `date'
+
+			drop reshape_id index
+
+			compress
+			
+			ipagettd `date'
+		
+			keep 	`enumerator' `keep' `date' `id'  parent parent_label parent_value child child_label child_value
+			order 	`enumerator' `date' `keep' `id' parent parent_label parent_value child child_label child_value 
+
+			foreach var of varlist _all {
+				lab var `var' ""
+			}
+			
+			label var parent 		"parent variable"
+			label var parent_label 	"parent label"
+			label var parent_value 	"parent value"
+			label var child 		"child variable"
+			label var child_label 	"child label"
+			label var child_value 	"child value"
+			
+			if "`keep'" ~= "" ipalabels `keep', `nolabel'
+			ipalabels `id' `enumerator', `nolabel'
+			export excel using "`outfile'", sheet("`outsheet1'") first(varl) `sheetreplace' `sheetmodify'
+			mata: colwidths("`outfile'", "`outsheet1'")
+			mata: colformats("`outfile'", "`outsheet1'", "`date'", "date_d_mon_yy")
+			mata: setheader("`outfile'", "`outsheet1'")
+			
+			tab child
+			loc var_cnt `r(r)'
+			
+			frames frm_choice_list {
+
+				gsort variable value
+				foreach var of varlist _all {
+					lab var `var' ""
+				}
+			
+				label var vartype 		"variable type"
+				label var choice_label 	"choice list"
+
+				export excel using "`outfile'", sheet("`outsheet2'") first(varl) `sheetreplace' `sheetmodify'
+
+				mata: colwidths("`outfile'", "`outsheet2'")
+				mata: colformats("`outfile'", "`outsheet2'", "percentage", "percent_d2")	
+				mata: setheader("`outfile'", "`outsheet2'")
+				
+				* get row numbers for seperator line
+				cap frame drop frm_subset
+				frame put variable value, into(frm_subset)
+				frame frm_subset {
+				    bys variable (value): gen _dp_index = _n
+					bys variable (value): gen _dp_count = _N
+					gen _dp_row = _n + 1
+					keep if _dp_index == _dp_count
+					mata: rows = st_data(., st_varindex("_dp_row"))
+				}
+				frame drop frm_subset
+				mata: addlines("`outfile'", "`outsheet2'", rows, "thin")
+			}
+			
+			frame drop frm_choice_list
+			
+			noi disp "Found {cmd:`c(N)'} total specified values in `var_cnt' variables."
+		}
+		else {
+		    loc var_cnt 0
+			
+			noi disp "Found {cmd:0} other specify values."
+		}
+
+		return local N_specify 		= `c(N)'
+		return local N_vars 		= `var_cnt'
+		return local parentvarlist 	= "`unab_parent'"
+		return local childvarlist	= "`unab_child'"
 	}
 
 end

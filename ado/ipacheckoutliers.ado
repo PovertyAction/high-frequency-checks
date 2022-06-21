@@ -1,366 +1,312 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 4.0.0 11may2022
+*! Innovations for Poverty Action
+* ipacheckoutliers: Flag outliers in numeric variables
 
 program ipacheckoutliers, rclass
-	/* This program checks for outliers among 
-	   unconstrained survey variables. */
-	version 14.1
+	
+	
+	version 17
 
-	#d ;
-	syntax varlist, 
-		/* consent options */
-	    MULTIplier(numlist missingokay) [SD]
-		/* output filename */
-	    saving(string) 
-	    /* output options */
-        id(varname) ENUMerator(varname) SUBMITted(varname) [KEEPvars(string)] 
-		[IGNore(string) SCTOdb(string)]
-
-		/* other options */
-		[SHEETMODify SHEETREPlace NOLabel];	
+	#d;
+	syntax 	using/,
+			[SHeet(string)]
+        	OUTFile(string)
+        	[OUTSheet(string)]  
+			id(varname) 
+        	ENUMerator(varname) 
+        	date(varname) 
+			[SHEETMODify SHEETREPlace] 
+			[NOLABel]
+		;	
 	#d cr
-	
-	* test for fatal conditions
-	foreach var in `varlist' {
-	    * check that all variables are numeric
-		cap confirm numeric variable `var'
-		if _rc {
-			di as err "Variable `var' is not numeric."
-			error 198
-		}
-	}
-	
-	*confirm that only numbers are in the exclude list, after removing "."
-	foreach num in `ignore' {
 
-		cap confirm number `num'
-		if _rc {
-			if "`num'" == "." {
-				continue // the code isn't harmed by including a "."
-			}
-			di as err "ignore option contains non-numeric value '`num''."
-			error 109
-		}
-	}
-
-	di ""
-	di "HFC 11 => Checking that unconstrained variables have no outliers..."
 	qui {
-
-	* count nvars
-	unab vars : _all
-	local nvars : word count `vars'
-
-	* define temporary files 
-	tempfile tmp org
-	save "`org'"
-
-	* define temporary variable
-	tempvar outlier min max use
-	g `outlier' = .
-	g `min' = .
-	g `max' = .
-	g `use' = .
-
-	* generate _hfcokay & _hfcokayvar if they do not exist
-	cap confirm var _hfcokay
-	if _rc == 111 gen _hfcokay = 0
-	cap confirm var _hfcokayvar 
-	if _rc == 111 gen _hfcokayvar = ""
-
-	* define default output variable list
-	unab admin : `submitted' `id' `enumerator'
-	local meta `"variable label value message"'
-	if !missing("`sctodb'") {
-		local meta `"`meta' scto_link"'
-	}
-
-	* add user-specified keep vars to output list
-    local lines : subinstr local keepvars ";" "", all
-    local lines : subinstr local lines "." "", all
-
-    local unique : list uniq lines
-    local keeplist : list admin | meta
-    local keeplist : list keeplist | unique
-
-    * initialize local counters
-	local noutliers = 0
-	local i = 1
-
-	* initialize meta data variables
-	foreach var in `meta' {
-		g `var' = ""
-	}
-	* Create scto_link variable
-	if !missing("`sctodb'") {
-		local bad_chars `"":" "%" " " "?" "&" "=" "{" "}" "[" "]""'
-		local new_chars `""%3A" "%25" "%20" "%3F" "%26" "%3D" "%7B" "%7D" "%5B" "%5D""'
-		local url "https://`sctodb'.surveycto.com/view/submission.html?uuid="
-		local url_redirect "https://`sctodb'.surveycto.com/officelink.html?url="
-
-		foreach bad_char in `bad_chars' {
-			gettoken new_char new_chars : new_chars
-			replace scto_link = subinstr(key, "`bad_char'", "`new_char'", .)
-		}
-		replace scto_link = `"HYPERLINK("`url_redirect'`url'"' + scto_link + `"", "View Submission")"'
-	}
-	
-
-	* initialize temporary output file
-	poke `tmp', var(`keeplist')
-
-	foreach var in `varlist' {
-		* mark variables that contain error codes and should be ignored
-		replace `use' = 1
-		foreach num in `ignore' {
-			replace `use' = 0 if `var' == `num'
-		}
-		* get current value of iqr
-		local val : word `i' of `multiplier'
+	    
+		preserve
 		
-		* capture variable label
-		local varl : variable label `var'
+		tempvar tmv_flag tmv_dups
+		
+		* set default insheet values
+		if "`sheet'" == "" loc sheet "outliers"
+		
+		* set default outsheet values
+		if "`outsheet'" == "" loc outsheet "outliers"
 
-		* update values for additional variables
-		replace variable = "`var'"
-		replace label = "`varl'"
-		replace value = string(`var')
+		* import input data	
+		import excel using "`using'", clear sheet("`sheet'") first case(l) allstr
 
-		if "`sd'" == "" {
-			* create temp stats variables
-			tempvar sigma q1 q3
+		* check for duplicates in variable comlumn
+		drop if missing(variable)
+		cap isid variable
+		if _rc == 459 {
+			duplicates tag variable, gen (`tmv_dups')
+			di as err "Duplicates found in inputs sheet:"
+			noi list variable by method multiplier combine if dups
+			exit 459 
+		}
+		
+		* check and insert optionally needed required columns
+		foreach var in by method multiplier combine keepvars {
+			cap confirm var `var'
+			if _rc == 111 {
+				gen `var' = ""
+			}
+		}
 
-			* calculate iqr stats
-			egen `sigma' = iqr(`var') if `use' == 1
-			egen `q1' = pctile(`var') if `use' == 1, p(25)
-			egen `q3' = pctile(`var') if `use' == 1, p(75)
-			replace `max' = `q3' + `val' * `sigma'
-			replace `min' = `q1' - `val' * `sigma'
+		* save variables, by and keep vars locals
+		levelsof variable, loc (vars) clean
+		levelsof by, loc (byvars) clean
+		levelsof keepvars, loc(keepvars) clean
+		
+		* keep only relevant vars
+		keep variable by method multiplier combine
 
-			* drop reused egen variables
-			drop `sigma' `q1' `q3'
+		* include default values method and multiplier
+			* if no method is supplied, assume iqr
+			* if no multiplier is supplied, assume 1.5 for iqr & 3 for SD
 
-			replace message = "Range for `val' * IQR: " + ///
-			    string(`min', "%2.0f") + " to " + string(`max', "%2.0f") + ")"
+		replace method = "iqr" if missing(method)
+		replace multiplier = cond(method == "iqr" & missing(multiplier), "1.5", ///
+							 cond(method == "sd" & missing(multiplier), "3", multiplier))
+
+		destring multiplier, replace 
+
+		* check that all multpliers are numeric
+		cap confirm numeric var multiplier
+		if _rc == 7 {
+			disp as err "Multiplier contains non-numeric variables"
+			destring multiplier, force gen(`tmv_flag')
+			gen row = _n, before(variable)
+			noi list row variable method multiplier if mi(`tmv_flag'), abbreviate(32) noobs
+			ex 198
+		}
+
+		loc cnt `=_N'
+
+		* copy inputs into data frame
+		cap frame drop frm_inputs
+		frames put * , into(frm_inputs)
+
+		restore, preserve 
+		
+		cap confirm var _hfcokay
+		if !_rc {
+		    cap confirm var _hfcokayvar 
+			if !_rc {
+			    count if _hfcokay == 1
+			    loc checkok 1
+				cap frame drop frm_hfcokay
+				frames put `id' _hfcokay _hfcokayvar if _hfcokay == 1, into(frm_hfcokay)
+			}
 		}
 		else {
-			* create temp stats variables
-			tempvar sigma  mu
-
-			* calculate sd stats
-			egen `sigma' = sd(`var') if `use' == 1
-			egen `mu' = mean(`var') if `use' == 1
-			replace `max' = `mu' + `val' * `sigma'
-			replace `min' = `mu' - `val' * `sigma'
-
-			* drop reused egen variables
-			drop `sigma' `mu'
-
-			replace message = "Range for `val' * SD: " + ///
-			    string(`min', "%2.0f") + " to " + string(`max', "%2.0f") 
+		    loc checkok 0
 		}
 
-		* identify outliers 
-		replace `outlier' = (`var' > `max' | `var' < `min') ///
-			& !mi(`var') & `use' == 1 & (!_hfcokay & !regexm(_hfcokayvar, "`var'"))
+		* expand and replace vars in input sheet
+		forval i = 1/`cnt' {
 
-		* count outliers
-		count if `outlier' == 1
-		local n = `r(N)'
-		local noutliers = `noutliers' + `n'
+			frames frm_inputs: loc vars`i' = variable[`i']
+			unab vars`i': `vars`i''
+			frames frm_inputs: replace variable = "`vars`i''" in `i'
 
-		* append violations to the temporary data set
-		saveappend using "`tmp'" if `outlier' == 1, ///
-		    keep("`keeplist'") sort(`id')
-
-		* alert user
-		nois di "  Variable `var' has `n' potential outliers."
-	}
-
-	* import compiled list of violations
-	use "`tmp'", clear
-
-	* if there are no violations
-	if `=_N' == 0 {
-		set obs 1
-	} 
+			* check that the variable specified is not also a keep var
+			if "`keep'" ~= "" {
+				loc viol: list vars`i' in keepvars
+				if `viol' {
+					disp as err "Variables in varlist and keepvars are mutually exclusive. `vars`i'' is in both"
+					ex 198
+				}
+			}
+		}
 
 
-	order `keeplist'
-    gsort -`submitted', gen(order)
+		* rename and reshape outlier vars
+		loc i 1
+		foreach var of varlist `vars' {
+			* check that variable is numeric
+			cap confirm numeric var `var'
+			if _rc == 7 {
+				disp as err "Variable `var' must be a numeric variable"
+				ex 7
+			}
 
-	format `submitted' %tc
-	tempvar bot bottom lines
-
-	bysort variable (`enumerator' order) : gen `lines' = _n
-	egen `bot' = max(`lines'), by(variable)
-	gen `bottom' = cond(`bot' == `lines', 1, 0)
+			ren `var' ovvalue_`i'
+			gen ovname_`i' = "`var'" if !missing(ovvalue_`i')
+			gen ovlabel_`i' = "`:var lab ovvalue_`i''" if !missing(ovvalue_`i'), after(ovvalue_`i')
+			loc ++i
+		}
 		
-	loc colorcols
-	foreach var in variable label message {
-		loc pos : list posof "`var'" in keeplist
-		loc colorcols `colorcols' `pos'
-	}
-	
-	* export compiled list to excel
-	export excel `keeplist' using "`saving'" ,  ///
-		sheet("11. outliers") `sheetreplace' `sheetmodify' ///
-		firstrow(variables) `nolabel'
-	
-	unab keeplist : `keeplist'	
-	mata: basic_formatting("`saving'", "11. outliers", tokens("`keeplist'"), tokens("`colorcols'"), `=_N')	
+		* keep only relevant variables
+		keep `id' `enumerator' `date' `keep' `byvars' ovvalue_* ovname_* ovlabel_*
 
-	
-	*export scto links as links
-	if !missing("`sctodb'") {
-		unab allvars : _all
-		local pos : list posof "scto_link" in allvars
-		mata: add_scto_link("`saving'", "11. outliers", "scto_link", `pos')
-	}
-	
-	* revert to original
-	use "`org'", clear
-	}
+		gen reshape_id = _n
 
-	* return scalars
-	return scalar noutliers = `noutliers'
+		reshape long ovvalue_ ovname_ ovlabel_, i(reshape_id) j(index)
+		ren (ovvalue_ ovname_ ovlabel_) (value variable varlabel)
 
-end
+		drop if missing(value)
+		drop reshape_id index
 
-program saveappend
-	/* this program appends the data in memory, or a subset 
-	   of that data, to a stata file on disk. */
-	syntax using/ [if] [in] [, keep(varlist) sort(varlist)]
-
-	marksample touse 
-	preserve
-
-	keep if `touse'
-
-	if "`keep'" != "" {
-		keep `keep' `touse'
-	}
-
-	append using "`using'"
-
-	if "`sort'" != "" {
-		sort `sort'
-	}
-
-	drop `touse'
-	save "`using'", replace
-
-	restore
-end
-
-program poke
-	syntax [anything], [var(varlist)] [replace] 
-
-	* remove quotes from filename, if present
-	local file = `"`=subinstr(`"`anything'"', `"""', "", .)'"'
-
-	* test fatal conditions
-	cap assert "`file'" != "" 
-	if _rc {
-		di as err "must specify valid filename."
-		error 100
-	}
-
-	preserve 
-
-	if "`var'" != "" {
-		keep `var'
-		drop if _n > 0
-	}
-	else {
-		drop _all
-		g var = 1
-		drop var
-	}
-	* save 
-	save "`file'", emptyok `replace'
-
-	restore
-
-end
-
-mata: 
-mata clear
-void basic_formatting(string scalar filename, string scalar sheet, string matrix vars, string matrix colors, real scalar nrow) 
-{
-
-class xl scalar b
-real scalar i, ncol
-real vector column_widths, varname_widths, bottomrows
-real matrix bottom
-
-b = xl()
-ncol = length(vars)
-
-b.load_book(filename)
-b.set_sheet(sheet)
-b.set_mode("open")
-
-b.set_bottom_border(1, (1, ncol), "thin")
-b.set_font_bold(1, (1, ncol), "on")
-b.set_horizontal_align(1, (1, ncol), "center")
-
-if (length(colors) > 1 & nrow > 2) {	
-for (j=1; j<=length(colors); j++) {
-	b.set_font((3, nrow+1), strtoreal(colors[j]), "Calibri", 11, "lightgray")
-	}
-}
-
-
-// Add separating bottom lines : figure out which columns to gray out	
-bottom = st_data(., st_local("bottom"))
-bottomrows = selectindex(bottom :== 1)
-column_widths = colmax(strlen(st_sdata(., vars)))	
-varname_widths = strlen(vars)
-
-for (i=1; i<=cols(column_widths); i++) {
-	if	(column_widths[i] < varname_widths[i]) {
-		column_widths[i] = varname_widths[i]
-	}
-
-	b.set_column_width(i, i, column_widths[i] + 2)
-}
-
-if (rows(bottomrows) > 1) {
-for (i=1; i<=rows(bottomrows); i++) {
-	b.set_bottom_border(bottomrows[i]+1, (1, ncol), "thin")
-	if (length(colors) > 1) {
-		for (k=1; k<=length(colors); k++) {
-			b.set_font(bottomrows[i]+2, strtoreal(colors[k]), "Calibri", 11, "black")
+		* gen placeholders for important vars
+		loc statvars "value_count value_min value_max value_mean value_median value_sd p25 p75 iqr"
+		foreach var of newlist `statvars' {
+			gen `var' = .
 		}
+
+		gen byvar 		= ""
+		gen method 		= ""
+		gen multiplier 	= .
+		gen combine 	= variable
+		gen combine_ind = 0
+		
+		* calculate outliers
+		forval i = 1/`cnt' {
+			frames frm_inputs {
+				loc vars`i' 		= variable[`i']
+				loc by`i' 			= by[`i']
+				loc method`i' 		= method[`i']
+				loc multiplier`i' 	= multiplier[`i']
+				loc combine`i' 		= combine[`i'] 
+			}
+
+			* check if vars are combined
+			if lower("`combine`i''") == "yes" {
+				foreach var in `vars`i'' {
+					replace combine = "`vars`i''" if variable == "`var'"
+					replace combine_ind = 1 if variable == "`var'"
+				}
+				
+				if "`by`i''" ~= "" 	loc by_syntnax "bys `by`i'':"
+				else 				loc by_syntax ""
+					
+				`by_syntax' egen vcount  = count(value)   if combine == "`vars`i''"
+				`by_syntax' egen vmin 	  = min(value) 	  if combine == "`vars`i''"
+				`by_syntax' egen vmax 	  = max(value) 	  if combine == "`vars`i''"
+				`by_syntax' egen vmean   = mean(value)    if combine == "`vars`i''"
+				`by_syntax' egen vmedian = median(value)  if combine == "`vars`i''"
+				`by_syntax' egen vsd     = sd(value)      if combine == "`vars`i''"
+				`by_syntax' egen vp25 	  = pctile(value) if combine == "`vars`i''", p(25)
+				`by_syntax' egen vp75 	  = pctile(value) if combine == "`vars`i''", p(75)
+				`by_syntax' egen viqr 	  = iqr(value)    if combine == "`vars`i''"
+
+				replace value_count 	  = vcount 		  if combine == "`vars`i''"
+				replace value_min 		  = vmin 		  if combine == "`vars`i''"
+				replace value_max 		  = vmax 		  if combine == "`vars`i''"
+				replace value_mean 		  = vmean 		  if combine == "`vars`i''"
+				replace value_median 	  = vmedian 	  if combine == "`vars`i''"
+				replace value_sd 	  	  = vmedian 	  if combine == "`vars`i''"
+				replace p25 			  = vp25       	  if combine == "`vars`i''"
+				replace p75 			  = vp75 		  if combine == "`vars`i''"
+				replace iqr 			  = viqr 		  if combine == "`vars`i''"
+
+				replace byvar 		= "`by`i''" 		if combine == "`vars`i''" 
+				replace method 		= "`method`i''"		if combine == "`vars`i''"
+				replace multiplier 	= `multiplier`i''   if combine == "`vars`i''"
+
+				drop vcount vmin vmax vmean vmedian vsd vp25 vp75 viqr
+			}
+			else {
+				foreach var in `vars`i'' {
+					if "`by`i''" ~= "" 	loc by_sytnax "bys `by`i'':"
+					else 				loc by_sytnax ""
+					
+					`by_syntax' egen vcount  = count(value)  if variable == "`var'"
+					`by_syntax' egen vmin 	  = min(value) 	  if variable == "`var'"
+					`by_syntax' egen vmax 	  = max(value) 	  if variable == "`var'"
+					`by_syntax' egen vmean   = mean(value)   if variable == "`var'"
+					`by_syntax' egen vmedian = median(value) if variable == "`var'"
+					`by_syntax' egen vsd     = sd(value)     if variable == "`var'"
+					`by_syntax' egen vp25 	  = pctile(value) if variable == "`var'", p(25)
+					`by_syntax' egen vp75 	  = pctile(value) if variable == "`var'", p(75)
+					`by_syntax' egen viqr 	  = iqr(value)    if variable == "`var'"
+
+					replace value_count 	  = vcount 		  if variable == "`var'"
+					replace value_min 		  = vmin 		  if variable == "`var'"
+					replace value_max 		  = vmax 		  if variable == "`var'"
+					replace value_mean 		  = vmean 		  if variable == "`var'"
+					replace value_median 	  = vmedian 	  if variable == "`var'"
+					replace value_sd 	  	  = vmedian 	  if variable == "`var'"
+					replace p25 			  = vp25       	  if variable == "`var'"
+					replace p75 			  = vp75 		  if variable == "`var'"
+					replace iqr 			  = viqr 		  if variable == "`var'"
+
+					replace byvar 		= "`by`i''" 		  if variable == "`var'" 
+					replace method 		= "`method`i''"		  if variable == "`var'"
+					replace multiplier 	= `multiplier`i''     if variable == "`var'"
+
+					drop vcount vmin vmax vmean vmedian vsd vp25 vp75 viqr
+				}
+			}
+		}
+
+		* clean up and rename combine variables
+		replace combine = "" if !combine_ind
+		ren 	combine combine_vars
+		drop 	combine_ind
+
+		gen range_min = cond(method == "iqr", p25 - (1.5 * iqr), value_mean - (multiplier * value_sd))
+		gen range_max = cond(method == "iqr", p75 + (1.5 * iqr), value_mean + (multiplier * value_sd)) 
+		
+		keep if !inrange(value, range_min, range_max)
+		
+		* drop if already marked as ok
+		if `checkok' {
+		    frame frm_hfcokay: loc okaycnt `c(N)'
+			forval i = 1/`okaycnt' {
+			    loc vars = _frval(frm_hfcokay, _hfcokayvar, `i')
+			    drop if `id' == _frval(frm_hfcokay, `id', `i') & regexm("`vars'", variable)
+			}
+		}
+		
+		if `c(N)' > 0 {
+
+			ipagettd `date'
+			
+			gen method_value = cond(method == "iqr", iqr, value_sd)
+			gen range = "Range for " + string(multiplier, "%15.2f") + " * " + method + ///
+						"(" + string(method_value, "%15.2f") + "): " + ///
+						string(range_min, "%15.2f") + " to " + string(range_max, "%15.2f")
+						
+			foreach var of varlist _all {
+				lab var `var' "`var'"
+			}
+			
+			lab var varlabel 		"label"
+			lab var value_count 	"count"
+			lab var value_sd 		"sd"
+			lab var value_mean 		"mean"
+			lab var value_min 		"min"
+			lab var value_max 		"max"
+			
+			keep 	`enumerator' `keep' `date' `id'  variable varlabel ///
+					byvar `byvars' combine value value_count value_min value_mean value_max range 
+
+			order 	`enumerator' `keep' `date' `id'  variable varlabel ///
+					byvar `byvars' combine value value_count value_min value_mean value_max range 
+					
+			if "`keep'" ~= "" ipalabels `keep', `nolabel'
+			ipalabels `id' `enumerator', `nolabel'
+			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
+
+			mata: colwidths("`outfile'", "`outsheet'")
+			mata: colformats("`outfile'", "`outsheet'", ("value", "value_min", "value_mean", "value_max"), "number_sep_d2")	
+			mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
+			mata: setheader("`outfile'", "`outsheet'")
+			
+			tab variable
+			loc var_cnt `r(r)'
+			
+			* display number of outliers flagged
+			noi disp "Found {cmd:`c(N)'} outliers in `var_cnt' variable(s)."
+		}
+		else {
+		    loc var_cnt 0
+			noi disp "Found {cmd:0} outliers."
+		}
+		
+		return local N_outliers = `c(N)'
+		return local N_vars = `var_cnt'
 	}
-}
-}
-else b.set_bottom_border(2, (1, ncol), "thin")
-
-b.close_book()
-
-}
-
-void add_scto_link(string scalar filename, string scalar sheetname, string scalar variable, real scalar col)
-{
-	class xl scalar b
-	string matrix links
-	real scalar N
-
-	b = xl()
-	links = st_sdata(., variable)
-	N = length(links) + 1
-
-	b.load_book(filename)
-	b.set_sheet(sheetname)
-	b.set_mode("open")
-	b.put_formula(2, col, links)
-	b.set_font((2, N), col, "Calibri", 11, "5 99 193")
-	b.set_font_underline((2, N), col, "on")
-	b.set_column_width(col, col, 17)
 	
-	b.close_book()
-	}
-
 end
-

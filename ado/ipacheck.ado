@@ -1,83 +1,148 @@
-*! version 3.0.0 Innovations for Poverty Action 22oct2018
+*! version 4.0.0 11may2022
+*! Innovations for Poverty Action
+* ipacheck: Update ipacheck package and initialize new projects
 
 program ipacheck, rclass
-	/* This is a utility function to help update the ipacheck package
-	   and initialize new projects. */
-	version 13
-	gettoken cmd 0 : 0, parse(" ,")
-	syntax [anything], [surveys(string)] [folder(string)] [SUBFOLDERS] [files] [exercise]
+	
+	version 17
+	
+	#d;
+	syntax 	name(name=subcmd id="sub command"), 
+			[SURVeys(string)] 
+			[FOLDer(string)] 
+			[SUBfolders] 
+			[FILESonly] 
+			[EXercise]
+			[BRanch(name)]
+			;
+	#d cr
 
-	if `"`cmd'"'=="" {
-		di as txt "ipacheck options are"
-		di as txt "    {cmd:ipacheck version}"
-		di as txt "    {cmd:ipacheck update} [{it: branch}]"
-		di as txt "    {cmd:ipacheck new} [{it: filepath}]"
-		exit 198
-	}
-
-	local l = length(`"`cmd'"')
-	if `"`cmd'"' == substr("update", 1, max(1,`l')) {
-		ipacheckupdate `0'
-		exit
-		
-	}
-	if `"`cmd'"' == substr("version", 1, max(1,`l')) {
-		ipacheckversion `0'
-		exit
-	}
-	if `"`cmd'"' == substr("new", 1, max(1,`l')) {
-		ipachecknew, surveys(`surveys') folder(`folder') `subfolders' `files' `exercise'
-		exit
-	}
-end
-
-program define ipacheckupdate
-	gettoken cmd 0 : 0, parse(" ,")
-
-	local url = "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks"
-
-	if inlist(`"`cmd'"', "", "master") {
-		local url = "`url'/master/ado"
-	}
-	else {
-		local url = "`url'/`cmd'/ado"
-	}
-
-	net install ipacheck, replace from("`url'")
-end
-
-program define ipacheckversion
-	local programs          ///
-	    ipacheckallmiss     ///
-	    ipacheckcomplete    ///
-	    ipacheckconsent     ///
-	    ipacheckconstraints ///
-	    ipacheckdates       ///
-	    ipacheckdups        ///
-	    ipacheckenum        ///
-	    ipacheckfollowup    ///
-	    ipacheckids         ///
-	    ipacheckimport      ///
-	    ipachecknomiss      ///
-	    ipacheckoutliers    ///
-	    ipacheckresearch    ///
-	    ipachecklogic       ///
-	    ipacheckspecify     ///
-	    ipadoheader         ///
-	    ipatracksummary     ///
-	    progreport          ///     
-	    ipatrackversions           
-
-	foreach prg in `programs' {
-		cap which `prg'
-		if !_rc {
-			local path = c(sysdir_plus)
-			if substr("`prg'", 1, 1) == "i" {
-			mata: get_version("`path'i/`prg'.ado")
+	qui {
+		if !inlist("`subcmd'", "new", "version", "update") {
+			disp as err "illegal ipacheck sub command. Sub commands are:"
+			noi di as txt 	"{cmd:ipacheck new}"
+			noi di as txt 	"{cmd:ipacheck update}"
+			noi di as txt 	"{cmd:ipacheck version}"
+			ex 198
+		}
+		if inlist("`subcmd'", "update", "version") {
+			if "`surveys'" ~= "" {
+				disp as error "subccommand `subcmd' and surveys options are mutually exclusive"
+				ex 198
 			}
-			else mata: get_version("`path'p/`prg'.ado")
+			if "`folder'" ~= "" {
+				disp as error "sub command `subcmd' and folder options are mutually exclusive"
+				ex 198
+			}
+			if "`subfolders'" ~= "" {
+				disp as error "sub command `subcmd' and subfolders options are mutually exclusive"
+				ex 198
+			}
+			if "`filesonly'" ~= "" {
+				disp as error "sub command `subcmd' and files options are mutually exclusive"
+				ex 198
+			}
+			if "`exercise'" ~= "" {
+				disp as error "sub command `subcmd' and exercise options are mutually exclusive"
+				ex 198
+			}
+	 	}
+		else if "`subcmd'" == "new" {
+			if "`surveys'" == "" & "`subfolders'" ~= "" {
+				disp as err "subfolders option & survey options must be specified together"
+				ex 198
+			}
+			if "`exercise'" ~= "" {
+				if "`subfolders'" ~= "" {
+					disp as err "exercise and subfolders options are mutually exclusive"
+					ex 198
+				}
+				if "`filesonly'" ~= "" {
+					disp as err "exercise and filesonly options are mutually exclusive"
+					ex 198
+				}
+			}
+		}
+		
+		loc url 	= "https://raw.githubusercontent.com/PovertyAction/ipa_dms4.0"
+
+		if "`subcmd'" == "new" {
+			noi ipacheck_new, surveys(`surveys') folder("`folder'") `subfolders' `filesonly' url("`url'") branch(`branch') `exercise'
+			ex
+		}
+		else {
+			noi ipacheck_`subcmd', branch(`branch') url(`url')
+			ex
 		}
 	}
+end
+
+program define ipacheck_update
+	
+	syntax, [branch(name)] url(string)
+	
+	qui {
+		loc branch 	= cond("`branch'" ~= "", "`branch'", "master")
+		noi net install ipacheck, replace from("`url'/`branch'")
+		qui do "`url'/`branch'/mlib/ipacheckmata.do"
+		noi disp "Mata library lipadms installed"
+		noi mata mata mlib index
+	}
+	
+end
+
+program define ipacheck_version
+	
+	qui {
+		#d;
+		local 	programs          
+				ipacheckcorrections	
+				ipacheckspecifyrecode
+				ipacheckversions
+				ipacheckids
+				ipacheckdups
+				ipacheckmissing
+				ipacheckoutliers
+				ipacheckspecify
+				ipacheckcomments
+				ipachecktextaudit
+				ipachecktimeuse
+				ipachecksurveydb
+				ipacheckenumdb
+				ipatracksurvey
+				ipacodebook
+				ipasctocollate
+				ipalabels
+				ipagettd
+				ipagetcal
+				ipaanycount
+				ipabcstats
+			;
+		#d cr
+
+		cap frames drop frm_verdate
+		frames create frm_verdate str32 (program version date)
+
+		foreach prg in `programs' {
+			cap which `prg'
+			if !_rc {
+				mata: get_version("`c(sysdir_plus)'i/`prg'.ado")
+				di regexm("`verdate'", "[1-4]\.[0-9]+\.[0-9]+")
+				loc vers_num 	= regexs(0)
+				di regexm("`verdate'", "[0-9]+[a-zA-Z]+[0-9]+")
+				loc vers_date 	= regexs(0)
+
+				frames post frm_verdate ("`prg'") ("`vers_num'") ("`vers_date'")
+			}
+		}
+
+		frames frm_verdate {
+			compress
+			sort program
+			noi list, noobs h sep(0)
+		}
+	}
+	
 end
 
 mata: 
@@ -86,370 +151,253 @@ void get_version(string scalar program) {
 	
     fh = fopen(program, "r")
     line = fget(fh)
-    printf("  " + program + "\t\t%s\n", line) 
+    st_local("verdate", line) 
     fclose(fh)
 }
 end
 
-program define ipachecknew
-	syntax, [surveys(string)] [folder(string)] [SUBfolders] [files] [exercise]
+program define ipacheck_new
 	
-	// Set up URL
-	loc git "https://raw.githubusercontent.com/PovertyAction"
-	loc git_hfc "`git'/high-frequency-checks"
-	loc git_readme "https://raw.githubusercontent.com/PovertyAction/New_HFCs-Readmes"
-	loc branch master	
+	syntax, [surveys(string)] [folder(string)] [SUBfolders] [filesonly] [exercise] [branch(name)] url(string)
 	
+	loc branch 	= cond("`branch'" ~= "", "`branch'", "master") 
 	
-	////////////////////
-	// ERROR MESSAGES
-	////////////////////
 	if "`folder'" == "" {
-		loc folder `c(pwd)'
-	}
-	if `:word count `surveys'' == 1 & "`subfolders'" != "" {
-		noi disp as err "Option for subfolders is not allowed with only one survey form"
-		exit 101
-	}
-	if "`surveys'" == "" &  "`subfolders'" != "" {
-		noi disp as err "Option for subfolders is not allowed without specifying the surveys option"
-		exit 101 
+		loc folder "`c(pwd)'"
 	}
 	
-	if "`files'" == "files" & "`surveys'" != "" {
-		noi disp as err "Option for files can only be used with the folders option"
-		exit 101 	
-	}
+	loc surveys_cnt = `:word count `surveys''
 	
-	if "`exercise'" == "exercise" & "`surveys'" != "" {
-		noi disp as error "Option for exercise can only be used with the folders option"
-		exit 101
-	}
-	
-	////////////////////
-	// SET UP FOLDER
-	////////////////////
-	{
-		// Seting up main structure
+	if "`filesonly'" == "" {
 		#d;
 		loc folders 
-			""00_archive"
-			"01_instruments"
-				"01_instruments/01_paper"
-				"01_instruments/02_print"
-				"01_instruments/03_xls"
-			"02_dofiles"
-			"03_tracking"
-				"03_tracking/01_inputs"
-				"03_tracking/02_outputs"
-			"04_checks"
-				"04_checks/01_inputs"
-				"04_checks/02_outputs"	
-			"05_data"
-				"05_data/01_preloads"
-				"05_data/02_survey"
-				"05_data/03_bc"
-				"05_data/04_monitoring"
-			"06_media"
-			"07_documentation"
-			"08_field_manager"
-			"09_reports""
+			""0_archive"
+			"1_instruments"
+				"1_instruments/1_paper"
+				"1_instruments/2_scto_print"
+				"1_instruments/3_scto_xls"
+			"2_dofiles"
+			"3_checks"
+				"3_checks/1_inputs"
+				"3_checks/2_outputs"	
+			"4_data"
+				"4_data/1_preloads"
+				"4_data/2_survey"
+				"4_data/3_backcheck"
+				"4_data/4_monitoring"
+			"5_media"
+				"5_media/1_audio"
+				"5_media/2_images"
+				"5_media/3_video"
+			"6_documentation"
+			"7_field_manager"
+			"8_reports""
 			;
 		#d cr
 		
-		if "`files'" == "files" {
-	
-		// HFC input file
-		di "Saving HFC input file"
-		cap confirm file "`folder'/hfc_inputs.xlsm"
-		if !_rc {
-			
-			noi disp "{red:Skipped}: hfc_inputs.xlsm already exists"
-			} 
-		else {
-			loc output "`folder'/hfc_inputs.xlsm"
-			copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
-		}
-		
-		// HFC replacements file
-		di "Saving HFC replacements file"
-		
-		cap confirm file "`folder'/hfc_replacements.xlsm"
-		if !_rc {
-
-			noi disp "{red:Skipped}: hfc_replacements.xlsm already exists"
-			} 
-		else {
-		
-		loc output "`folder'/hfc_replacements.xlsm"
-		copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
-		}
-		// HFC master do file
-		di "Saving master do file"
-		cap confirm file "`folder'/master_check.do"
-		if !_rc {
-			
-			noi disp "{red:Skipped}: master_check.do already exists"
-			} 
-		else {
-		
-		loc output "`folder'/master_check.do"
-		copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
-		}
-		exit
-	}
-
-		
-		
-		// Create folders in local directory 
 		noi disp
 		noi disp "Setting up folders ..."
 		noi disp
 
 		foreach f in `folders' {
-			* Check that folder already exist
-			cap confirm file "`folder'/`f'/nul"
-			* If folder exist, return message that folder already exist, else create folder
-			if !_rc {
+			mata : st_numscalar("exists", direxists("`folder'/`f'"))
+			if scalar(exists) == 1 {
 				noi disp "{red:Skipped}: Folder `f' already exists"
 			}
-			* else create folder
 			else {
 				mkdir "`folder'/`f'"
 				noi disp "Successful: Folder `f' created"
 			}
 		}
 		
-		
-		// Additional folders if multiple surveys
-		
-		if `:word count `surveys'' > 1 & "`subfolders'" != "" {
-			di
-			di "Creating folders for multiple forms..."
-			di
-				
-			// List with folders where subfolders will be created
+		if "`subfolders'" == "subfolders" {
+			
 			#d;
-			loc folders_add 
-				""04_checks/01_inputs" 
-				"05_data/02_survey""
-			;
+			loc sfs
+				""3_checks/1_inputs"
+				"3_checks/2_outputs"
+				"4_data/1_preloads"
+				"4_data/2_survey"
+				"4_data/3_backcheck"
+				"4_data/4_monitoring"
+				"5_media/1_audio"
+				"5_media/2_images"
+				"5_media/3_video""
+				;
 			#d cr
 			
-			// Create list of new folders for each form
-			loc new_list
-			forvalues f=1/`:word count `folders_add'' {
-				loc set "`:word `f' of `folders_add''"
-				forvalues n=1/`:word count `surveys'' {
-					loc form "`:word `n' of `surveys''"
-					loc fol "`set'/`n'_`form'"
-					loc new_list `new_list' `fol'
-				}
-			}
+			noi disp
+			noi disp "Creating subfolders ..."
+			noi disp
+			loc i 1
 			
-			// Create new folders
-			foreach f in `new_list' {
-				* Check that folder already exist
-				cap confirm file "`folder'/`f'/nul"
-				* If folder exist, return message that folder already exist, else create folder
-				if !_rc {
-					noi disp "{red:Skipped}: Folder `f' already exists"
+			foreach survey in `surveys' {
+				loc sublab = "`i'_`survey'"
+				foreach sf in `sfs' {
+					mata : st_numscalar("exists", direxists("`folder'/`sf'/`sublab'"))
+					if scalar(exists) == 1 {
+						noi disp "{red:Skipped}: Sub-folder `sf' already exists"
+					}
+					else {
+						mkdir "`folder'/`sf'/`sublab'"
+						noi disp "Successful: Folder `sf'/`sublab' created"
+					}
 				}
-				* else create folder
+				loc ++i
+			}
+		}
+	}
+	
+	loc exp_dir "`folder'"
+		
+	noi disp
+	noi disp "Copying files to `exp_dir' ..."
+	noi disp
+	
+	cap confirm file "`exp_dir'/0_master.do"
+	if _rc == 601 {
+		copy "`url'/`branch'/do/0_master.do" "`exp_dir'/0_master.do"
+		noi disp "0_master.do copied to `exp_dir'"
+	}
+	else {
+		noi disp  "{red:Skipped}: File 0_master.do already exists"
+	}
+	
+	if "`filesonly'" == "" 	loc exp_dir "`folder'/2_dofiles"
+	else 					loc exp_dir "`folder'"
+	
+	foreach file in 1_globals 3_prepsurvey 4_checksurvey 5_prepbc 6_checkbc {
+		if `surveys_cnt' > 0 {
+			forval i = 1/`surveys_cnt' {
+				loc exp_file = "`file'_" + word("`surveys'", `i')
+				cap confirm file "`exp_dir'/`exp_file'.do"
+				if _rc == 601 {
+					copy "`url'/`branch'/do/`file'.do" "`exp_dir'/`exp_file'.do"
+					noi disp "`exp_file'.do copied to `exp_dir'"
+				}
 				else {
-					mkdir "`folder'/`f'"
-					noi disp "Successful: Folder `f' created"
+					noi disp  "{red:Skipped}: File `file'.do already exists"
 				}
 			}
 		}
-	
-	}
-	
-	////////////////////
-	// README FILES
-	////////////////////
-	{
-		noi di
-		noi di "Saving readme files..."
-		noi di
-		// List of main folders and names for read me files
-		loc folders_main ""00_archive" "01_instruments" "02_dofiles" "03_tracking" "04_checks" "05_data" "06_media" "07_documentation" "08_field_manager" "09_reports""
-		loc folders_names archive instruments dofiles tracking checks data media documentation field_manager reports
-		assert `:word count `folders_main'' == `:word count `folders_names''
-		
-		// Saving read me content in locals
-		
-		// Looping thorugh main folders to save readme files in each
-		forvalues i=1/`:word count `folders_names'' {
-			loc fol = "`:word `i' of `folders_main''"
-			loc name = "`:word `i' of `folders_names''"
-			loc output "`folder'/`fol'/`fol'_readme.txt"
-			cap confirm file "`output'"
-			if !_rc {
-				noi disp "{red:Skipped}: `fol'_readme.txt already exists"
-
+		else {
+			cap confirm file "`exp_dir'/`file'.do"
+			if _rc == 601 {
+				copy "`url'/`branch'/do/`file'.do" "`exp_dir'/`file'.do"
+				noi disp "`file'.do copied to `exp_dir'"
 			}
 			else {
-			di "Saving readme for `fol'"
-
-			copy "`git_readme'/master/`fol'_readme.txt" "`output'", replace
+				noi disp  "{red:Skipped}: File `file'.do already exists"
 			}
 		}
 	}
 	
-
-	////////////////////
-	// SAVE FILES
-	////////////////////
-	{
-		di
-		di "Populating folder..."
-		di
-		// Locals for file locations
-		loc hfc_input_loc "04_checks/01_inputs"
-		loc hfc_enum_loc "04_checks/01_inputs"
-		loc hfc_replace_loc "04_checks/01_inputs"
-		loc hfc_master_loc "02_dofiles"
-		
-		// Single form
-		if (`:word count `surveys'' == 1) | (`:word count `surveys'' == 0) {	
-
-			loc subfolders `" 04_checks/01_inputs 04_checks/01_inputs 02_dofiles "'
-			loc ex_folders `" 04_checks/01_inputs 04_checks/01_inputs 05_data/02_survey 05_data/01_preloads 05_data/03_bc 06_media "'
-
-			
-			loc outputs `" hfc_inputs.xlsm hfc_replacements.xlsm master_check.do "'
-			loc ex_outputs `" hfc_inputs_ANSWERS.xlsm hfc_replacements_ANSWERS.xlsm survey_data.dta sample.dta bc_survey_data.dta survey_media.zip exercise_instructions.pdf "'
-
-			
-			if "`exercise'" == "exercise" {
-				loc subfolders `subfolders' `ex_folders'
-				loc outputs `outputs' `ex_outputs'
-			}
-			
-			forval i = 1/`:word count `outputs'' {
-			loc subfolder "`: word `i' of `subfolders''"
-			loc output "`: word `i' of `outputs''"
-
-			if "`output'" == "hfc_inputs.xlsm" | "`output'" == "hfc_replacements.xlsm" | "`output'" == "master_check.do" | "`output'" == "exercise_instructions.pdf" {
-				loc gitfolder "xlsx"
-				if "`output'" == "master_check.do" | {
-					loc gitfolder ""
-				}
-				if "`output'" == "exercise_instructions.pdf" {
-					loc subfolder ""
-					loc gitfolder "exercise"
-				}
-			}
-			
-			else loc gitfolder "exercise"
+	if "`filesonly'" == "" 	loc exp_dir "`folder'/3_checks/1_inputs"
+	else 					loc exp_dir "`folder'"
 	
-			cap confirm file "`folder'/`subfolder'/`output'"
-			if !_rc {
-				noi disp "{red:Skipped}: `output' already exists"
+	noi disp
+	noi disp "Copying files to `folder'/3_checks/1_inputs ..."
+	noi disp
+	
+	foreach file in hfc_inputs corrections specifyrecode {
+		if `surveys_cnt' > 0 {
+			forval i = 1/`surveys_cnt' {
+				loc exp_file = "`file'_" + word("`surveys'", `i')
+				loc exp_dirmult  = cond("`subfolders'" == "", "`exp_dir'", "`exp_dir'/`i'_" + word("`surveys'", `i'))
+				cap confirm file "`exp_dirmult'/`exp_file'.xlsm"
+				if _rc == 601 {
+					qui copy "`url'/`branch'/excel/templates/`file'.xlsm" "`exp_dirmult'/`exp_file'.xlsm"
+					noi disp "`exp_file'.xlsm copied to `exp_dirmult'"
+				}
+				else {
+					noi disp "{red:Skipped}: File `file' already exists"
+				}
 			}
-			* else create folder
+		}
+		else {
+			cap confirm file "`exp_dir'/`file'.xlsm"
+			if _rc == 601 {
+				qui copy "`url'/`branch'/excel/templates/`file'.xlsm" "`exp_dir'/`file'.xlsm"
+				noi disp "`file'.xlsm copied to `exp_dir'"
+			}
 			else {
-				copy "`git_hfc'/`branch'/`gitfolder'/`output'" "`folder'/`subfolder'/`output'"
-				di "`output' saved"
+				noi disp "{red:Skipped}: File `file' already exists"
+			}
+		}
+	}
+
+	if "`exercise'" ~= "" {
+	
+		* copy exercise files
+
+		noi disp
+		noi disp "Copying exercise files ..."
+		noi disp
+
+		foreach file in household_survey.dta household_backcheck.dta household_preloads.xlsx respondent_targets.xlsx {
+			qui copy "`url'/`branch'/data/`file'" "`folder'/4_data/2_survey/`file'", replace
+			noi disp "`file' copied to 4_data/2_survey/`file'"
+		}
+		
+		qui copy "`url'/`branch'/data/household_backcheck.dta" "`folder'/4_data/3_backcheck/household_backcheck.dta", replace
+		noi disp "household_backcheck.dta copied to 4_data/3_backcheck/household_backcheck.dta"
+
+		foreach file in corrections hfc_inputs specifyrecode {
+			qui copy "`url'/`branch'/excel/exercise/`file'_exercise.xlsm" "`folder'/0_archive/`file'_exercise.xlsm", replace
+			noi disp "`file'_exercise.xlsm copied to 0_archive/`file'_exercise.xlsm"
+		}
+		
+		qui copy "`url'/`branch'/excel/exercise/Household_Survey.xlsx" "`folder'/1_instruments/3_scto_xls/Household_Survey.xlsx", replace
+		noi disp "Household_Survey.xlsx copied to 1_instruments/3_scto_xls/Household_Survey.xlsx"
+		
+		qui copy "`url'/`branch'/excel/exercise/Household_Back_Check_Survey.xlsx" "`folder'/1_instruments/3_scto_xls/Household_Back_Check_Survey.xlsx", replace
+		noi disp "Household_Back_Check_Survey.xlsx copied to 1_instruments/3_scto_xls/Household_Back_Check_Survey.xlsx"
+
+		noi disp
+		noi disp "Unpacking text audit and comment files ..."
+		noi disp
+
+		mata: st_numscalar("exists", direxists("`folder'/4_data/2_survey/media"))
+		if scalar(exists) == 1 {
+			cd "`folder'/4_data/2_survey"
+		}
+		else {
+			mkdir "`folder'/4_data/2_survey/media"
+			cd "`folder'/4_data/2_survey"
+		} 
+
+		* unpack text audits and comment files
+		unzipfile "`url'/`branch'/data/media.zip", replace
+
+		cd "`folder'"
+
+		noi disp
+		noi disp "Unpacking audio audit files ..."
+		noi disp
+
+		cap frames drop frm_audio_audit
+		frames create frm_audio_audit
+		frames frm_audio_audit: use aud_audit using "`url'/`branch'/data/household_survey.dta"
+
+		qui copy "`url'/`branch'/data/m4a_sample_on_&_on.m4a" "`c(tmpdir)'/audio_file_sample.m4a", replace
+		
+		frames frm_audio_audit {
+			
+			drop if missing(aud_audit)
+
+			loc import_cnt `c(N)'
+			
+			noi _dots 0, title(Unpacking `import_cnt' audio audit files ...) reps(`import_cnt')
+			
+			forval i = 1/`import_cnt' {
+
+				loc file = subinstr("`=aud_audit[`i']'", "media\", "", 1)
+			
+				qui copy 	"`c(tmpdir)'/audio_file_sample.m4a" "`folder'/4_data/2_survey/media/`file'", replace
+				noi _dots `i' 0
+			}
 
 		}
-		
-			}
-			
-		
-		}
-		
-		// Multiple forms with subfolders
-		if `:word count `surveys'' > 1 & "`subfolders'" != "" {
-		
-			//foreach form in `surveys' {
-			forvalues n=1/`:word count `surveys'' {
-			loc form "`:word `n' of `surveys''"
-				// HFC input file
-				di "Saving HFC input file - `form'"
-				loc output "`folder'//`hfc_input_loc'//`n'_`form'/hfc_inputs_`form'.xlsm"
-				cap confirm file "`output'"
-				if !_rc {
-					noi disp "{red:Skipped}: `output' already exists"
-				}
-				else {
-					copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
-					dis "`output' saved"
-				}
-				
-				// HFC replacements file
-				di "Saving HFC replacements file - `form'"
-				loc output "`folder'//`hfc_replace_loc'//`n'_`form'/hfc_replacements_`form'.xlsm"
-				cap confirm file "`output'"
-				if !_rc {
-					noi disp "{red:Skipped}: `output' already exists"
-				}
-				else {
-					copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
-					dis "`output' saved"
-				}
-				
-				// HFC master do file
-				di "Saving master do file - `form'"
-				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
-				cap confirm file "`output'"
-				if !_rc {
-					noi disp "{red:Skipped}: `output' already exists"
-				}
-				else {
-					copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
-					dis "`output' saved"
-			}
-			
-			}	
-		}
-		
-		// Multiple forms without subfolders
-		if `:word count `surveys'' > 1 & "`subfolders'" == "" {
-		
-			foreach form in `surveys' {
-				// HFC input file
-				di "Saving HFC input file - `form'"
-				loc output "`folder'//`hfc_input_loc'//hfc_inputs_`form'.xlsm"
-				cap confirm file "`output'"
-				if !_rc {
-					noi disp "{red:Skipped}: `output' already exists"
-				}
-				else {
-					copy "`git_hfc'/`branch'/xlsx/hfc_inputs.xlsm" "`output'", replace
-					dis "`output' saved"
-				}
-				// HFC replacements file
-				di "Saving HFC replacements file - `form'"
-				loc output "`folder'//`hfc_replace_loc'//hfc_replacements_`form'.xlsm"
-				cap confirm file "`output'"
-				if !_rc {
-					noi disp "{red:Skipped}: `output' already exists"
-				}
-				else {
-					copy "`git_hfc'/`branch'/xlsx/hfc_replacements.xlsm" "`output'", replace
-					dis "`output' saved"
-				}
-				
-				// HFC master do file
-				di "Saving master do file - `form'"
-				loc output "`folder'//`hfc_master_loc'/master_check_`form'.do"
-				cap confirm file "`output'"
-				if !_rc {
-					noi disp "{red:Skipped}: `output' already exists"
-				}
-				else {
-					copy "`git_hfc'/`branch'/master_check.do" "`output'", replace
-					dis "`output' saved"
-				}
-			}
-		}	
 	}
-	
+
 end
-
-
-
-
-
