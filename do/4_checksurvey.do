@@ -144,9 +144,11 @@
 			outsheet2("other specify (choices)")		///
 			${os_nolabel}								///
 			sheetreplace
+			
+			loc childvars "`r(childvarlist)'"
    }
    
-   return list
+   
    
    *============================ field comments ================================*
    
@@ -198,7 +200,7 @@
    }
    
    *=========================== Survey Dashboard ==============================* 
-
+	
    if $run_surveydb {
 		ipachecksurveydb,			 					///
 			by(${sv_by})								///
@@ -208,7 +210,7 @@
 			consent(${consent}, ${cons_vals})			///
 			dontknow(.d, ${dk_str})						///
 			refuse(.r, ${ref_str})						///
-			otherspecify(`r(childvarlist)')				///
+			otherspecify("`childvars'")					///
 			duration(${duration})						///
 			formversion(${formversion})					///
         	outfile("${surveydb_output}")				///
@@ -228,7 +230,7 @@
 			consent($consent, ${cons_vals})				///
 			dontknow(.d, ${dk_str})						///
 			refuse(.r, ${ref_str})						///
-			otherspecify(`r(childvarlist)')				///
+			otherspecify("`childvars'")					///
 			duration(${duration})						///
 			formversion(${formversion})					///
         	outfile("${enumdb_output}")					///
@@ -236,7 +238,6 @@
 			sheetreplace
    }
   
-   
    *========================= Track Survey Progress ===========================* 
 
    if $run_tracksurvey {
