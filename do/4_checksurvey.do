@@ -1,4 +1,4 @@
-*! version 4.0.0 Innovations for Poverty Action 30mar2022
+*! version 4.0.0 Innovations for Poverty Action 23jun2022
 
 /* =============================================================================
    =================== IPA HIGH FREQUENCY CHECK TEMPLATE ======================= 
@@ -82,7 +82,7 @@
     *============================= Form versions ===============================* 
 
    if $run_version {
-		ipacheckversion ${formversion}, 				///
+		ipacheckversions ${formversion}, 				///
 				enumerator(${enum}) 					///	
 				date(${date})							///
 				outfile("${hfc_output}") 				///

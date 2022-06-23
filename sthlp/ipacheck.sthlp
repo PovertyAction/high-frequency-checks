@@ -213,4 +213,4 @@ versions of which were authored by:
 
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
 {pstd}Rosemarie Sandino, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: June 11, 2022}{p_end}
+{pstd}{it:Last updated: June 23, 2022}{p_end}
