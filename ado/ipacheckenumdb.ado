@@ -152,6 +152,14 @@ program ipacheckenumdb, rclass sortpreserve
 				ex 111
 			}
 			else {
+	
+				* check that consent var is numeric
+				cap confirm numeric var `consent_var'
+				if _rc == 7 {
+					disp as err `"variable `consent_var' specifed in consent() option is not numeric"'
+					ex 7
+				}
+				
 				macro shift
 				loc consent_vals = subinstr(trim(itrim("`*'")), ",", "", 1)
 				if missing("`consent_vals'") {
@@ -412,10 +420,6 @@ program ipacheckenumdb, rclass sortpreserve
 		loc add = `=_N' + 1
 		set obs `add'
 		
-		tostring `enumerator', replace format(%15.0f)
-		
-		replace `enumerator' = "Total" in `add'
-		
 		foreach var of varlist vv_* {
 				
 			loc date = substr("`var'", 4, .)
@@ -473,8 +477,6 @@ program ipacheckenumdb, rclass sortpreserve
 			* add a total row
 			loc add = `=_N' + 1
 			set obs `add'
-			
-			* replace `team' = "Total" in `add'
 			
 			foreach var of varlist vv_* {
 					
