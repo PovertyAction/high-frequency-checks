@@ -125,7 +125,7 @@ program ipacheckversions, rclass
 			loc lastdate = last_date[`=_N'-1]
 			levelsof row if last_date == `lastdate' & _n ~= `c(N)'-1, ///
 				loc(rows) sep(,) clean
-			if "`rows'" ~= "" mata: addflags("`outfile'", "`outsheet1'", "lightpink", (1), (`rows'))
+			if "`rows'" ~= "" mata: addflags("`outfile'", "`outsheet1'", (`rows'), (1), "lightpink")
 		}
 
 		* export a list of outdate forms: ***
