@@ -33,6 +33,19 @@ void addflags (string scalar file, string scalar sheet, real vector rows, string
 	b.close_book()
 }
 
+void putstring (string scalar file, string scalar sheet, real scalar row, real scalar col, string scalar string)
+{
+	class xl scalar b
+	b = xl()
+	b.load_book(file)
+	b.set_sheet(sheet)
+	b.set_mode("open")
+	
+	b.put_string(row, col, string)
+	
+	b.close_book()
+}
+
 void colwidths(string scalar file, string scalar sheet) 
 {
 	real scalar i
