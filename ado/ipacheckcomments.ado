@@ -50,7 +50,7 @@ program ipacheckcomments, rclass
 							strpos(`varlist', ".csv") - strpos(`varlist', "media\") - 6)
 			}
 
-			cap confirm var comment
+			cap confirm var comment, exact
 			if !_rc {
 				ren comment __commentkeep
 			}
