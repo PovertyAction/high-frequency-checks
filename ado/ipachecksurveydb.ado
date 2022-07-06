@@ -40,6 +40,7 @@ program ipachecksurveydb, rclass
 		loc obs_count 	= c(N)
 		loc vars_count 	= c(k)
 		
+		
 		* get list of all vars
 		unab allvars: _all
 		
@@ -138,6 +139,7 @@ program ipachecksurveydb, rclass
 
 		* consent: consent(consent, 1) or consent(consent, 1 2 3)
 		if `_cons' {	
+			
 			* check  : check that consent variable is numeric and values is a numlist
 			token "`consent'", parse(,)
 			* check variable specified
@@ -151,6 +153,14 @@ program ipachecksurveydb, rclass
 				ex 111
 			}
 			else {
+				
+				* check that consent var is numeric
+				cap confirm numeric var `consent_var'
+				if _rc == 7 {
+					disp as err `"variable `consent_var' specifed in consent() option is not numeric"'
+					ex 7
+				}
+			
 				macro shift
 				loc consent_vals = subinstr(trim(itrim("`*'")), ",", "", 1)
 				if missing("`consent_vals'") {
@@ -493,8 +503,6 @@ program ipachecksurveydb, rclass
 			loc add = `=_N' + 1
 			set obs `add'
 			
-			replace `by' = "Total" in `add'
-			
 			foreach var of varlist vv_* {
 					
 				loc date = substr("`var'", 4, .)
@@ -518,6 +526,7 @@ program ipachecksurveydb, rclass
 			mata: setheader("`outfile'", "`period' productivity (grouped)")
 			mata: colformats("`outfile'", "`period' productivity (grouped)", st_varname(2..st_nvar()), "number_sep")
 			mata: settotal("`outfile'", "`period' productivity (grouped)")
+
 		}
 	}
 	
