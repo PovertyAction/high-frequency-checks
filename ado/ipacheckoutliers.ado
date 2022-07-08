@@ -1,4 +1,4 @@
-*! version 4.0.1 06jul2022
+*! version 4.0.1 07jul2022
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -122,8 +122,9 @@ program ipacheckoutliers, rclass
 
 
 		* rename and reshape outlier vars
+		loc vars: list uniq vars
 		loc i 1
-		foreach var of varlist `:list uniq vars' {
+		foreach var of varlist `vars' {
 			* check that variable is numeric
 			cap confirm numeric var `var'
 			if _rc == 7 {
