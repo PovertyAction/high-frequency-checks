@@ -33,7 +33,7 @@ void addflags (string scalar file, string scalar sheet, real vector rows, string
 	b.close_book()
 }
 
-void putstring (string scalar file, string scalar sheet, real scalar row, real scalar col, string scalar string)
+void putstring (string scalar file, string scalar sheet, real scalar row, real scalar col, string scalar text)
 {
 	class xl scalar b
 	b = xl()
@@ -41,7 +41,7 @@ void putstring (string scalar file, string scalar sheet, real scalar row, real s
 	b.set_sheet(sheet)
 	b.set_mode("open")
 	
-	b.put_string(row, col, string)
+	b.put_string(row, col, text)
 	
 	b.close_book()
 }
