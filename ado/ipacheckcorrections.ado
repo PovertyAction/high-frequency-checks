@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 08jul2022
 *! Innovations for Poverty Action
 * ipacheckcorrections: Make corrections to data
 
@@ -18,9 +18,6 @@ program define ipacheckcorrections, rclass
 	cap version 17 
 
 	qui {
-	    
-		* preserve
-		preserve
 		
 		tempvar tmv_status tmv_id_check
 		
@@ -210,7 +207,6 @@ program define ipacheckcorrections, rclass
 			loc failed_cnt 0
 		}
 		
-		restore
 		use "`tmf_main_data'", clear
 		
 		return loc N_obs 		= `rep_cnt'
