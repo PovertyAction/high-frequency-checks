@@ -9,7 +9,7 @@ program ipacheckenumdb, rclass sortpreserve
 	#d;
 	syntax 	[using/],
 			[SHEETname(string)]
-        	DATE(varname)
+        	date(varname)
         	[PERiod(string)]
         	ENUMerator(varname)
 			[TEAM(varname)]
@@ -422,14 +422,14 @@ program ipacheckenumdb, rclass sortpreserve
 		
 		foreach var of varlist vv_* {
 				
-			loc date = substr("`var'", 4, .)
+			loc vdate = substr("`var'", 4, .)
 			
 			if "`period'" == "daily" {
-				loc lab "`:disp %td  `date''"
+				loc lab "`:disp %td  `vdate''"
 				lab var `var' "`lab'"
 			}
-			else if "`period'" == "weekly" 	lab var `var' "week `date'"
-			else 							lab var `var' "month `date'"
+			else if "`period'" == "weekly" 	lab var `var' "week `vdate'"
+			else 							lab var `var' "month `vdate'"
 			
 			mata: st_numscalar("sum", colsum(st_data(., "`var'")))
 			replace `var' = scalar(sum) in `add'
