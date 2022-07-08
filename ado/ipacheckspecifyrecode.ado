@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 08jul2022
 *! Innovations for Poverty Action
 * ipacheckspecifyrecode: Recode other specify
 
@@ -19,8 +19,6 @@ program define ipacheckspecifyrecode, rclass
 	version 17 
 
 	qui {
-	    
-		preserve
 		
 		tempvar tmv_modified tmv_oldval tmv_newval tmv_oldval_lab tmv_newval_lab
 		
@@ -199,6 +197,8 @@ program define ipacheckspecifyrecode, rclass
 				}
 			}
 			
+			save "`tmf_main_data'", replace
+			
 			if "`logfile'" ~= "" {
 				use "`tmf_recodelog'", clear	
 				
@@ -225,6 +225,9 @@ program define ipacheckspecifyrecode, rclass
 		}
 		
 		return local N_recoded = `recoded'
+		
+		* restore
+		use "`tmf_main_data'", clear
 		
 	}
 end
