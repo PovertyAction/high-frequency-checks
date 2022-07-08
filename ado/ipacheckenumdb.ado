@@ -560,6 +560,9 @@ program ipacheckenumdb, rclass sortpreserve
 			}
 			
 			* rename and reshape outlier vars
+			unab statvars: `statvars'
+			loc statvars: list uniq statvars
+			
 			loc i 1
 			foreach var of varlist `statvars' {
 				* check that variable is numeric
@@ -605,6 +608,9 @@ program ipacheckenumdb, rclass sortpreserve
 					loc combine`i' 		= combine[`i'] 
 					loc input_lab`i'	= input_lab[`i']
 				}
+				
+				unab vars`i': `vars`i''
+				loc vars`i': list uniq vars`i'
 			
 				* check if vars are combined
 				if lower("`combine`i''") == "yes" {
