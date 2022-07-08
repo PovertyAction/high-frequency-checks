@@ -122,6 +122,7 @@ program ipacheckoutliers, rclass
 
 
 		* rename and reshape outlier vars
+		unab vars: `vars'
 		loc vars: list uniq vars
 		loc i 1
 		foreach var of varlist `vars' {
