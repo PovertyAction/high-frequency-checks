@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 08jul2022
 *! Innovations for Poverty Action
 * ipacheckversion: Outputs a table showing number of submissions per formversion
 
@@ -125,7 +125,7 @@ program ipacheckversions, rclass
 			loc lastdate = last_date[`=_N'-1]
 			levelsof row if last_date == `lastdate' & _n ~= `c(N)'-1, ///
 				loc(rows) sep(,) clean
-			if "`rows'" ~= "" mata: addflags("`outfile'", "`outsheet1'", (`rows'), (1), "lightpink")
+			if "`rows'" ~= "" mata: addflags("`outfile'", "`outsheet1'", (`rows'), ("`varlist'"), "lightpink")
 		}
 
 		* export a list of outdate forms: ***
