@@ -1,4 +1,4 @@
-*! version 4.0.0 Innovations for Poverty Action 23jun2022
+*! version 4.0.1 Innovations for Poverty Action 08jul2022
 
 /* =============================================================================
    =================== IPA HIGH FREQUENCY CHECK TEMPLATE ======================= 
@@ -59,9 +59,10 @@
 		ipacheckcorrections using "${corrfile}", 		///
 			sheet("${cr_othersheet}")					///
 			id(${id}) 									///
-			logfile("${cr_output}")						///
+			logfile("${recodelog_output}")				///
 			logsheet("${cr_othersheet}")				///
-			${cr_nolabel}
+			${cr_nolabel}								///
+			sheetreplace
 			
 		save "${checkedsurvey}", replace
 	}
