@@ -549,7 +549,7 @@ program ipacheckenumdb, rclass sortpreserve
 			
 			levelsof variable, loc (statvars) clean
 			
-			use `enumerator' `statvars' using "`tmf_main_data'", replace
+			use `enumerator' `statvars' using "`tmf_main_data'", clear
 			
 			* expand and replace vars in input sheet
 			forval i = 1/`statsvar_count' {
