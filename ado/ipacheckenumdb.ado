@@ -27,7 +27,7 @@ program ipacheckenumdb, rclass
 
 	qui {
 	    
-		* preserve
+		preserve
 
 		tempvar tmv_subdate tmv_consent_yn tmv_team tmv_enum
 		tempvar tmv_obs tmv_enum tmv_formversion tmv_days tmv_dur tmv_miss tmv_dk tmv_ref tmv_other 
