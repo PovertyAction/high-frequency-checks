@@ -2,7 +2,7 @@
 *! Innovations for Poverty Action
 * ipacheckenumdb: Outputs survey statistics by enumerator
 
-program ipacheckenumdb, rclass sortpreserve
+program ipacheckenumdb, rclass
 	
 	version 17
 
@@ -27,7 +27,7 @@ program ipacheckenumdb, rclass sortpreserve
 
 	qui {
 	    
-		preserve
+		* preserve
 
 		tempvar tmv_subdate tmv_consent_yn tmv_team tmv_enum
 		tempvar tmv_obs tmv_enum tmv_formversion tmv_days tmv_dur tmv_miss tmv_dk tmv_ref tmv_other 
@@ -552,10 +552,11 @@ program ipacheckenumdb, rclass sortpreserve
 			use `enumerator' `statvars' using "`tmf_main_data'", clear
 			
 			* expand and replace vars in input sheet
-			forval i = 1/`statsvar_count' {
+			forval i`' = 1/`statsvar_count' {
 
 				frames frm_enumstats: loc vars`i' = variable[`i']
 				unab vars`i': `vars`i''
+				loc vars`i': list uniq vars`i'
 				frames frm_enumstats: replace variable = "`vars`i''" in `i'
 			}
 			
@@ -584,7 +585,7 @@ program ipacheckenumdb, rclass sortpreserve
 			
 			drop if missing(value)
 			drop reshape_id index
-
+			
 			* gen placeholders for important vars
 			loc statvars "count min mean median sd max"
 			foreach var of newlist `statvars' {
@@ -608,9 +609,6 @@ program ipacheckenumdb, rclass sortpreserve
 					loc combine`i' 		= combine[`i'] 
 					loc input_lab`i'	= input_lab[`i']
 				}
-				
-				unab vars`i': `vars`i''
-				loc vars`i': list uniq vars`i'
 			
 				* check if vars are combined
 				if lower("`combine`i''") == "yes" {
