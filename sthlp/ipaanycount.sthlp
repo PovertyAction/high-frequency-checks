@@ -55,7 +55,7 @@ a space seperated list of items. eg "-999" or "-888 -999".
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use f_hr_lead_r* using "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use f_hr_lead_r* using "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
 
   {text:count the number of don't know responses ie. -999}
 	{phang}{com}   . ipaanycount _all, gen(dk_count) str("-999"){p_end}

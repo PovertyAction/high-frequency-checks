@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 11may2022}{...}
+{* *! version 4.0.1 02aug2022}{...}
 {title:Title}
 
 {phang}
@@ -132,8 +132,8 @@ they want {cmd:ipacheckspecifyrecode} to assume them as literal text.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
-	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/excel/specifyrecode_example.xlsm" "specifyrecode_example.xlsm", replace{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/excel/example/specifyrecode_example.xlsm" "specifyrecode_example.xlsm", replace{p_end}
 
   {text:Recode other specify using "other specify recode" sheet of "specify_recode_example.xlsm"}
 	{phang}{com}   .ipacheckspecifyrecode using "specifyrecode_example.xlsm", sheet("other specify recode") id(key) logf("specifyrecode_log.xlsx") logs("household survey") sheetrep{p_end}

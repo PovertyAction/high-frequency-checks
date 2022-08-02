@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 11may2022}{...}
+{* *! version 4.0.1 Innovations for Poverty Action 02aug2022}{...}
 {title:Title}
 
 {phang}
@@ -100,8 +100,8 @@ or other do-files. See {help ipacheck} for more details on how to use the Data M
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
-	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/media.zip", replace{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/media.zip", replace{p_end}
 	
   {text:Collate text audit comments}
 	{phang}{com}   . ipasctocollate textaudit text_audit, folder("./media") save("textaudit_data.dta") replace{p_end}
@@ -117,7 +117,7 @@ or other do-files. See {help ipacheck} for more details on how to use the Data M
 {pstd}
 Ishmail Azindoo Baako
 (Innovations for Poverty Action){p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
+{pstd}{it:Last updated: August 02, 2022}{p_end}
 
 {pstd}For questions or suggestions, submit a
 {browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}

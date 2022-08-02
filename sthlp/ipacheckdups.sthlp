@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 11may2022}{...}
+{* *! version 4.0.0 Innovations for Poverty Action 02aug2022}{...}
 {title:Title}
 
 {phang}
@@ -109,7 +109,7 @@ to use the Data Management System.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
 
   {text:Flag and export duplicates in phone_number variable}
 	{phang}{com}   . ipacheckdups phone_number, id(hhid) enum(a_enum_id) date(starttime) keep(a_enum_name a_pl_hhh_fn submissiondate endtime) outf("hfc_outputs.xlsx") sheetrep{p_end}

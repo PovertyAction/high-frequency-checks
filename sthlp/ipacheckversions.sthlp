@@ -109,7 +109,7 @@ values are numeric and in ascending order from the oldest to the most recent for
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
 
   {text:Run check}
 	{phang}{com}   . ipacheckversions formdef_version, enum(a_enum_id) date(starttime) outfile("hfc_outputs.xlsx") keep(a_enum_name hhid a_pl_hhh_fn) sheetrep{p_end}

@@ -61,8 +61,8 @@ the text audit or comments files.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
-	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/media.zip", replace{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/media.zip", replace{p_end}
 
   {text:Collate field comments}
 	{phang}{com}   . ipasctocollate comments field_comments, folder("./media") save("comments_data.dta") replace{p_end}

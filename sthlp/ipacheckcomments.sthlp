@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 25apr2022}{...}
+{* *! version 4.0.0 Innovations for Poverty Action 02aug2022}{...}
 {title:Title}
 
 {phang}
@@ -102,8 +102,8 @@ on how to use the Data Management System.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
-	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/media.zip", replace{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . unzipfile "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/media.zip", replace{p_end}
 	
   {text:Collate field comments}
 	{phang}{com}   . ipasctocollate comments field_comments, folder("./media") save("comments_data.dta") replace{p_end}

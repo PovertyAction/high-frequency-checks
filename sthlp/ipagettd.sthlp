@@ -21,7 +21,7 @@ of %td {help datetime_display_formats:date} format.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
 
   {text:convert submissiondate, starttime and endtime from datetime to date}
 	{phang}{com}   . ipagettd submissiondate starttime endtime{p_end}

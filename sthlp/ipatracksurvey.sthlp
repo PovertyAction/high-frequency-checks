@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 11may2022}{...}
+{* *! version 4.0.1 Innovations for Poverty Action 02aug2022}{...}
 {title:Title}
 
 {phang}
@@ -190,10 +190,10 @@ to use the Data Management System.
 
 {synoptline}
   {text:Setup}
-	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_survey.dta", clear{p_end}
+	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
 	{phang}{com}   . duplicates drop hhid, force
-	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/household_preloads.xlsx" "household_preloads.xlsx", replace{p_end}
-	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/final/data/respondent_targets.xlsx" "respondent_targets.xlsx", replace{p_end}
+	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_preloads.xlsx" "household_preloads.xlsx", replace{p_end}
+	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/respondent_targets.xlsx" "respondent_targets.xlsx", replace{p_end}
 		
   {text:Run ipatracksurveys with masterdata showing summaryonly}
     {phang}{com}   . ipatracksurvey, m("household_preloads.xlsx") date(submissiondate) id(hhid) by(a_kg) keepm(district) surveyok outfile("tracksurvey.xlsx") nol summary replace{p_end}
