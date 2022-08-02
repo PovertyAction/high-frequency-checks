@@ -1,4 +1,4 @@
-*! version 4.0.1 07jul2022
+*! version 4.0.2 02aug2022
 *! Innovations for Poverty Action
 * ipacheckenumdb: Outputs survey statistics by enumerator
 
