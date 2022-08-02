@@ -1,4 +1,4 @@
-*! version 4.0.1 Innovations for Poverty Action 08jul2022
+*! version 4.0.2 Innovations for Poverty Action 02aug2022
 
 /* =============================================================================
    =================== IPA HIGH FREQUENCY CHECK TEMPLATE ======================= 
@@ -23,8 +23,8 @@
 		ipacheckcorrections using "${corrfile}",		///
 			sheet("${cr_dupsheet}")						///
 			id(${key}) 									///
-			logfile("${cr_output}")						///
-			logsheet("${cr_dupsheet}")					///
+			logfile("${corrlog_output}")				///
+			logsheet("${cr_dupslogsheet}")				///
 			${cr_nolabel}								///
 			${cr_ignore}
 	}
@@ -59,8 +59,8 @@
 		ipacheckcorrections using "${corrfile}", 		///
 			sheet("${cr_othersheet}")					///
 			id(${id}) 									///
-			logfile("${recodelog_output}")				///
-			logsheet("${cr_othersheet}")				///
+			logfile("${corrlog_output}")				///
+			logsheet("${cr_otherlogsheet}")				///
 			${cr_nolabel}								///
 			sheetreplace
 			
@@ -70,11 +70,11 @@
     *========================== Recode other specify ==========================* 
    
    if $run_specifyrecode {		
-		ipacheckspecifyrecode using "$recodefile",		///
-			sheet("$rc_sheet")							///
+		ipacheckspecifyrecode using "${recodefile}",	///
+			sheet("${rc_sheet}")						///
 			id($id)										///
-			logfile("$rc_output")						///
-			logsheet("$rc_logsheet")					///
+			logfile("${recodelog_output}")				///
+			logsheet("${rc_logsheet}")					///
 			${rc_nolabel}
 			
 		save "${checkedsurvey}", replace
