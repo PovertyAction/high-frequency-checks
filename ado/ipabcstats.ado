@@ -1,4 +1,4 @@
-*! version 1.0.0 09dec2020
+*! version 1.0.1 31aug2022
 *! Innovations for Poverty Action
 * version 1.0 Ishmail Azindoo Baako & Rosemarie Sandino
 
@@ -1282,6 +1282,7 @@ program ipabcstats, rclass
 				if `=_N' > 0 {
 					gen _id = 1
 					ren error_rate V_
+					duplicates drop _id variable, force
 					reshape wide V_, i(_id) j(variable) str
 					ren V_* *
 					drop _id
@@ -1301,6 +1302,7 @@ program ipabcstats, rclass
 							drop type test
 							gen _id = 1
 							ren pvalue V_
+							duplicates drop _id variable, force
 							reshape wide V_, i(_id) j(variable) str
 							ren V_* *
 							drop _id
