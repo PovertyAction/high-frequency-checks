@@ -21,11 +21,11 @@
 {title:Remarks}
 
 {pstd}
-{cmd:colwidths()} is mata program in the lipadms mata library which is part of {helpb ipacheck} Stata package. 
+{cmd:colformats()} is mata program in the lipadms mata library which is part of {helpb ipacheck} Stata package. 
 
 {title:Conformability}
 
-    {cmd:colwidths(}{it:file}{cmd:,} sheet{cmd:,} {it:vars}{cmd:,} {it:format}{cmd:)}
+    {cmd:colformats(}{it:file}{cmd:,} sheet{cmd:,} {it:vars}{cmd:,} {it:format}{cmd:)}
 	{it:  file}: 1 {it:x} 1
 	{it: sheet}: 1 {it:x} 1
 	{it:  vars}: 1 {it:x} 1
@@ -56,7 +56,6 @@
 
 {pstd}Rosemarie Sandino, GRDS, Innovations for Poverty Action{p_end}
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
 
 {title:Also see}
 

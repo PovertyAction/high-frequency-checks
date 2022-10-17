@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.1 Innovations for Poverty Action 02aug2022}{...}
+{* *! version 4.0.1 Innovations for Poverty Action 07jul2022}{...}
 {title:Title}
 
 {phang}
@@ -43,7 +43,7 @@ Checks for outliers among numeric survey variables.
 {title:Description}
 
 {pstd}
-{cmd:ipacheckoutliers} checks for outliers in numeric survey variables. 
+{cmd:ipacheckoutliers} checks for outliers in numeric survey variables. ipacheckoutliers checks for outliers using the inter-quartile range (IQR) or the standard deviation (SD) method. Users can specify a method and an outlier for each variable or group of variables to check.  
 
 {title:Options}
 
@@ -177,7 +177,6 @@ and outputs are formatted in a .xlsx file or used directly from the command wind
 {pstd}
 Ishmail Azindoo Baako
 (Innovations for Poverty Action){p_end}
-{pstd}{it:Last updated: August 02, 2022}{p_end}
 
 {pstd}For questions or suggestions, submit a
 {browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}
@@ -185,4 +184,4 @@ or e-mail researchsupport@poverty-action.org.{p_end}
 
 {title:Also see}
 
-User-written: {helpb ipacheckcorrections:ipacheckcorrections}, {helpb extremes:extremes}
+User-written: {helpb ipacheckcorrections:ipacheckconstraints}, {helpb ipacheckcorrections:ipacheckcorrections}, {helpb extremes:extremes}

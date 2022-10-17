@@ -43,14 +43,14 @@ Checks for soft and hard constraint violations in numeric survey variables.
 {title:Description}
 
 {pstd}
-{cmd:ipacheckconstraints} checks for hard and soft constraint violations in numeric survey variables. Hard constraints violations occur when variables contain values which should not exist in the dataset. These are often constrained in the electronic survey instrument. eg. It will be an obvious error if a respondents age is listed as 200 years. Soft constraints on the other hand occur when the data contains values which are within possible but are less likely. For instance, the Research Associate may like to flag and investigate any situation where the respondent is over 80 years old or if the income of a household member of over 10,000 USD per month. Please note that the threshold for flagging constraints have to be specified by the user in the using file. 
+{cmd:ipacheckconstraints} checks for hard and soft constraint violations in numeric survey variables. Hard constraints violations occur when variables contain values which should not exist in the dataset. These are often constrained in the electronic survey instrument. eg. It will be an obvious error if a respondents age is listed as 200 years. Soft constraints on the other hand occur when the data contains values which are within possible but are less likely. For instance, the Research Associate may like to flag and investigate any situation where the respondent is over 80 years old or if the income of a household member is over 10,000 USD per month. Please note that the threshold for flagging constraints have to be specified by the user in the using file. 
 
 {title:Options}
 
 {dlgtab:Main}
 
 {phang}
-{opt sheet("sheetname")} specifies the Excel worksheet to load from the {help using} file. This is used if the using file is {opt .xls} or {opt .xlsx} formats and is ignored if the using file is {opt .csv} or {opt .dta} file. The default value is "constraints".
+{opt sheet("sheetname")} specifies the Excel worksheet to load from the {help using} file. This is used if the using file is in one of the excel formats {opt Excel} formats and is ignored if the using file is {opt .csv} or {opt .dta} file. The default value is "constraints".
 
 {pstd}
 {opt id(varname)} specifies the id variable for the dataset. {cmd:id()} is required 
