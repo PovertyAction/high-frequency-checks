@@ -48,7 +48,7 @@
    
    *======================= Track Back Check Progress =========================* 
 
-   if $run_tracksurvey {
+   if $run_trackbc {
        ipatracksurvey,									///
 			surveydata("$checkedbc")					///
 			id(${id})									///

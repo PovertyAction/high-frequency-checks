@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.1 Innovations for Poverty Action 17oct2022}{...}
+{* *! version 4.1.0 Innovations for Poverty Action 17oct2022}{...}
 
 {cmd:ipacheck} {c -} Update ipacheck package and initialize a high frequency check project or exercise
 
@@ -214,4 +214,4 @@ versions of which were authored by:
 
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
 {pstd}Rosemarie Sandino, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: October 17, 2022}{p_end}
+{pstd}{it:Last updated: October 17, 2022 (v4.1.0)}{p_end}
