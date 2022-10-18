@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.1 Innovations for Poverty Action 02aug2022}{...}
+{* *! version 4.0.0 Innovations for Poverty Action 11may2022}{...}
 {title:Title}
 
 {phang}
@@ -216,7 +216,6 @@ to use the Data Management System.
 {pstd}
 Ishmail Azindoo Baako
 (Innovations for Poverty Action){p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
 
 {pstd}For questions or suggestions, submit a
 {browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}

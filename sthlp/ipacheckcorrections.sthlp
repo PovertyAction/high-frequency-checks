@@ -1,8 +1,9 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 02aug2022}{...}
+{* *! version 4.0.1 Innovations for Poverty Action 11may2022}{...}
 {title:Title}
 {phang}
 {cmd:ipacheckcorrections} {hline 2}
+
 Make replacements, drop observations, or mark as okay observations that are specified 
 in an external dataset.
 
@@ -41,14 +42,12 @@ the corrections specified in the using dataset{p_end}
 
 {pstd}
 {cmd:ipacheckcorrections} modifies the dataset currently in memory by
-making changes that are specified in an external dataset or the corrections file.
-
-{pstd}
+making changes that are specified in an external dataset or the corrections file. 
 {cmd:ipacheckcorrections} allows the option to replace a current value with 
 another value, drop the entire observation (such as in the case of a duplicate), 
 or mark a value in an observation as "okay". The action to "okay" a value is only relevant 
 when {cmd:ipacheckcorrections} is used within IPA's Data Management System. When 
-an observation is "okay", the {help ipacheckoutliers} check no longer flags the value as an outlier. 
+an observation is "okay", the {help ipacheckoutliers} & {help ipacheckconstraints} checks no longer flag the value as an outlier or constraint violation. 
 
 {marker options}{...}
 {title:Options}
@@ -57,8 +56,8 @@ an observation is "okay", the {help ipacheckoutliers} check no longer flags the 
 
 {phang}
 {opt sheet("sheetname")} imports the worksheet named sheetname in the 
-corrections file. This is required if the correction file is {opt .xls} or 
-{opt .xlsx} formats. option {opt sheet()} is ignored if correction file is 
+corrections file. This is required if the correction file is in one of the {opt Excel} formats or 
+. option {opt sheet()} is ignored if correction file is 
 {opt .csv} or {opt .dta} file.
 
 {phang}
@@ -115,7 +114,7 @@ the logfile option is used.{p_end}
     {c LT}{hline 10}{c -}{hline 12}{c -}{hline 14}{c -}{hline 14}{c -}{hline 12}{c -}{hline 27}{c RT}
     {c |}      105     district             12             13      replace      respondent relocated   {c |}
     {c |}      125          age              1              2      replace      enum mistake           {c |}
-    {c |}      138       gender              0                     okay         checked                {c |}
+    {c |}      138       gender              0                     okay         verified               {c |}
     {c |}      199     district             31                     drop         duplicate              {c |}
     {c |}      112   am_failure              1              3      replace      enum mistake           {c |}
     {c BLC}{hline 10}{c -}{hline 12}{c -}{hline 14}{c -}{hline 14}{c -}{hline 12}{c -}{hline 27}{c BRC}

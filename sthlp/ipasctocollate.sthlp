@@ -90,7 +90,6 @@ the text audit or comments files.
 
 {pstd}Ishmail Azindoo Baako
 (Innovations for Poverty Action){p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
 
 {pstd}For questions or suggestions, submit a
 {browse "https://github.com/PovertyAction/high-frequency-checks/issues":GitHub issue}

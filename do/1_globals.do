@@ -21,6 +21,7 @@
 	gl run_dups				1	//	Check other Survey variables for duplicates
 	gl run_missing			1	//	Check variable missingness
 	gl run_outliers			1	//	Check numeric variables for outliers
+	gl run_constraints		1	//	Check numeric variables for constraint violations
 	gl run_specify			1	//	Check for other specify values
 	gl run_comments			1	//	Collate and output field comments
 	gl run_textaudit		1	//	Check Survey duration using text audit data
@@ -511,6 +512,29 @@
 	* NB: Edit this section: Change values if neccesary.
 	
 	gl ol_nolabel			""
+	
+	* NB: Set-up required options in the input file
+
+
+/* ipacheckconstraints: Export constraint violations for numeric variables
+
+	Description of globals for ipacheckconstraints:
+	-----------------------------------------------
+	
+	ipacheckconstraints checks for outliers among numeric survey variables.
+	
+	NB: Set-up is required in global inputfile
+	
+	ct_nolabel         Option to apply export underlying values instead of value 
+						labels. 
+						* Specify "nolabel" to apply nolabel
+						* leave blank to export value labels instead of values
+*/
+*------------------------------------------------------------------------------*	
+	
+	* NB: Edit this section: Change values if neccesary.
+	
+	gl ct_nolabel			""
 	
 	* NB: Set-up required options in the input file
 	

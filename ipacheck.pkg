@@ -23,6 +23,7 @@ f ado/ipacheckids.ado
 f ado/ipacheckmissing.ado
 f ado/ipacheckspecify.ado
 f ado/ipacheckoutliers.ado
+f ado/ipacheckconstraints.ado
 f ado/ipacheckcomments.ado
 f ado/ipachecktextaudit.ado
 f ado/ipachecktimeuse.ado
@@ -46,6 +47,7 @@ f sthlp/ipacheckids.sthlp
 f sthlp/ipacheckmissing.sthlp
 f sthlp/ipacheckspecify.sthlp
 f sthlp/ipacheckoutliers.sthlp
+f sthlp/ipacheckconstraints.sthlp
 f sthlp/ipacheckcomments.sthlp
 f sthlp/ipachecktextaudit.sthlp
 f sthlp/ipachecktimeuse.sthlp

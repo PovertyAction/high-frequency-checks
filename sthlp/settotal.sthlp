@@ -44,7 +44,6 @@
 {title:Author}
 
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
 
 {title:Also see}
 

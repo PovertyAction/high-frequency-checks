@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.1.1 18oct2022
 *! Innovations for Poverty Action
 * ipacheck: Update ipacheck package and initialize new projects
 
@@ -103,6 +103,7 @@ program define ipacheck_version
 				ipacheckdups
 				ipacheckmissing
 				ipacheckoutliers
+				ipacheckconstraints
 				ipacheckspecify
 				ipacheckcomments
 				ipachecktextaudit

@@ -10,9 +10,9 @@ are equal to any integer value in a supplied numlist and any word value in suppl
 {pmore}
 {cmd:ipaanycount}
 {help varlist}
-[{cmd:,}
+{cmd:,}
 {opth gen:erate(newvar)}
-{it:{help ipaanycount##options:options}}]
+[{it:{help ipaanycount##options:options}}]
 
 {marker options}
 {synoptset 23 tabbed}{...}
@@ -49,7 +49,10 @@ values such as .a, .b, ... , .z.
 
 {phang}
 {cmd:strval(numlist)} specifies the string values to match. {cmd:strval()} expects 
-a space seperated list of items. eg "-999" or "-888 -999". 
+a space seperated list of items. eg "-999" or "-888 -999". Note that when dealing with 
+strings, ipanycount matches words values contained in the variable. For instance strval("-999") will 
+match values of "-999" & "-999 -888" but will not match "-9991". This is useful 
+for counting values in select_multiple types of questions.  
 
 {title:Examples} 
 
@@ -65,7 +68,6 @@ a space seperated list of items. eg "-999" or "-888 -999".
 {title:Author}
 
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
 
 {title:Also see}
 

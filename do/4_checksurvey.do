@@ -131,6 +131,20 @@
 			${ol_nolabel}								///
 			sheetreplace
    }
+
+    *============================= Constraints ================================* 
+
+   if $run_constraints {
+		ipacheckconstraints using "${inputfile}",		///
+			id(${id})									///
+			enumerator(${enum}) 						///	
+			date(${date})	 							///
+			sheet("constraints")						///
+        	outfile("${hfc_output}") 					///
+			outsheet("constraints")						///
+			${ct_nolabel}								///
+			sheetreplace
+   }
    
    *============================= Other Specify ===============================* 
    

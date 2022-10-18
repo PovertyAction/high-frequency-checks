@@ -12,6 +12,7 @@ ipacheck is Innovations for Poverty Action's Stata package for running high-freq
  - `ipacheckdups`- export duplicates in non-ID variables.
  - `ipacheckmissing`- export statistics on missingness & distintness for each variable.
  - `ipacheckoutliers` - export outliers in numeric variables.
+ - `ipacheckoconstraints` - export outliers in numeric variables.
  - `ipacheckspecify` - export all values specified for variables with 'other speciy' category.
  - `ipacheckcomments` - export field comments generated with SurveyCTO's comments field type.
  - `ipachecktextaudit` - export statistics on duration per field using the SurveyCTO's text audit files.

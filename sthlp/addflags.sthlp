@@ -7,7 +7,7 @@
 
 {p 8 12 2}
 {it:void}{bind:         }
-{cmd:addlines(}{it:string scalar file}{cmd:,} 
+{cmd:addflags(}{it:string scalar file}{cmd:,} 
 {it:string scalar sheet}{cmd:,}
 {it:string scalar var}{cmd:,}
 {it:real vector rows}{cmd:,}
@@ -57,7 +57,7 @@
 {title:Author}
 
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: May 11, 2022}{p_end}
+{pstd}{it:Last updated: October 17, 2022}{p_end}
 
 {title:Also see}
 

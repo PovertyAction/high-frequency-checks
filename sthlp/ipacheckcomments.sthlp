@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 02aug2022}{...}
+{* *! version 4.0.0 Innovations for Poverty Action 11may2022}{...}
 {title:Title}
 
 {phang}
@@ -11,7 +11,7 @@ Exports comments from SurveyCTO's {it:comment} field type.
 
 {p 8 10 2}
 {cmd:ipacheckcomments} {it:{help varname}}{cmd:,}
-{opth comments:data(filename)}  
+{opth comments:data(filename)} 
 {opth enum:erator(varname)}
 {opth outf:ile(filename)} 
 [{it:{help ipacheckcomments##options:options}}]
@@ -34,7 +34,7 @@ Exports comments from SurveyCTO's {it:comment} field type.
 {synoptline}
 {p2colreset}{...}
 
-{p 4 6 2}* {opt commentsdata()}, {opt enumerator()} and {outfile id()} are required.
+{p 4 6 2}* {opt commentsdata()}, {opt enumerator()} and {opt outfile id()} are required.
 
 {title:Description}
 
@@ -54,9 +54,7 @@ contains a dataset collated by {help ipasctocollate} command.
 
 {pstd}
 {opt outfile("filename.xlsx")} specifies Excel workbook to export the text audit report into. 
-{cmd:outfile()} is required. Excel formats xls and xlsx are supported in {cmd:outfile()}. 
-If a file extension is not specified with {cmd:outfile()}, .xls is assumed, because 
-this format is more common and is compatible with more applications that also can read from Excel files.
+Excel formats xls and xlsx are supported in {cmd:outfile()}. If a file extension is not specified with {cmd:outfile()}, .xls is assumed, because this format is more common and is compatible with more applications that also can read from Excel files.
 
 
 {dlgtab:Specifications}

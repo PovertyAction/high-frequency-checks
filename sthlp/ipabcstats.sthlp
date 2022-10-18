@@ -105,15 +105,14 @@ comparing{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}* {opt surveydata()}, {opt bcdata()}, {opt id()}, {opt enumerator()}, and {opt backchecker()} are required.{p_end}
-{p 4 6 2}* Note that {opt enumerator()}, {opt backchecker()}, {opt enumteam()}, and {opt bcteam()} must be numeric variables.{p_end}
-{p 4 6 2}+ At least one type option must be specified. {p_end}
+{p 4 6 2}+ At least one type option must be specified.{p_end}
 
 
 {marker description}{...}
 {title:Description}
 
 {pstd}
-{cmd:bcstats} compares back check data and survey data,
+{cmd:ipabcstats} compares back check data and survey data,
 producing a data set of comparisons.
 It completes enumerator checks for type 1 and type 2 variables and
 stability checks for type 2 and type 3 variables.

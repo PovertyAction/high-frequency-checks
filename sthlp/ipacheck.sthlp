@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 11may2022}{...}
+{* *! version 4.1.1 Innovations for Poverty Action 18oct2022}{...}
 
 {cmd:ipacheck} {c -} Update ipacheck package and initialize a high frequency check project or exercise
 
@@ -167,6 +167,7 @@ The {cmd:ipacheck} package contains the following commands:
 {synopt:{help ipacheckmissing}}export statistics on missingness & distinctness for each variable{p_end}
 {synopt:{help ipacheckspecify}}export all values specified for variables with an 'other' category{p_end}
 {synopt:{help ipacheckoutliers}}export outliers in numeric variables{p_end}
+{synopt:{help ipacheckconstraints}}export constraint violations in numeric variables{p_end}
 {synopt:{help ipacheckcomments}}export field comments generated with SurveyCTO's comments field type{p_end}
 {synopt:{help ipachecktextaudit}}export field duration statistics using the SurveyCTO's text audit files{p_end}
 {synopt:{help ipachecktimeuse}}export statistics on hours of engagement using the SurveyCTO's text audit files{p_end}
@@ -202,15 +203,15 @@ by the Global Research & Data Support (GRDS) Team of Innovations for Poverty Act
 The current {cmd:version 4.0} of this Stata package is partly based on previous 
 versions of which were authored by:
 
-{phang} .Chris Boyer{p_end}
-{phang} .Ishmail Azindoo Baako{p_end}
-{phang} .Rosemarie Sandino{p_end}  
-{phang} .Isabel Onate{p_end}
-{phang} .Kelsey Larson{p_end}
-{phang} .Caton Brewster{p_end}
+{phang}{com} .Chris Boyer{p_end}
+{phang}{com} .Ishmail Azindoo Baako{p_end}
+{phang}{com} .Rosemarie Sandino{p_end}
+{phang}{com} .Isabel Onate{p_end}
+{phang}{com} .Kelsey Larson{p_end}
+{phang}{com} .Caton Brewster{p_end}
 
 {title:Author}
 
 {pstd}Ishmail Azindoo Baako, GRDS, Innovations for Poverty Action{p_end}
 {pstd}Rosemarie Sandino, GRDS, Innovations for Poverty Action{p_end}
-{pstd}{it:Last updated: June 23, 2022}{p_end}
+{pstd}{it:Last updated: October 17, 2022 (v4.1.0)}{p_end}
