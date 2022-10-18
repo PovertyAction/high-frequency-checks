@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.1.0 Innovations for Poverty Action 17oct2022}{...}
+{* *! version 4.1.1 Innovations for Poverty Action 18oct2022}{...}
 
 {cmd:ipacheck} {c -} Update ipacheck package and initialize a high frequency check project or exercise
 
