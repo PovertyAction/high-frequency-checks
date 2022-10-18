@@ -137,11 +137,27 @@ program ipacheckconstraints, rclass
 		* keep only relevant variables
 		frames frm_inputs: levelsof variable, loc (vars) clean
 		loc vars: list uniq vars
+
+		* check for okay var. Add if missing
+		cap confirm var _hfcokay
+		if !_rc {
+		    cap confirm var _hfcokayvar 
+			if !_rc {
+			    loc checkok 1
+				cap frame drop frm_hfcokay
+				frames put `id' _hfcokay _hfcokayvar if _hfcokay == 1, into(frm_hfcokay)
+			}
+			else loc checkok 0
+		}
+		else {
+		    loc checkok 0
+		}
 		
 		keep `vars' `cvars' `keep' `id' `enumerator' `date'
 		
 		* save data that is required
 		save "`tmf_data'", replace
+
 		
 		* check constraints		
 		forval i = 1/`cnt' {
@@ -192,6 +208,15 @@ program ipacheckconstraints, rclass
 		}
 		
 		use `id' `enumerator' `date' `keep' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint' using "`tmf_viols'", clear
+
+		* drop if already marked as ok
+		if `checkok' {
+		    frame frm_hfcokay: loc okaycnt `c(N)'
+			forval i = 1/`okaycnt' {
+			    loc vars = _frval(frm_hfcokay, _hfcokayvar, `i')
+			    drop if `id' == _frval(frm_hfcokay, `id', `i') & regexm("`vars'", variable)
+			}
+		}
 		
 		* remove duplicates
 		duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
@@ -201,7 +226,6 @@ program ipacheckconstraints, rclass
 		gsort `id' `enumerator' `tmv_var' `tmv_value' -`tmv_hard_flag'
 		
 		duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
-		
 		
 		* export constraint violations
 		
