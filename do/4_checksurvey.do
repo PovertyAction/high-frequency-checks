@@ -139,7 +139,7 @@
 			id(${id})									///
 			enumerator(${enum}) 						///	
 			date(${date})	 							///
-			sheet("outliers")							///
+			sheet("constraints")						///
         	outfile("${hfc_output}") 					///
 			outsheet("constraints")						///
 			${ct_nolabel}								///
