@@ -1,4 +1,4 @@
-*! version 4.0.1 07jul2022
+*! version 4.0.2 18oct2022
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -93,11 +93,11 @@ program ipacheckoutliers, rclass
 		if !_rc {
 		    cap confirm var _hfcokayvar 
 			if !_rc {
-			    count if _hfcokay == 1
 			    loc checkok 1
 				cap frame drop frm_hfcokay
 				frames put `id' _hfcokay _hfcokayvar if _hfcokay == 1, into(frm_hfcokay)
 			}
+			else loc checkok 0
 		}
 		else {
 		    loc checkok 0
@@ -197,7 +197,7 @@ program ipacheckoutliers, rclass
 				replace value_max 		  = vmax 		  if combine == "`vars`i''"
 				replace value_mean 		  = vmean 		  if combine == "`vars`i''"
 				replace value_median 	  = vmedian 	  if combine == "`vars`i''"
-				replace value_sd 	  	  = vmedian 	  if combine == "`vars`i''"
+				replace value_sd 	  	  = vsd 	  	  if combine == "`vars`i''"
 				replace p25 			  = vp25       	  if combine == "`vars`i''"
 				replace p75 			  = vp75 		  if combine == "`vars`i''"
 				replace iqr 			  = viqr 		  if combine == "`vars`i''"
@@ -228,7 +228,7 @@ program ipacheckoutliers, rclass
 					replace value_max 		  = vmax 		  if variable == "`var'"
 					replace value_mean 		  = vmean 		  if variable == "`var'"
 					replace value_median 	  = vmedian 	  if variable == "`var'"
-					replace value_sd 	  	  = vmedian 	  if variable == "`var'"
+					replace value_sd 	  	  = vsd 	  	  if variable == "`var'"
 					replace p25 			  = vp25       	  if variable == "`var'"
 					replace p75 			  = vp75 		  if variable == "`var'"
 					replace iqr 			  = viqr 		  if variable == "`var'"
