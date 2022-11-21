@@ -69,6 +69,10 @@ ipacheck new, exercise
 * to verify you have the latest versions of the commands
 ipacheck version
 ```
+
+## Learn about the DMS
+Check out the [DMS wiki](https://github.com/PovertyAction/high-frequency-checks/wiki) for more information about the DMS. You can also review the [DMS exercise](https://github.com/PovertyAction/high-frequency-checks/wiki/Exercise) to learn how to setup the DMS for your project. 
+
 If you encounter a clear bug, please file a minimal reproducible example on [github](https://github.com/PovertyAction/high-frequency-checks/issues). For questions and other discussion, please email us at [researchsupport@poverty-action.org](mailto:researchsupport@poverty-action.org).
 
 ## Current Author(s)
