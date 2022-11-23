@@ -1,6 +1,6 @@
-*! version 4.0.1 07jul2022
+*! version 4.0.2 23nov2022
 *! Innovations for Poverty Action
-* ipacheckoutliers: Flag outliers in numeric variables
+* ipacheckoutliers: Flag constraints in numeric variables
 
 program ipacheckconstraints, rclass
 	
@@ -207,57 +207,66 @@ program ipacheckconstraints, rclass
 			}
 		}
 		
-		use `id' `enumerator' `date' `keep' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint' using "`tmf_viols'", clear
 
-		* drop if already marked as ok
-		if `checkok' {
-		    frame frm_hfcokay: loc okaycnt `c(N)'
-			forval i = 1/`okaycnt' {
-			    loc vars = _frval(frm_hfcokay, _hfcokayvar, `i')
-			    drop if `id' == _frval(frm_hfcokay, `id', `i') & regexm("`vars'", variable)
-			}
-		}
-		
-		* remove duplicates
-		duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
-		
-		gen `tmv_hard_flag' = regexm(`tmv_constraint', "^hard")
-		duplicates tag `id' `enumerator' `tmv_var' `tmv_value', gen(`tmv_dups')
-		gsort `id' `enumerator' `tmv_var' `tmv_value' -`tmv_hard_flag'
-		
-		duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
-		
-		* export constraint violations
-		
+		use "`tmf_viols'", clear
+
 		if `c(N)' > 0 {
-			keep `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
-			order `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
 			
-			foreach var of varlist _all {
-				lab var `var' "`var'"
-				
-				lab var `tmv_var'			"variable" 
-				lab var `tmv_lab'			"label"
-				lab var `tmv_value' 		"value"
-				lab var `tmv_constraint'	"constraint"
+			keep `id' `enumerator' `date' `keep' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
+
+			* drop if already marked as ok
+			if `checkok' {
+			    frame frm_hfcokay: loc okaycnt `c(N)'
+				forval i = 1/`okaycnt' {
+				    loc vars = _frval(frm_hfcokay, _hfcokayvar, `i')
+				    drop if `id' == _frval(frm_hfcokay, `id', `i') & regexm("`vars'", variable)
+				}
 			}
 			
-			if "`keep'" ~= "" ipalabels `keep', `nolabel'
-			ipalabels `id' `enumerator', `nolabel'
+			* remove duplicates
+			duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
 			
-			sort `date'
+			gen `tmv_hard_flag' = regexm(`tmv_constraint', "^hard")
+			duplicates tag `id' `enumerator' `tmv_var' `tmv_value', gen(`tmv_dups')
+			gsort `id' `enumerator' `tmv_var' `tmv_value' -`tmv_hard_flag'
 			
-			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
+			duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
+			
+			* export constraint violations
+			
+			if `c(N)' > 0 {
+				keep `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
+				order `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
+				
+				foreach var of varlist _all {
+					lab var `var' "`var'"
+					
+					lab var `tmv_var'			"variable" 
+					lab var `tmv_lab'			"label"
+					lab var `tmv_value' 		"value"
+					lab var `tmv_constraint'	"constraint"
+				}
+				
+				if "`keep'" ~= "" ipalabels `keep', `nolabel'
+				ipalabels `id' `enumerator', `nolabel'
+				
+				sort `date'
+				
+				export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-			mata: colwidths("`outfile'", "`outsheet'")
-			mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-			mata: setheader("`outfile'", "`outsheet'")
+				mata: colwidths("`outfile'", "`outsheet'")
+				mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
+				mata: setheader("`outfile'", "`outsheet'")
+			}
 		}
 		
 		return local N_constraints = `c(N)'
 		
-		tab `tmv_var'
-		return local N_vars = `r(r)'
+		if `c(N)' > 0 {
+			tab `tmv_var'
+			return local N_vars = `r(r)'
+		}
+		else return local N_vars = 0
 	}
 	
 end
