@@ -1,4 +1,4 @@
-*! version 4.0.0 Innovations for Poverty Action 30mar2022
+*! version 4.1.0 Innovations for Poverty Action 23nov2022
 
 /* =============================================================================
    =================== IPA BACK CHECK COMPARISON TEMPLATE ====================== 
@@ -11,12 +11,12 @@
    *======================== Resolve Survey Duplicates =========================* 
    
 	if $run_corrections {
-		ipacheckcorrections using "${corrfile}",		///
+		ipacheckcorrections using "${corrfile}",	///
 			sheet("${cr_dupsheetbc}")					///
-			id(${key}) 									///
+			id(${key}) 										///
 			logfile("${corrlog_output}")				///
 			logsheet("${cr_dupslogsheetbc}")			///
-			${cr_nolabel}								///
+			${cr_nolabel}									///
 			${cr_ignore}
 			
 			save "${checkedbc}", replace
@@ -26,16 +26,16 @@
    
    if $run_ids {
 	   ipacheckids ${id},								///
-				enumerator(${bcer}) 					///	
-				date(${date})	 						///
-				key(${key}) 							///
+				enumerator(${bcer}) 						///	
+				date(${date})	 							///
+				key(${key}) 								///
 				outfile("${hfc_output}") 				///
 				outsheet("BC id duplicates")			///
-				keep(${id_keepvars})	 				///
+				keep(${id_keepvars})	 					///
 				dupfile("${id_dups_output}")			///
-				save("${checkedbc}")					///
-				${id_nolabel}							///
-				force									///
+				save("${checkedbc}")						///
+				${id_nolabel}								///
+				force											///
 				sheetreplace
 				
 		use "${checkedbc}", clear
@@ -51,23 +51,23 @@
    if $run_trackbc {
        ipatracksurvey,									///
 			surveydata("$checkedbc")					///
-			id(${id})									///
-			date(${date})								///
+			id(${id})										///
+			date(${date})									///
 			by(${bs_tr_by})								///
 			outcome(${bs_tr_outcome})					///
 			target(${bs_tr_target})						///
 			masterdata("${masterbc}")					///
-			masterid(${bs_tr_masterid})					///
-			trackingdata("${trackingsurvey}")			///
-			keepmaster(${bs_tr_keepmaster})				///
-			keeptracking(${bs_tr_keeptracking})			///
-			keepsurvey(${bs_tr_keepsurvey})				///
-			outfile("${trackingbc_output}")				///
+			masterid(${bs_tr_masterid})				///
+			trackingdata("${trackingsurvey}")		///
+			keepmaster(${bs_tr_keepmaster})			///
+			keeptracking(${bs_tr_keeptracking})		///
+			keepsurvey(${bs_tr_keepsurvey})			///
+			outfile("${trackingbc_output}")			///
 			save("${bs_tr_save}")						///
-			${bs_tr_nolabel} 							///
-			${bs_tr_summaryonly}						///
+			${bs_tr_nolabel} 								///
+			${bs_tr_summaryonly}							///
 			${bs_tr_workbooks} 							///
-			${bs_tr_surveyok}							///
+			${bs_tr_surveyok}								///
 			replace
    }
    
@@ -75,26 +75,38 @@
 	
 	if $run_bc {
 		ipabcstats,						 				///
-			t1vars("${bs_t1vars}")						///
-			t2vars("${bs_t2vars}")						///
-			t3vars("${bs_t3vars}")						///
+			t1vars("${bs_t1vars}")					///
+			t2vars("${bs_t2vars}")					///
+			t3vars("${bs_t3vars}")					///
 			ttest("${bs_ttest}")						///
-			prtest("${bs_prtest}")						///
-			signrank("${bs_signrank}")					///
-			reliability("${bs_reliability}")			///
-			surveydata("${checkedsurvey}") 				///
-			bcdata("${checkedbc}")						///
+			prtest("${bs_prtest}")					///
+			signrank("${bs_signrank}")				///
+			reliability("${bs_reliability}")		///
+			surveydata("${checkedsurvey}") 		///
+			bcdata("${checkedbc}")					///
 			id(${id})									///
-			enumerator(${enum})							///
+			enumerator(${enum})						///
 			enumteam(${team})							///
 			backchecker(${bcer})						///
-			bcteam(${bcerteam})							///
-			filename("${bc_output}")					///								
-			surveydate(${starttime})					///
+			bcteam(${bcerteam})						///
+			filename("${bc_output}")				///								
+			surveydate(${starttime})				///
 			bcdate(${starttime})						///
 			showid(${bs_showid})						///
-			level(${bs_level})							///
-			${bc_full}									///
-			${bc_nolabel}								///
+			level(${bs_level})						///
+			keepsurvey(${bs_keepsurvey})			///
+			keepbc(${bs_keepbc})						///
+			okrange(${bs_okrange})					///
+			nodiffnum(${bs_nodiffnum})				///
+			nodiffstr(${bs_nodiffstr})				///
+			excludenum(${bs_excludenum})			///
+			excludestr(${bs_excludestr})			///
+			${bs_lower}									///
+			${bs_upper}									///
+			${bs_nosymbol}								///
+			${bs_trim}									///
+			${bs_full}									///
+			${bs_nolabel}								///
+			${bs_exclusemissing}						///
 			replace
 	}
