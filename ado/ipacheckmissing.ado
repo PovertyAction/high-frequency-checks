@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 23nov2022
 *! Innovations for Poverty Action
 * ipacheckmissing: Outputs a table showing information missing data in survey
 
@@ -17,6 +17,9 @@ program ipacheckmissing, rclass
 	#d cr
 
 	qui {
+
+		* create temp vars
+		tempvar tmv_uniq_index
 
 		preserve
 	
@@ -64,8 +67,10 @@ program ipacheckmissing, rclass
 			qui count if missing(`var')
 			loc missing_cnt `r(N)'
 			
-			qui tab `var'
-			loc unique_cnt `r(r)'
+			bys `var': gen `tmv_uniq_index' = _n
+			count if !missing(`var') & `tmv_uniq_index' == 1
+			loc unique_cnt `r(N)'
+			drop `tmv_uniq_index'
 
 			if "`priority'" ~= "" loc important_var: list var in priority
 
@@ -87,7 +92,7 @@ program ipacheckmissing, rclass
 			count if percent_missing == 1
 			loc allmisscount `r(N)'
 
-			count if percent_missing ~= 1
+			count if number_missing > 0
 			loc misscount `r(N)'
 
 			* apply show option
