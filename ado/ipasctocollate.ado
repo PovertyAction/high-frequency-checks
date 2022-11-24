@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 24nov2022
 *! Innovations for Poverty Action
 * ipacheckcomments: Collate & export text audit or field comments
 
@@ -95,7 +95,7 @@ program ipasctocollate, rclass
 					
 					noi disp "skipping `olddata_cnt' files already imported"
 					
-					drop if missing(frm_oldmedia)
+					drop if !missing(frm_oldmedia)
 					keep `mediavar'
 				}
 				
