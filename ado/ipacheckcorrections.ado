@@ -1,4 +1,4 @@
-*! version 4.0.1 08jul2022
+*! version 4.0.2 05jan2023
 *! Innovations for Poverty Action
 * ipacheckcorrections: Make corrections to data
 
@@ -147,7 +147,7 @@ program define ipacheckcorrections, rclass
 				}
 			    
 			    if `str_var' cap assert `var' == "`val'" if `id' == _frval(frm_repfile, `id', `i')
-				else 		 cap assert `var' == `val' 	 if `id' == _frval(frm_repfile, `id', `i')
+				else 		 cap assert `var' == float(`val') 	 if `id' == _frval(frm_repfile, `id', `i')
 				if _rc == 9 {
 					frame frm_repfile: replace `tmv_status' = "failed" in `i'
 				}
@@ -187,7 +187,10 @@ program define ipacheckcorrections, rclass
 				if `failed_cnt' > 0 {
 				    disp as err "List of `r(N)' failed correction ... "
 					noi list `id' variable value newvalue action if `tmv_status' == "failed"
-					if "`ignore'" == "" ex 198
+					if "`ignore'" == "" {
+						disp as err "Fix failed corrections and re-run. You can use the ignore option to bypass this error"
+						ex 198
+					}
 				}
 				else {
 				    loc failed_cnt 0
