@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.0 Innovations for Poverty Action 02aug2022}{...}
+{* *! version 4.0.1 Innovations for Poverty Action 06jan2023}{...}
 {title:Title}
 
 {phang}
@@ -111,8 +111,11 @@ to use the Data Management System.
   {text:Setup}
 	{phang}{com}   . use "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/data/household_survey.dta", clear{p_end}
 
-  {text:Flag and export duplicates in phone_number variable}
-	{phang}{com}   . ipacheckdups phone_number, id(hhid) enum(a_enum_id) date(starttime) keep(a_enum_name a_pl_hhh_fn submissiondate endtime) outf("hfc_outputs.xlsx") sheetrep{p_end}
+	{text:The program requires a unique ID. So for this test, we will drop the duplicates in the hhid variable}
+	{phang}{com}   . duplicates drop hhid, force{p_end}
+
+  {text:Flag and export duplicates in resp_contact variable}
+	{phang}{com}   . ipacheckdups resp_contact, id(hhid) enum(a_enum_id) date(starttime) keep(a_enum_name a_pl_hhh_fn submissiondate endtime) outf("hfc_outputs.xlsx") sheetrep{p_end}
 	
 {synoptline}
 

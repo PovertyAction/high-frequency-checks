@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 4.0.1 Innovations for Poverty Action 11may2022}{...}
+{* *! version 4.0.2 Innovations for Poverty Action 06jan2023}{...}
 {title:Title}
 {phang}
 {cmd:ipacheckcorrections} {hline 2}
@@ -188,10 +188,10 @@ a longer {cmd:str}{it:#} type or to {cmd:strL}.{p_end}
 	{phang}{com}   . copy "https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master/excel/examples/corrections_example.xlsm" "corrections_example.xlsm", replace{p_end}
 
   {text:Apply changes in duplicates sheet}
-	{phang}{com}   .ipacheckcorrections using "corrections_example.xlsm", sheet("duplicates") id(key) logf("corrections_log.xlsx") logs("duplicates"){p_end}
+	{phang}{com}   .ipacheckcorrections using "corrections_example.xlsm", sheet("duplicates") id(key) logf("corrections_log.xlsx") logsh("duplicates"){p_end}
 	
   {text:Apply changes in other issues sheet ignoring failed corrections}
-	{phang}{com}   .ipacheckcorrections using "corrections_example.xlsm", sheet("other issues") id(hhid) logf("corrections_log.xlsx") logs("other issues") ignore{p_end}
+	{phang}{com}   .ipacheckcorrections using "corrections_example.xlsm", sheet("other issues") id(hhid) logf("corrections_log.xlsx") logsh("other issues") ignore{p_end}
 	
 {synoptline}
 
