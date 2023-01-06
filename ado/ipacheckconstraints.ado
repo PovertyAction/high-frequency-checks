@@ -1,4 +1,4 @@
-*! version 4.0.2 23nov2022
+*! version 4.0.3 06jan2023
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag constraints in numeric variables
 
@@ -183,8 +183,8 @@ program ipacheckconstraints, rclass
 						loc rc `=_rc'
 						if `rc' == 7 loc cval = cond(wordcount("`cval'")  == 1, "`cval'", word("`cval'", `j'))
 						
-						gen `col'_viol = cond(`k' <= 2, `var' < `cval' & !missing(`var'),  ///
-													   `var' > `cval' & !missing(`var'))
+						gen `col'_viol = cond(`k' <= float(2), `var' < float(`cval') & !missing(`var'),  ///
+													   `var' > float(`cval') & !missing(`var'))
 													   
 						keep if `col'_viol
 										

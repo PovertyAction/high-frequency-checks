@@ -1,4 +1,4 @@
-*! version 4.0.2 18oct2022
+*! version 4.0.3 06jan2023
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -23,7 +23,7 @@ program ipacheckoutliers, rclass
 	qui {
 	    
 		preserve
-		
+
 		tempvar tmv_flag tmv_dups
 		
 		* set default insheet values
@@ -46,7 +46,7 @@ program ipacheckoutliers, rclass
 		}
 		
 		* check and insert optionally needed required columns
-		foreach var in by method multiplier combine keepvars {
+		foreach var in by method multiplier combine keep {
 			cap confirm var `var'
 			if _rc == 111 {
 				gen `var' = ""
@@ -56,8 +56,8 @@ program ipacheckoutliers, rclass
 		* save variables, by and keep vars locals
 		levelsof variable, loc (vars) clean
 		levelsof by, loc (byvars) clean
-		levelsof keepvars, loc(keepvars) clean
-		
+		levelsof keep, loc(keep) clean
+
 		* keep only relevant vars
 		keep variable by method multiplier combine
 
@@ -112,9 +112,9 @@ program ipacheckoutliers, rclass
 
 			* check that the variable specified is not also a keep var
 			if "`keep'" ~= "" {
-				loc viol: list vars`i' in keepvars
+				loc viol: list vars`i' in keep
 				if `viol' {
-					disp as err "Variables in varlist and keepvars are mutually exclusive. `vars`i'' is in both"
+					disp as err "Variables in varlist and keep are mutually exclusive. `vars`i'' is in both"
 					ex 198
 				}
 			}

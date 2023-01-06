@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 06jan2023
 *! Innovations for Poverty Action
 *! ipacheckspecify: This program collates and list other specify values.
 
@@ -47,7 +47,7 @@ program ipacheckspecify, rclass sortpreserve
 		* get inputs from inputs sheet if using is specified	
 		import excel using "`using'", sheet("`sheet'") first clear allstr case(l)
 		drop if missing(child) & missing(parent)
-		levelsof keepvars, loc(keep) clean
+		levelsof keep, loc(keep) clean
 
 		* get child and parent vars
 		keep child parent
