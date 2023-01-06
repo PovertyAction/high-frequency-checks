@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 06jan2023
 *! Innovations for Poverty Action
 * ipacheckdups: check for duplicates in other variables
 
@@ -42,10 +42,13 @@ program ipacheckdups, rclass
 		ipagettd `date'
 		
 		* check for duplicates 
+		loc varwithdups ""
 		gen `tmv_dv_check' = 0
 		foreach var in `varlist' {
 			duplicates tag `var' if !mi(`var'), gen(`tmv_dv_flag')
 			replace `tmv_dv_check' = 1 if `tmv_dv_flag' & !mi(`tmv_dv_flag')
+			count if `tmv_dv_flag' == 1
+			if `r(N)' > 0 loc varwithdups = "`varwithdups' `var'"
 			drop `tmv_dv_flag'
 		}
 		
@@ -53,9 +56,13 @@ program ipacheckdups, rclass
 		drop if !`tmv_dv_check'
 		
 		if `c(N)' > 0 {
+
+			* keep variables of interest
+			keep `date' `varwithdups' `id' `enumerator' `date' `keep'
+
 			* save variable information in locals
 			loc i 1
-			foreach var of varlist `varlist' {
+			foreach var of varlist `varwithdups' {
 				loc var`i' 		"`var'"
 				loc varlab`i'		"`:var lab `var''"
 				
@@ -123,7 +130,7 @@ program ipacheckdups, rclass
 				lab var `tmv_`var'' "`var'"
 			}
 			
-			lab var _v "variable"
+			lab var _v "value"
 			
 			* check for duplicates again and drop any non duplicate values
 			duplicates tag `tmv_variable' _v, gen (`tmv_dv_flag')
