@@ -276,4 +276,4 @@ TSWLatexianTemp*
 *.lpz
 
 # Folder containing test data
-./test/*
+./0_test/*
