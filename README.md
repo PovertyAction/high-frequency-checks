@@ -1,4 +1,4 @@
-# IPACHECK 4.0
+# IPACHECK 4
 
 ## Overview
 ipacheck is Innovations for Poverty Action's Stata package for running high-frequency checks during data collection. This package includes the following programs:
