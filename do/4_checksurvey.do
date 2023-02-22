@@ -145,6 +145,21 @@
 			${ct_nolabel}								///
 			sheetreplace
    }
+
+
+    *================================ Logic ===================================* 
+
+   if $run_logic {
+		ipachecklogic using "${inputfile}",				///
+			id(${id})									///
+			enumerator(${enum}) 						///	
+			date(${date})	 							///
+			sheet("logic")								///
+        	outfile("${hfc_output}") 					///
+			outsheet("logic")							///
+			${cl_nolabel}								///
+			sheetreplace
+   }
    
    *============================= Other Specify ===============================* 
    
@@ -162,8 +177,6 @@
 			
 			loc childvars "`r(childvarlist)'"
    }
-   
-   
    
    *============================ field comments ================================*
    
