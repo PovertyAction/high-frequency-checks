@@ -508,12 +508,13 @@ program ipabcstats, rclass
 
 			save "`_bcerdata'"
 
-			* creare enumerator team statistics
+			* create enumerator team statistics
 			if "`bcteam'" ~= "" {
 				use "`_bdata'", clear
 				keep `bcteam'
 				bys `bcteam': gen backchecks = _N 
 				bys `bcteam': keep if _n == 1
+				save "`_bcerteamdata'"
 			}
 			
 			* merge datasets
