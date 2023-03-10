@@ -74,7 +74,7 @@ program ipacheckspecify, rclass sortpreserve
 		restore, preserve
 	
 		* expand keep
-		if "`keep'" == "" unab keep: `keep'
+		if "`keep'" ~= "" unab keep: `keep'
 
 		* For each pair, check that # of children and parents match after expansion
 		forval i = 1/`osp_N' {
