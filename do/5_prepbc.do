@@ -1,5 +1,5 @@
 ********************************************************************************
-** 	TITLE	: 3_prep.do
+** 	TITLE	: 5_prepbc.do
 **
 **	PURPOSE	: Prepare Back Check Data for BCSTATS
 **				
