@@ -1,4 +1,14 @@
-*! version 4.0.3 Innovations for Poverty Action 31aug2022
+*! version 4.0.4 Innovations for Poverty Action 13mar2023
+
+********************************************************************************
+** 	TITLE	: 4_checksurvey.do
+**
+**	PURPOSE	: Run IPA's High Frequency Check Commands 
+**				
+**	AUTHOR	: 
+**
+**	DATE	: 
+********************************************************************************
 
 /* =============================================================================
    =================== IPA HIGH FREQUENCY CHECK TEMPLATE ======================= 
