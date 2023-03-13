@@ -22,7 +22,7 @@ program ipachecklogic, rclass
 
 	qui {
 	    
-		* preserve
+		preserve
 		
 		tempfile tmf_data tmf_viols
 		tempname tmv_var tmv_lab tmv_value tmv_logic_viol tmv_logic tmv_dups
