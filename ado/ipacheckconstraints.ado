@@ -1,4 +1,4 @@
-*! version 4.0.3 06jan2023
+*! version 4.0.4 14mar2023
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag constraints in numeric variables
 
@@ -213,16 +213,16 @@ program ipacheckconstraints, rclass
 		if `c(N)' > 0 {
 			
 			keep `id' `enumerator' `date' `keep' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
-
+			set trace on
 			* drop if already marked as ok
 			if `checkok' {
 			    frame frm_hfcokay: loc okaycnt `c(N)'
 				forval i = 1/`okaycnt' {
 				    loc vars = _frval(frm_hfcokay, _hfcokayvar, `i')
-				    drop if `id' == _frval(frm_hfcokay, `id', `i') & regexm("`vars'", variable)
+				    drop if `id' == _frval(frm_hfcokay, `id', `i') & (regexm("`vars'", "^" + `tmv_var' + "/") | regexm("`vars'", "/" + `tmv_var' + "/"))
 				}
 			}
-			
+		
 			* remove duplicates
 			duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
 			
