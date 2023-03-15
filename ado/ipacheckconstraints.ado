@@ -213,7 +213,7 @@ program ipacheckconstraints, rclass
 		if `c(N)' > 0 {
 			
 			keep `id' `enumerator' `date' `keep' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
-			set trace on
+			
 			* drop if already marked as ok
 			if `checkok' {
 			    frame frm_hfcokay: loc okaycnt `c(N)'
@@ -223,40 +223,42 @@ program ipacheckconstraints, rclass
 				}
 			}
 		
-			* remove duplicates
-			duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
-			
-			gen `tmv_hard_flag' = regexm(`tmv_constraint', "^hard")
-			duplicates tag `id' `enumerator' `tmv_var' `tmv_value', gen(`tmv_dups')
-			gsort `id' `enumerator' `tmv_var' `tmv_value' -`tmv_hard_flag'
-			
-			duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
-			
-			* export constraint violations
-			
 			if `c(N)' > 0 {
-				keep `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
-				order `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
+				* remove duplicates
+				duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
 				
-				foreach var of varlist _all {
-					lab var `var' "`var'"
+				gen `tmv_hard_flag' = regexm(`tmv_constraint', "^hard")
+				duplicates tag `id' `enumerator' `tmv_var' `tmv_value', gen(`tmv_dups')
+				gsort `id' `enumerator' `tmv_var' `tmv_value' -`tmv_hard_flag'
+				
+				duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
+				
+				* export constraint violations
+				
+				if `c(N)' > 0 {
+					keep `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
+					order `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_constraint'
 					
-					lab var `tmv_var'			"variable" 
-					lab var `tmv_lab'			"label"
-					lab var `tmv_value' 		"value"
-					lab var `tmv_constraint'	"constraint"
-				}
-				
-				if "`keep'" ~= "" ipalabels `keep', `nolabel'
-				ipalabels `id' `enumerator', `nolabel'
-				
-				sort `date'
-				
-				export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
+					foreach var of varlist _all {
+						lab var `var' "`var'"
+						
+						lab var `tmv_var'			"variable" 
+						lab var `tmv_lab'			"label"
+						lab var `tmv_value' 		"value"
+						lab var `tmv_constraint'	"constraint"
+					}
+					
+					if "`keep'" ~= "" ipalabels `keep', `nolabel'
+					ipalabels `id' `enumerator', `nolabel'
+					
+					sort `date'
+					
+					export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-				mata: colwidths("`outfile'", "`outsheet'")
-				mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-				mata: setheader("`outfile'", "`outsheet'")
+					mata: colwidths("`outfile'", "`outsheet'")
+					mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
+					mata: setheader("`outfile'", "`outsheet'")
+				}
 			}
 		}
 		
