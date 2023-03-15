@@ -1,4 +1,4 @@
-*! version 4.0.0 02feb2023
+*! version 4.0.1 15mar2023
 *! Innovations for Poverty Action
 * ipachecklogic: Flag logic violations in Survey
 
@@ -157,38 +157,40 @@ program ipachecklogic, rclass
 			    frame frm_hfcokay: loc okaycnt `c(N)'
 				forval i = 1/`okaycnt' {
 				    loc vars = _frval(frm_hfcokay, _hfcokayvar, `i')
-				    drop if `id' == _frval(frm_hfcokay, `id', `i') & regexm("`vars'", variable)
+				    drop if `id' == _frval(frm_hfcokay, `id', `i') & (regexm("`vars'", "^" + `tmv_var' + "/") | regexm("`vars'", "/" + `tmv_var' + "/"))
 				}
 			}
 			
-			* remove duplicates / for values that violate multiple logic conditions			
-			duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
-			
-			* export logic violations
-			
 			if `c(N)' > 0 {
-				keep `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_logic'
-				order `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_logic'
+				* remove duplicates / for values that violate multiple logic conditions			
+				duplicates drop `id' `enumerator' `tmv_var' `tmv_value', force
 				
-				foreach var of varlist _all {
-					lab var `var' "`var'"
+				* export logic violations
+				
+				if `c(N)' > 0 {
+					keep `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_logic'
+					order `enumerator' `keep' `date' `id' `tmv_var' `tmv_lab' `tmv_value' `tmv_logic'
 					
-					lab var `tmv_var'		"variable" 
-					lab var `tmv_lab'		"label"
-					lab var `tmv_value' 	"value"
-					lab var `tmv_logic'		"logic"
-				}
-				
-				if "`keep'" ~= "" ipalabels `keep', `nolabel'
-				ipalabels `id' `enumerator', `nolabel'
-				
-				sort `date'
-				
-				export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
+					foreach var of varlist _all {
+						lab var `var' "`var'"
+						
+						lab var `tmv_var'		"variable" 
+						lab var `tmv_lab'		"label"
+						lab var `tmv_value' 	"value"
+						lab var `tmv_logic'		"logic"
+					}
+					
+					if "`keep'" ~= "" ipalabels `keep', `nolabel'
+					ipalabels `id' `enumerator', `nolabel'
+					
+					sort `date'
+					
+					export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-				mata: colwidths("`outfile'", "`outsheet'")
-				mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-				mata: setheader("`outfile'", "`outsheet'")
+					mata: colwidths("`outfile'", "`outsheet'")
+					mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
+					mata: setheader("`outfile'", "`outsheet'")
+				}
 			}
 		}
 		
