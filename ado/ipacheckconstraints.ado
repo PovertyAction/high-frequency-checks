@@ -1,4 +1,4 @@
-*! version 4.0.4 14mar2023
+*! version 4.0.4 15mar2023
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag constraints in numeric variables
 
@@ -224,6 +224,7 @@ program ipacheckconstraints, rclass
 			}
 		
 			if `c(N)' > 0 {
+				
 				* remove duplicates
 				duplicates drop `id' `enumerator' `tmv_var' `tmv_value' `tmv_constraint', force
 				
