@@ -163,7 +163,7 @@ program define ipacheckcorrections, rclass
 				    loc action_type = _frval(frm_repfile, action, `i')
 				    if "`action_type'" == "okay" {
 					    replace _hfcokay 	= 1 		if `id' == _frval(frm_repfile, `id', `i')
-						replace _hfcokayvar = "`var'/"	if `id' == _frval(frm_repfile, `id', `i')
+						replace _hfcokayvar = _hfcokayvar + "`var'/"	if `id' == _frval(frm_repfile, `id', `i')
 					}
 					else if "`action_type'" == "replace" {
 						loc newval	= _frval(frm_repfile, newvalue, `i') 
