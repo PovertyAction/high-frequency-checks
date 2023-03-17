@@ -1190,62 +1190,71 @@ program ipabcstats, rclass
 				loc total `r(N)'
 				levelsof _vvlab if _vvar == "`var'", loc (label) clean
 
-				if `:list var in ttest' | `:list var in prtest' | `:list var in signrank' | `:list var in reliability' {
-					qui su _survey if _compared & _vvar == "`var'"
-					loc surveymean = round(`r(mean)', 0.01)
-					qui su _backcheck if _compared & _vvar == "`var'"
-					loc bcmean = round(`r(mean)', 0.01)
-					loc differences = round(`surveymean' - `bcmean', 0.01) 
-				}
-				
-				if `:list var in reliability' {
+				if `total' > 0 {
 
-					gen _reldiff = _survey - _backcheck if _compared & _vvar == "`var'"
-					su _reldiff if _compared & _vvar == "`var'"
-					loc srv = r(sd)^2 / 2
-					drop _reldiff
-
-					* Calculate the variance of the back check variable.
-					* We're using the back check variable instead of the survey variable,
-					* thinking that the back check data is probably more reliable.
-					su _backcheck if _compared & _vvar == "`var'"
-					loc variance = r(sd)^2
-
-					loc ratio = 1 - `srv' / `variance'
-				}
-				else {
-					loc srv   -222
-					loc ratio -222
-				}
-
-				if `:list var in ttest' {
-					ttest _survey == _backcheck if _compared & _vvar == "`var'", level(`level')
-					loc test 			"ttest"
-					loc pvalue 			`r(p)'
-				}
-				else if `:list var in prtest' {
+					if `:list var in ttest' | `:list var in prtest' | `:list var in signrank' | `:list var in reliability' {
+						qui su _survey if _compared & _vvar == "`var'"
+						loc surveymean = round(`r(mean)', 0.01)
+						qui su _backcheck if _compared & _vvar == "`var'"
+						loc bcmean = round(`r(mean)', 0.01)
+						loc differences = round(`surveymean' - `bcmean', 0.01) 
+					}
 					
-					prtest _survey == _backcheck if _compared & _vvar == "`var'", level(`level')
-					loc test 			"prtest"
-					loc pvalue 			`r(p)'
-				}
-				else if `:list var in signrank' {
+					if `:list var in reliability' {
 
-					signrank _survey = _backcheck if _compared & _vvar == "`var'"
-					loc test 			"signrank"
-					loc pvalue 			`r(p_2)'
+						gen _reldiff = _survey - _backcheck if _compared & _vvar == "`var'"
+						su _reldiff if _compared & _vvar == "`var'"
+						loc srv = r(sd)^2 / 2
+						drop _reldiff
+
+						* Calculate the variance of the back check variable.
+						* We're using the back check variable instead of the survey variable,
+						* thinking that the back check data is probably more reliable.
+						su _backcheck if _compared & _vvar == "`var'"
+						loc variance = r(sd)^2
+
+						loc ratio = 1 - `srv' / `variance'
+					}
+					else {
+						loc srv   -222
+						loc ratio -222
+					}
+
+					if `:list var in ttest' {
+						ttest _survey == _backcheck if _compared & _vvar == "`var'", level(`level')
+						loc test 			"ttest"
+						loc pvalue 			`r(p)'
+					}
+					else if `:list var in prtest' {
+						
+						prtest _survey == _backcheck if _compared & _vvar == "`var'", level(`level')
+						loc test 			"prtest"
+						loc pvalue 			`r(p)'
+					}
+					else if `:list var in signrank' {
+
+						signrank _survey = _backcheck if _compared & _vvar == "`var'"
+						loc test 			"signrank"
+						loc pvalue 			`r(p_2)'
+					}
+					else {
+						loc surveymean  -222
+						loc bcmean 		-222
+						loc differences -222
+						loc test 		""
+						loc pvalue 		-222
+					}
+
+					post postchecks ("`var'") ("`label'") ("`type'") (`diff') (`total') ///
+							(round((`diff'/`total'), 0.01)) (`surveymean') (`bcmean') (`differences') ("`test'") ///
+							(`pvalue') (`srv') (`ratio')
 				}
+
 				else {
-					loc surveymean  -222
-					loc bcmean 		-222
-					loc differences -222
-					loc test 		""
-					loc pvalue 		-222
+					post postchecks ("`var'") ("`label'") ("`type'") (.) (0) ///
+							(.) (.) (.) (.) ("") ///
+							(.) (.) (.)
 				}
-
-				post postchecks ("`var'") ("`label'") ("`type'") (`diff') (`total') ///
-						(round((`diff'/`total'), 0.01)) (`surveymean') (`bcmean') (`differences') ("`test'") ///
-						(`pvalue') (`srv') (`ratio')
 
 			}
 
