@@ -1,4 +1,4 @@
-*! version 4.0.1 15mar2023
+*! version 4.0.2 28mar2023
 *! Innovations for Poverty Action
 * ipachecklogic: Flag logic violations in Survey
 
@@ -53,8 +53,8 @@ program ipachecklogic, rclass
 			}
 			
 
-			* add "if" to beginning of valid if_conditions
-			replace if_condition = " & (" + if_condition + ")" if !missing(if_condition) 
+			* add "if" to beginning of valid if_conditions, gen new var
+			replace if_condition = " if (" + if_condition + ")" if !missing(if_condition) 
 			
 			* save keep vars locals
 			levelsof keep, loc(keep) clean
@@ -114,19 +114,17 @@ program ipachecklogic, rclass
 		* Run logic checks for each variable	
 		forval i = 1/`cnt' {
 		    
-			frames frm_inputs: loc var 			= variable[`i']
-			frames frm_inputs: loc assert 		= assert[`i']
-			frames frm_inputs: loc if_condition = if_condition[`i']
-			
+			frames frm_inputs: loc var 				= variable[`i']
+			frames frm_inputs: loc assert 			= assert[`i']
+			frames frm_inputs: loc if_condition 	= if_condition[`i']			
 			
 			use "`tmf_data'", clear
 
-			gen `tmv_logic_viol' = !(`assert' `if_condition')	
+			gen `tmv_logic_viol' = !(`assert') `if_condition'	
 
-			keep if `tmv_logic_viol'
+			keep if `tmv_logic_viol' == 1
 
 			if `c(N)' > 0 {
-				
 				
 				* save value / convert to string if numeric var
 				cap confirm numeric var `var'
