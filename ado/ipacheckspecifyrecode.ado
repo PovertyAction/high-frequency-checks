@@ -89,7 +89,7 @@ program define ipacheckspecifyrecode, rclass
 			
 			gen `tmv_modified' 	= 0
 			gen `tmv_oldval'   	= ""
-			gen `tmv_newval'		= ""
+			gen `tmv_newval'	= ""
 			forval i = 1/`recode_cnt' {
 				
 				frame frm_recode {
@@ -141,7 +141,10 @@ program define ipacheckspecifyrecode, rclass
 							}
 															
 							replace `pvar' = subinstr(`pvar', "//", " ", .)	
-							replace `tmv_newval' = `pvar'						
+							replace `tmv_newval' = `pvar'
+
+							cap gen `tmv_oldval_lab' = ""
+							cap gen `tmv_newval_lab' = ""						
 						}
 						else {
 							loc plab "`:val lab `pvar''"
