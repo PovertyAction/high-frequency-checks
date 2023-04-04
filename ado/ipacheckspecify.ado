@@ -1,4 +1,4 @@
-*! version 4.0.1 06jan2023
+*! version 4.0.2 04apr2023
 *! Innovations for Poverty Action
 *! ipacheckspecify: This program collates and list other specify values.
 
@@ -105,6 +105,9 @@ program ipacheckspecify, rclass sortpreserve
 		
 		loc child_cnt = wordcount("`unab_child'")
 
+		* track variables with actual specify values
+		loc varswithosp_cnt 0
+
 		forval i = 1/`child_cnt' {
 			
 			* get child and parent vars
@@ -117,6 +120,7 @@ program ipacheckspecify, rclass sortpreserve
 				drop `p_var' `c_var'
 				continue
 			}
+			else loc ++varswithosp_cnt
 
 			* reset list_vals to empty
 			loc list_vals ""
@@ -228,7 +232,12 @@ program ipacheckspecify, rclass sortpreserve
 		}
 		
 		* drop rows that contain no osp
-		egen noosp = rownonmiss(child*), strok
+		if `varswithosp_cnt' > 0 {
+			egen noosp = rownonmiss(child*), strok
+		}
+		else gen noosp = 0
+
+		* end if no var has osp
 		drop if !noosp
 		drop noosp
 		
