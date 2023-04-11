@@ -1,4 +1,4 @@
-*! version 4.0.2 05apr2023
+*! version 4.0.3 11apr2023
 *! Innovations for Poverty Action
 * ipacheckdups: check for duplicates in other variables
 
@@ -67,7 +67,7 @@ program ipacheckdups, rclass
 			loc i 1
 			foreach var of varlist `varwithdups' {
 				loc var`i' 		"`var'"
-				loc varlab`i'		"`:var lab `var''"
+				loc varlab`i'	"`:var lab `var''"
 				
 				cap confirm numeric var `var'
 				if !_rc {
@@ -155,11 +155,13 @@ program ipacheckdups, rclass
 			
 			if "`keep'" ~= "" ipalabels `keep', `nolabel'
 			ipalabels `id' `enumerator', `nolabel'
-						
-			export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetmodify' `sheetreplace'
-			mata: colwidths("`outfile'", "`outsheet'")
-			mata: setheader("`outfile'", "`outsheet'")
-			mata: addlines("`outfile'", "`outsheet'", rows, "thin")
+			
+			if `c(N)' > 0 {
+				export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetmodify' `sheetreplace'
+				mata: colwidths("`outfile'", "`outsheet'")
+				mata: setheader("`outfile'", "`outsheet'")
+				mata: addlines("`outfile'", "`outsheet'", rows, "thin")
+			}			
 			
 			tab `tmv_variable'
 			loc var_cnt `r(r)'
