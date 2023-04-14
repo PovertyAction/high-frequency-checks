@@ -1,4 +1,4 @@
-*! version 4.0.3 11apr2023
+*! version 4.0.4 14apr2023
 *! Innovations for Poverty Action
 * ipacheckdups: check for duplicates in other variables
 
@@ -54,6 +54,8 @@ program ipacheckdups, rclass
 				drop `tmv_dv_flag'
 			}			
 		}
+
+		*ren `tmv_dv_check' tmv_dv_check
 		
 		* keep only observations with at least one duplicate
 		drop if !`tmv_dv_check'
@@ -79,17 +81,17 @@ program ipacheckdups, rclass
 				loc ++i
 			}
 			
-			loc vl_cnt = `i' - 1
-			loc obs_cnt `c(N)'
-			
 			* reshape data to long
+			loc vl_cnt = `i' - 1
 			expand `vl_cnt'
+			loc obs_cnt `c(N)'
+
 			bys `id': gen `tmv_index' = _n
 			cap confirm string var `id'
 			if !_rc {
 				mata: ids = st_sdata(., "`id'")
 				gen _v = ""
-				forval i = 1/`obs_cnt' {
+				forval i = 1(`vl_cnt')`obs_cnt' {
 					mata: st_local("instanceid", ids[`i'])
 					forval j = 1/`vl_cnt' {
 						replace _v = _v`j' if `id' == "`instanceid'" & `tmv_index' == `j'
@@ -99,7 +101,7 @@ program ipacheckdups, rclass
 			else {
 				mata: ids = st_data(., "`id'")
 				gen _v = ""
-				forval i = 1/`obs_cnt' {
+				forval i = 1/1(`vl_cnt')`obs_cnt' {
 					mata: st_local("instanceid", ids[`i'])
 					forval j = 1/`vl_cnt' {
 						replace _v = _v`j' if `id' == `instanceid' & `tmv_index' == `j'
@@ -110,8 +112,8 @@ program ipacheckdups, rclass
 			drop _v?*
 			drop if missing(_v)
 		
-			gen `tmv_variable' = "", before(_v)
-			gen `tmv_label' = "", after(_v)
+			gen `tmv_variable' 	= "", before(_v)
+			gen `tmv_label' 	= "", after(_v)
 			forval i = 1/`vl_cnt' {
 				replace `tmv_variable' 	= "`var`i''" 	if `tmv_index' == `i'
 				replace `tmv_label' 	= "`varlab`i''" if `tmv_index' == `i'
