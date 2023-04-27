@@ -1153,7 +1153,7 @@ program ipabcstats, rclass
 				forval i = 3(-1)1 {
 					cap confirm var error_rate`i'
 					if !_rc {
-						mkmat `bcteam' error_rate`i', matrix(bcteam)
+						mkmat `bcteam' error_rate`i', matrix(bcteam`i')
 						return matrix bcteam`i' = bcteam`i'
 					}
 				}
