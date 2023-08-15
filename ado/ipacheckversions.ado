@@ -1,4 +1,4 @@
-*! version 4.0.1 08jul2022
+*! version 4.0.2 15aug2023
 *! Innovations for Poverty Action
 * ipacheckversion: Outputs a table showing number of submissions per formversion
 
@@ -41,7 +41,7 @@ program ipacheckversions, rclass
 		cap frame drop frm_version
 		#d;
 		frames 	create  frm_version 
-				str10 	formdef_version 
+				str10 	`varlist' 
 				double 	(submitted outdated) 
 				double 	(first_date last_date)
 			;
