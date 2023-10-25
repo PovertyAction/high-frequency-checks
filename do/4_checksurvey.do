@@ -85,6 +85,7 @@
 			id($id)										///
 			logfile("${recodelog_output}")				///
 			logsheet("${rc_logsheet}")					///
+			sheetreplace 								///
 			${rc_nolabel}
 			
 		save "${checkedsurvey}", replace
