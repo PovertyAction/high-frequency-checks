@@ -1,4 +1,4 @@
-*! version 4.0.2 02aug2022
+*! version 4.0.3 27nov2023
 *! Innovations for Poverty Action
 * ipacheckenumdb: Outputs survey statistics by enumerator
 
@@ -513,7 +513,7 @@ program ipacheckenumdb, rclass
 			* import enumstats input sheet
 			import excel using "`using'", sheet("`sheetname'") clear first allstr
 			
-			keep variable min mean show_mean_as media max sd combine
+			keep variable min mean show_mean_as median max sd combine
 			keep if !missing(variable)
 			
 			count if !missing(variable)

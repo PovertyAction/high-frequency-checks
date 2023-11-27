@@ -1,4 +1,4 @@
-*! version 4.0.3 06jan2023
+*! version 4.0.4 27nov2023
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -244,7 +244,6 @@ program ipacheckoutliers, rclass
 
 		* clean up and rename combine variables
 		replace combine = "" if !combine_ind
-		ren 	combine combine_vars
 		drop 	combine_ind
 
 		gen range_min = cond(method == "iqr", p25 - (1.5 * iqr), value_mean - (multiplier * value_sd))
