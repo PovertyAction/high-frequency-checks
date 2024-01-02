@@ -73,6 +73,12 @@ program ipachecktimeuse, rclass sortpreserve
 			* keep only needed variables 
 			cap confirm var devicetime 
 			if !_rc {
+
+				cap confirm var formtimems 
+				if !_rc {
+					ren formtimems formtime
+				}
+
 				keep fieldname formtime `varlist' `starttime' `enumerator'
 				ren (formtime) (firstappeared)
 				destring firstappeared, replace
