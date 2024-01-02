@@ -1,4 +1,4 @@
-*! version 1.0.4 27apr2023
+*! version 1.0.5 02jan2024
 *! Innovations for Poverty Action
 * version 1.0 Ishmail Azindoo Baako & Rosemarie Sandino
 
@@ -187,12 +187,16 @@ program ipabcstats, rclass
 				ex 198
 			}
 
-			cap confirm numeric var `enumteam'
-			if _rc == 7 {
-				nois di as error `"Enumerator team variable `enumteam' in enumteam() must be a numeric variable."'
-				nois di as error `"enumteam option will not be included in output."'
-				loc enumteam ""
+			if "`enumteam'" ~= "" {
+
+				cap confirm numeric var `enumteam'
+				if _rc == 7 {
+					nois di as error `"Enumerator team variable `enumteam' in enumteam() must be a numeric variable."'
+					nois di as error `"enumteam option will not be included in output."'
+					loc enumteam ""
+				}
 			}
+			
 
 			* check that no variable is prefixed with _bc
 			cap ds _bc*
@@ -1136,7 +1140,7 @@ program ipabcstats, rclass
 			mata: format_enumstats("`filename'", "backchecker stats", "`backchecker'", 1)
 
 			if "`bcteam'" ~= "" {
-				create_stats using "`_diffs'", bc enum(`backchecker') enumdata("`_bcerteamdata'") type(_vtype) compared(_compared) different(_vdiff) enumlabel(bc team) `nolabel'
+				create_stats using "`_diffs'", bc enum(`bcteam') enumdata("`_bcerteamdata'") type(_vtype) compared(_compared) different(_vdiff) enumlabel(bc team) `nolabel'
 				merge 1:1 `bcteam' using "`_bcteamavgdata'", nogen
 				order days, after(backchecks)
 				* sort data based on error rates
