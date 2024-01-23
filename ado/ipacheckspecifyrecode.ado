@@ -1,4 +1,4 @@
-*! version 4.0.2 28mar2023
+*! version 4.0.3 23jan2024
 *! Innovations for Poverty Action
 * ipacheckspecifyrecode: Recode other specify
 
@@ -37,10 +37,10 @@ program define ipacheckspecifyrecode, rclass
 			    disp as err "sheet option required with .xlsx, .xls or .xlsm files"
 				ex 198
 			}
-			import excel using "`using'", sheet("`sheet'") firstrow clear
+			import excel using "`using'", sheet("`sheet'") allstr firstrow clear
 		}
 		else if "`ext'" == ".csv" {
-			import delim using "`using'", clear varnames(1)
+			import delim using "`using'", stringcols(_all) clear varnames(1)
 		}
 		else {
 		    cap use "`using'", clear
