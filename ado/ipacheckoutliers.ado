@@ -1,4 +1,4 @@
-*! version 4.0.4 27nov2023
+*! version 4.0.5 25jan2024
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -290,10 +290,10 @@ program ipacheckoutliers, rclass
 			ipalabels `id' `enumerator', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-			mata: colwidths("`outfile'", "`outsheet'")
-			mata: colformats("`outfile'", "`outsheet'", ("value", "value_min", "value_mean", "value_max"), "number_sep_d2")	
-			mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-			mata: setheader("`outfile'", "`outsheet'")
+			cap mata: colwidths("`outfile'", "`outsheet'")
+			cap mata: colformats("`outfile'", "`outsheet'", ("value", "value_min", "value_mean", "value_max"), "number_sep_d2")	
+			cap mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
+			cap mata: setheader("`outfile'", "`outsheet'")
 			
 			tab variable
 			loc var_cnt `r(r)'

@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 25jan2024
 *! Innovations for Poverty Action 
 * ipacodebook: export excel codebook
 
@@ -138,9 +138,9 @@ program define ipacodebook, rclass
 			
 			* export & format output
 			export excel using "`using'", first(var) sheet("codebook") `replace'
-			mata: colwidths("`using'", "codebook")
-			mata: colformats("`using'", "codebook", "percent_missing", "percent_d2")
-			mata: addlines("`using'", "codebook", (1, `=_N' + 1), "medium")
+			cap mata: colwidths("`using'", "codebook")
+			cap mata: colformats("`using'", "codebook", "percent_missing", "percent_d2")
+			cap mata: addlines("`using'", "codebook", (1, `=_N' + 1), "medium")
 			
 			* save vallels in local
 			levelsof vallabel, clean
@@ -213,8 +213,8 @@ program define ipacodebook, rclass
 			frame frm_choice_list {
 				export excel using "`using'", first(var) sheet("value labels")
 				
-				mata: colwidths("`using'", "value labels")
-				mata: addlines("`using'", "value labels", (1, `=_N' + 1), "medium")
+				cap mata: colwidths("`using'", "value labels")
+				cap mata: addlines("`using'", "value labels", (1, `=_N' + 1), "medium")
 			}
 			
 		}

@@ -1,4 +1,4 @@
-*! version 4.0.1 07jul2022
+*! version 4.0.2 25jan2024
 *! Innovations for Poverty Action
 * ipachecksurveydb: Outputs general survey statistics
 
@@ -411,16 +411,16 @@ program ipachecksurveydb, rclass
 
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("summary (grouped)")
-			mata: colwidths("`outfile'", "summary (grouped)")
-			mata: setheader("`outfile'", "summary (grouped)")
+			cap mata: colwidths("`outfile'", "summary (grouped)")
+			cap mata: setheader("`outfile'", "summary (grouped)")
 
-			if `_cons' 	mata: colformats("`outfile'", "summary (grouped)", ("consent_rate", "missing_rate"), "percent_d2")
-			if `_dk' 	mata: colformats("`outfile'", "summary (grouped)", ("dontknow_rate"), "percent_d2")
-			if `_ref' 	mata: colformats("`outfile'", "summary (grouped)", ("refuse_rate"), "percent_d2")
-			if `_other' mata: colformats("`outfile'", "summary (grouped)", ("other_rate"), "percent_d2")
-			if `_dur'   mata: colformats("`outfile'", "summary (grouped)", ("duration_min", "duration_mean", "duration_median", "duration_max"), "number_sep")
-						mata: colformats("`outfile'", "summary (grouped)", ("enumerators", "formversion", "days"), "number_sep")
-						mata: colformats("`outfile'", "summary (grouped)", ("firstdate", "lastdate"), "date_d_mon_yy")
+			if `_cons' 	cap mata: colformats("`outfile'", "summary (grouped)", ("consent_rate", "missing_rate"), "percent_d2")
+			if `_dk' 	cap mata: colformats("`outfile'", "summary (grouped)", ("dontknow_rate"), "percent_d2")
+			if `_ref' 	cap mata: colformats("`outfile'", "summary (grouped)", ("refuse_rate"), "percent_d2")
+			if `_other' cap mata: colformats("`outfile'", "summary (grouped)", ("other_rate"), "percent_d2")
+			if `_dur'   cap mata: colformats("`outfile'", "summary (grouped)", ("duration_min", "duration_mean", "duration_median", "duration_max"), "number_sep")
+						cap mata: colformats("`outfile'", "summary (grouped)", ("enumerators", "formversion", "days"), "number_sep")
+						cap mata: colformats("`outfile'", "summary (grouped)", ("firstdate", "lastdate"), "date_d_mon_yy")
 					
 		}
 		
@@ -456,19 +456,19 @@ program ipachecksurveydb, rclass
 		}
 		
 		export excel using "`outfile'", first(var) sheet("`period' productivity")
-		mata: colwidths("`outfile'", "`period' productivity")
-		mata: setheader("`outfile'", "`period' productivity")
+		cap mata: colwidths("`outfile'", "`period' productivity")
+		cap mata: setheader("`outfile'", "`period' productivity")
 		if "`period'" == "daily" {
-			mata: colformats("`outfile'", "`period' productivity", ("day", "submissions"), "number_sep")
-			mata: colformats("`outfile'", "`period' productivity", ("`date'"), "date_d_mon_yy")
+			cap mata: colformats("`outfile'", "`period' productivity", ("day", "submissions"), "number_sep")
+			cap mata: colformats("`outfile'", "`period' productivity", ("`date'"), "date_d_mon_yy")
 		}
 		else if "`period'" == "weekly" {
-			mata: colformats("`outfile'", "`period' productivity", ("week", "submissions"), "number_sep")
-			mata: colformats("`outfile'", "`period' productivity", ("startdate", "enddate"), "date_d_mon_yy")
+			cap mata: colformats("`outfile'", "`period' productivity", ("week", "submissions"), "number_sep")
+			cap mata: colformats("`outfile'", "`period' productivity", ("startdate", "enddate"), "date_d_mon_yy")
 		}
 		else {
-			mata: colformats("`outfile'", "`period' productivity", ("month", "submissions"), "number_sep")
-			mata: colformats("`outfile'", "`period' productivity", ("startdate", "enddate"), "date_d_mon_yy")
+			cap mata: colformats("`outfile'", "`period' productivity", ("month", "submissions"), "number_sep")
+			cap mata: colformats("`outfile'", "`period' productivity", ("startdate", "enddate"), "date_d_mon_yy")
 		}
 		
 		*** productivity by group ***
@@ -522,10 +522,10 @@ program ipachecksurveydb, rclass
 			replace submissions = scalar(sum) in `add'
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("`period' productivity (grouped)")
-			mata: colwidths("`outfile'", "`period' productivity (grouped)")
-			mata: setheader("`outfile'", "`period' productivity (grouped)")
-			mata: colformats("`outfile'", "`period' productivity (grouped)", st_varname(2..st_nvar()), "number_sep")
-			mata: settotal("`outfile'", "`period' productivity (grouped)")
+			cap mata: colwidths("`outfile'", "`period' productivity (grouped)")
+			cap mata: setheader("`outfile'", "`period' productivity (grouped)")
+			cap mata: colformats("`outfile'", "`period' productivity (grouped)", st_varname(2..st_nvar()), "number_sep")
+			cap mata: settotal("`outfile'", "`period' productivity (grouped)")
 
 		}
 	}

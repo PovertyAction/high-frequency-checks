@@ -185,9 +185,9 @@ program ipachecklogic, rclass
 					
 					export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-					mata: colwidths("`outfile'", "`outsheet'")
-					mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-					mata: setheader("`outfile'", "`outsheet'")
+					cap mata: colwidths("`outfile'", "`outsheet'")
+					cap mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
+					cap mata: setheader("`outfile'", "`outsheet'")
 				}
 			}
 		}

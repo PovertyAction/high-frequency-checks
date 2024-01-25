@@ -1,4 +1,4 @@
-*! version 4.0.4 14apr2023
+*! version 4.0.5 25jan2024
 *! Innovations for Poverty Action
 * ipacheckdups: check for duplicates in other variables
 
@@ -160,9 +160,9 @@ program ipacheckdups, rclass
 			
 			if `c(N)' > 0 {
 				export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetmodify' `sheetreplace'
-				mata: colwidths("`outfile'", "`outsheet'")
-				mata: setheader("`outfile'", "`outsheet'")
-				mata: addlines("`outfile'", "`outsheet'", rows, "thin")
+				cap mata: colwidths("`outfile'", "`outsheet'")
+				cap mata: setheader("`outfile'", "`outsheet'")
+				cap mata: addlines("`outfile'", "`outsheet'", rows, "thin")
 			}			
 			
 			tab `tmv_variable'

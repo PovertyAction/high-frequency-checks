@@ -1,4 +1,4 @@
-*! version 4.0.2 15aug2023
+*! version 4.0.3 25jan2024
 *! Innovations for Poverty Action
 * ipacheckversion: Outputs a table showing number of submissions per formversion
 
@@ -114,11 +114,11 @@ program ipacheckversions, rclass
 											`sheetmodify' 				///
 											`sheetreplace'
 											
-			mata: colwidths("`outfile'", "`outsheet1'")
-			mata: colformats("`outfile'", "`outsheet1'", ("first_date", "last_date"), "date_d_mon_yy")
-			mata: colformats("`outfile'", "`outsheet1'", ("submitted", "outdated"), "number_sep")
-			mata: setheader("`outfile'", "`outsheet1'")
-			mata: settotal("`outfile'", "`outsheet1'")
+			cap mata: colwidths("`outfile'", "`outsheet1'")
+			cap mata: colformats("`outfile'", "`outsheet1'", ("first_date", "last_date"), "date_d_mon_yy")
+			cap mata: colformats("`outfile'", "`outsheet1'", ("submitted", "outdated"), "number_sep")
+			cap mata: setheader("`outfile'", "`outsheet1'")
+			cap mata: settotal("`outfile'", "`outsheet1'")
 
 			* highlight versions still in use
 			gen row = _n
@@ -141,9 +141,9 @@ program ipacheckversions, rclass
 			ipalabels `enumerator', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("`outsheet2'") `sheetreplace'
 			
-			mata: colwidths("`outfile'", "`outsheet2'")
-			mata: colformats("`outfile'", "`outsheet2'", ("`date'"), "date_d_mon_yy")
-			mata: setheader("`outfile'", "`outsheet2'")
+			cap mata: colwidths("`outfile'", "`outsheet2'")
+			cap mata: colformats("`outfile'", "`outsheet2'", ("`date'"), "date_d_mon_yy")
+			cap mata: setheader("`outfile'", "`outsheet2'")
 		}
 
 		noi disp "Found {cmd:`outdated'} submissions with outdated forms."

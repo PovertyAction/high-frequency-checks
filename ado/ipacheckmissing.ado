@@ -1,4 +1,4 @@
-*! version 4.0.1 23nov2022
+*! version 4.0.2 25jan2024
 *! Innovations for Poverty Action
 * ipacheckmissing: Outputs a table showing information missing data in survey
 
@@ -117,9 +117,9 @@ program ipacheckmissing, rclass
 			
 			* export & format output
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetmodify' `sheetreplace'
-			mata: colwidths("`outfile'", "`outsheet'")
-			mata: colformats("`outfile'", "`outsheet'", "percent_missing", "percent_d2")
-			mata: setheader("`outfile'", "`outsheet'")
+			cap mata: colwidths("`outfile'", "`outsheet'")
+			cap mata: colformats("`outfile'", "`outsheet'", "percent_missing", "percent_d2")
+			cap mata: setheader("`outfile'", "`outsheet'")
 		}
 	}
 	

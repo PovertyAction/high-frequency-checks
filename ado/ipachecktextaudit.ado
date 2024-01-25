@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.0 25jan2024
 *! Innovations for Poverty Action
 * ipachecktextaudit: Import and analyse text audit data
 
@@ -107,13 +107,13 @@ program ipachecktextaudit, rclass
 			}
 					 
 			export excel using "`outfile'", sheet("field stats") first(var) replace
-			mata: colwidths("`outfile'", "field stats")
-			mata: setheader("`outfile'", "field stats")
+			cap mata: colwidths("`outfile'", "field stats")
+			cap mata: setheader("`outfile'", "field stats")
 			
 			foreach stat of loc all_stats {
 				if `:list stat in stats' {
 					if inlist("`stat'", "count", "min", "max") mata: colformats("`outfile'", "field stats", "`stat'", "number_sep")
-					else mata: colformats("`outfile'", "field stats", "`stat'", "number_d2")
+					else cap mata: colformats("`outfile'", "field stats", "`stat'", "number_d2")
 				}
 			}
 			
@@ -147,8 +147,8 @@ program ipachecktextaudit, rclass
 			ipalabels `enumerator', `nolabel'
 			
 			export excel using "`outfile'", sheet("field average by enumerator") first(varl)
-			mata: colwidths("`outfile'", "field average by enumerator")
-			mata: setheader("`outfile'", "field average by enumerator")
+			cap mata: colwidths("`outfile'", "field average by enumerator")
+			cap mata: setheader("`outfile'", "field average by enumerator")
 			* mata: colformats("`outfile'", "field average by enumerator", st_varname(2..st_nvar()), "number_sep_d2")		
 			
 			*** GROUP STATS ***
@@ -206,8 +206,8 @@ program ipachecktextaudit, rclass
 				}
 				
 				export excel using "`outfile'", sheet("group stats") first(var)
-				mata: colwidths("`outfile'", "group stats")
-				mata: setheader("`outfile'", "group stats")
+				cap mata: colwidths("`outfile'", "group stats")
+				cap mata: setheader("`outfile'", "group stats")
 				
 				foreach stat of loc all_stats {
 					if `:list stat in stats' {
@@ -260,8 +260,8 @@ program ipachecktextaudit, rclass
 				lab var `enumerator' "`enumerator'"
 				ipalabels `enumerator', `nolabel'
 				export excel using "`outfile'", sheet("group average by enumerator") first(varl)
-				mata: colwidths("`outfile'", "group average by enumerator")
-				mata: setheader("`outfile'", "group average by enumerator")
+				cap mata: colwidths("`outfile'", "group average by enumerator")
+				cap mata: setheader("`outfile'", "group average by enumerator")
 				* mata: colformats("`outfile'", "group average by enumerator", st_varname(2..st_nvar()), "number_d2")
 			}
 		}

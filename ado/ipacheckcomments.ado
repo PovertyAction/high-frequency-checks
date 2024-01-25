@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 25jan2024
 *! Innovations for Poverty Action
 * ipacheckcomments: Collate & export field comments
 
@@ -88,8 +88,8 @@ program ipacheckcomments, rclass
 			if "`keepvars'" ~= "" ipalabels `keepvars', `nolabel'
  			ipalabels `enumerator', `nolabel'
 			export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetreplace' `sheetmodify'
-			mata: colwidths("`outfile'", "`outsheet'")
-			mata: setheader("`outfile'", "`outsheet'")
+			cap mata: colwidths("`outfile'", "`outsheet'")
+			cap mata: setheader("`outfile'", "`outsheet'")
 			
 			noi disp "Found {cmd:`c(N)'} comments."
 		}

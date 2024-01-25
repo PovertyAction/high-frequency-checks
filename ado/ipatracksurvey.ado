@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 25jan2024
 *! Innovations for Poverty Action
 * ipasurveyprogress: Show survey progress
 
@@ -212,17 +212,17 @@ program ipatracksurvey, rclass
 			}
 
 			export excel using "`outfile'", first(varl) sheet("survey progress") replace
-			mata: colwidths("`outfile'", "survey progress")
-			mata: setheader("`outfile'", "survey progress")
-			mata: settotal("`outfile'", "survey progress")
-			mata: colformats("`outfile'", "survey progress", ("`tmv_fdate'", "`tmv_ldate'"), "date_d_mon_yy")
+			cap mata: colwidths("`outfile'", "survey progress")
+			cap mata: setheader("`outfile'", "survey progress")
+			cap mata: settotal("`outfile'", "survey progress")
+			cap mata: colformats("`outfile'", "survey progress", ("`tmv_fdate'", "`tmv_ldate'"), "date_d_mon_yy")
 			if "`outcome'" ~= "" {
-			    mata: colformats("`outfile'", "survey progress", ("`target'", "`tmv_survey'", "`tmv_complete'"), "number_sep")
-				mata: colformats("`outfile'", "survey progress", ("`tmv_survey_perc'", "`tmv_complete_perc'"), "percent_d2")
+			    cap mata: colformats("`outfile'", "survey progress", ("`target'", "`tmv_survey'", "`tmv_complete'"), "number_sep")
+				cap mata: colformats("`outfile'", "survey progress", ("`tmv_survey_perc'", "`tmv_complete_perc'"), "percent_d2")
 			}
 			else {
-			    mata: colformats("`outfile'", "survey progress", ("`target'", "`tmv_survey'"), "number_sep")
-				mata: colformats("`outfile'", "survey progress", ("`tmv_survey_perc'"), "percent_d2")
+			    cap mata: colformats("`outfile'", "survey progress", ("`target'", "`tmv_survey'"), "number_sep")
+				cap mata: colformats("`outfile'", "survey progress", ("`tmv_survey_perc'"), "percent_d2")
 			}
 			
 			if "`surveyok'" ~= "" {
@@ -234,8 +234,8 @@ program ipatracksurvey, rclass
 					if "`keepsurvey'" ~= "" ipalabels `keepsurvey', `nolabel'
 					ipalabels `id', `nolabel'
 					export excel using "`outfile'", sheet("Unmatched IDs from Survey") first(varl)
-					mata: colwidths("`outfile'", "Unmatched IDs from Survey")
-					mata: setheader("`outfile'", "Unmatched IDs from Survey")
+					cap mata: colwidths("`outfile'", "Unmatched IDs from Survey")
+					cap mata: setheader("`outfile'", "Unmatched IDs from Survey")
 					ds, has(format %td) 
 					foreach var of varlist `r(varlist)' {
 						mata: colformats("`outfile'", "Unmatched IDs from Survey", "`var'", "date_d_mon_yy")
@@ -352,17 +352,17 @@ program ipatracksurvey, rclass
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("summary") replace
 			
-			mata: colwidths("`outfile'", "summary")
-			mata: setheader("`outfile'", "summary")
-			mata: settotal("`outfile'", "summary")
-			mata: colformats("`outfile'", "summary", ("`tmv_fdate'", "`tmv_ldate'"), "date_d_mon_yy")
+			cap mata: colwidths("`outfile'", "summary")
+			cap mata: setheader("`outfile'", "summary")
+			cap mata: settotal("`outfile'", "summary")
+			cap mata: colformats("`outfile'", "summary", ("`tmv_fdate'", "`tmv_ldate'"), "date_d_mon_yy")
 			if "`outcome'" ~= "" {
-			    mata: colformats("`outfile'", "summary", ("`tmv_target'", "`tmv_survey'", "`tmv_complete'"), "number_sep")
-				mata: colformats("`outfile'", "summary", ("`tmv_survey_perc'", "`tmv_complete_perc'"), "percent_d2")
+			    cap mata: colformats("`outfile'", "summary", ("`tmv_target'", "`tmv_survey'", "`tmv_complete'"), "number_sep")
+				cap mata: colformats("`outfile'", "summary", ("`tmv_survey_perc'", "`tmv_complete_perc'"), "percent_d2")
 			}
 			else {
-			    mata: colformats("`outfile'", "summary", ("`tmv_target'", "`tmv_survey'"), "number_sep")
-				mata: colformats("`outfile'", "summary", ("`tmv_survey_perc'"), "percent_d2")
+			    cap mata: colformats("`outfile'", "summary", ("`tmv_target'", "`tmv_survey'"), "number_sep")
+				cap mata: colformats("`outfile'", "summary", ("`tmv_survey_perc'"), "percent_d2")
 			}
 			
 			use "`tmf_input_data'", clear
@@ -391,11 +391,11 @@ program ipatracksurvey, rclass
 					}
 					ipalabels `id', `nolabel'
 					export excel using "`outfile'", sheet("Unmatched IDs from Survey") first(varl)
-					mata: colwidths("`outfile'", "Unmatched IDs from Survey")
-					mata: setheader("`outfile'", "Unmatched IDs from Survey")
+					cap mata: colwidths("`outfile'", "Unmatched IDs from Survey")
+					cap mata: setheader("`outfile'", "Unmatched IDs from Survey")
 					ds, has(format %td) 
 					foreach var of varlist `r(varlist)' {
-						mata: colformats("`outfile'", "Unmatched IDs from Survey", "`var'", "date_d_mon_yy")
+						cap mata: colformats("`outfile'", "Unmatched IDs from Survey", "`var'", "date_d_mon_yy")
 					}
 				}
 			}
@@ -452,8 +452,8 @@ program ipatracksurvey, rclass
 							loc sheet "`group'"
 						}
 						
-						mata: colwidths("`file'", "`sheet'")
-						mata: setheader("`file'", "`sheet'")
+						cap mata: colwidths("`file'", "`sheet'")
+						cap mata: setheader("`file'", "`sheet'")
 						ds, has(format %td) 
 						foreach var of varlist `r(varlist)' {
 							mata: colformats("`file'", "`sheet'", "`var'", "date_d_mon_yy")
@@ -491,8 +491,8 @@ program ipatracksurvey, rclass
 							loc sheet 	"`group'"
 						}
 						
-						mata: colwidths("`file'", "`sheet'")
-						mata: setheader("`file'", "`sheet'")
+						cap mata: colwidths("`file'", "`sheet'")
+						cap mata: setheader("`file'", "`sheet'")
 						ds, has(format %td) 
 						foreach var of varlist `r(varlist)' {
 							mata: colformats("`file'", "`sheet'", "`var'", "date_d_mon_yy")

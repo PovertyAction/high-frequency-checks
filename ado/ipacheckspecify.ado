@@ -1,4 +1,4 @@
-*! version 4.0.2 04apr2023
+*! version 4.0.3 25jan2024
 *! Innovations for Poverty Action
 *! ipacheckspecify: This program collates and list other specify values.
 
@@ -284,9 +284,9 @@ program ipacheckspecify, rclass sortpreserve
 			if "`keep'" ~= "" ipalabels `keep', `nolabel'
 			ipalabels `id' `enumerator', `nolabel'
 			export excel using "`outfile'", sheet("`outsheet1'") first(varl) `sheetreplace' `sheetmodify'
-			mata: colwidths("`outfile'", "`outsheet1'")
-			mata: colformats("`outfile'", "`outsheet1'", "`date'", "date_d_mon_yy")
-			mata: setheader("`outfile'", "`outsheet1'")
+			cap mata: colwidths("`outfile'", "`outsheet1'")
+			cap mata: colformats("`outfile'", "`outsheet1'", "`date'", "date_d_mon_yy")
+			cap mata: setheader("`outfile'", "`outsheet1'")
 			
 			tab child
 			loc var_cnt `r(r)'
@@ -303,9 +303,9 @@ program ipacheckspecify, rclass sortpreserve
 
 				export excel using "`outfile'", sheet("`outsheet2'") first(varl) `sheetreplace' `sheetmodify'
 
-				mata: colwidths("`outfile'", "`outsheet2'")
-				mata: colformats("`outfile'", "`outsheet2'", "percentage", "percent_d2")	
-				mata: setheader("`outfile'", "`outsheet2'")
+				cap mata: colwidths("`outfile'", "`outsheet2'")
+				cap mata: colformats("`outfile'", "`outsheet2'", "percentage", "percent_d2")	
+				cap mata: setheader("`outfile'", "`outsheet2'")
 				
 				* get row numbers for seperator line
 				cap frame drop frm_subset

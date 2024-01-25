@@ -1,4 +1,4 @@
-*! version 4.0.0 11may2022
+*! version 4.0.1 25jan2024
 *! Innovations for Poverty Action
 * ipacheckids: Outputs duplicates in survey id
 
@@ -103,11 +103,11 @@ program ipacheckids, rclass
 			ipalabels `id' `key' `enumerator', `nolabel'
 			
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace' `sheetmodify'
-			mata: colwidths("`outfile'", "`outsheet'")
-			mata: colformats("`outfile'", "`outsheet'", "`tmv_perc_diffs'", "percent_d2")	
-			mata: colformats("`outfile'", "`outsheet'", ("`tmv_diffs'", "`tmv_compared'"), "number_sep")
-			mata: colformats("`outfile'", "`outsheet'", "`date'", "date_d_mon_yy")	
-			mata: setheader("`outfile'", "`outsheet'")
+			cap mata: colwidths("`outfile'", "`outsheet'")
+			cap mata: colformats("`outfile'", "`outsheet'", "`tmv_perc_diffs'", "percent_d2")	
+			cap mata: colformats("`outfile'", "`outsheet'", ("`tmv_diffs'", "`tmv_compared'"), "number_sep")
+			cap mata: colformats("`outfile'", "`outsheet'", "`date'", "date_d_mon_yy")	
+			cap mata: setheader("`outfile'", "`outsheet'")
 			
 			* get row numbers for seperator line
 			cap frame drop frm_subset

@@ -1,4 +1,4 @@
-*! version 4.0.2 05jan2023
+*! version 4.0.3 25jan2025
 *! Innovations for Poverty Action
 * ipacheckcorrections: Make corrections to data
 
@@ -200,8 +200,8 @@ program define ipacheckcorrections, rclass
 					lab var `tmv_status' "status"
 					ipalabels `id', `nolabel'
 					export excel using "`logfile'", sheet("`logsheet'") sheetreplace first(varl)
-					mata: colwidths("`logfile'", "`logsheet'")
-					mata: setheader("`logfile'", "`logsheet'")
+					cap mata: colwidths("`logfile'", "`logsheet'")
+					cap mata: setheader("`logfile'", "`logsheet'")
 				}
 			}
 		}
