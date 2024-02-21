@@ -486,7 +486,7 @@ program ipatracksurvey, rclass
 							loc sheet 	"status"
 						}
 						else {
-							export excel using "`outfile'", first(varl) sheet("`group'") sheet("status") sheetreplace
+							export excel using "`outfile'", first(varl) sheet("`group'") sheetreplace
 							loc file 	"`outfile'"
 							loc sheet 	"`group'"
 						}
