@@ -1,4 +1,4 @@
-*! version 4.0.1 25jan2024
+*! version 4.0.2 21feb2024
 *! Innovations for Poverty Action
 * ipasurveyprogress: Show survey progress
 
@@ -447,7 +447,7 @@ program ipatracksurvey, rclass
 							loc sheet 	"status"
 						}
 						else {
-							export excel using "`outfile'", first(varl) sheet("`group'") sheet("status") sheetreplace
+							export excel using "`outfile'", first(varl) sheet("`group'") sheetreplace
 							loc file 	"`outfile'"
 							loc sheet "`group'"
 						}
