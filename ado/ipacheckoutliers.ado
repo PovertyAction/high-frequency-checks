@@ -1,4 +1,4 @@
-*! version 4.0.5 25jan2024
+*! version 4.0.6 18mar2024
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -179,7 +179,7 @@ program ipacheckoutliers, rclass
 					replace combine_ind = 1 if variable == "`var'"
 				}
 				
-				if "`by`i''" ~= "" 	loc by_syntnax "bys `by`i'':"
+				if "`by`i''" ~= "" 	loc by_syntax "bys `by`i'':"
 				else 				loc by_syntax ""
 					
 				`by_syntax' egen vcount  = count(value)   if combine == "`vars`i''"
@@ -210,8 +210,8 @@ program ipacheckoutliers, rclass
 			}
 			else {
 				foreach var in `vars`i'' {
-					if "`by`i''" ~= "" 	loc by_sytnax "bys `by`i'':"
-					else 				loc by_sytnax ""
+					if "`by`i''" ~= "" 	loc by_syntax "bys `by`i'':"
+					else 				loc by_syntax ""
 					
 					`by_syntax' egen vcount  = count(value)  if variable == "`var'"
 					`by_syntax' egen vmin 	  = min(value) 	  if variable == "`var'"
