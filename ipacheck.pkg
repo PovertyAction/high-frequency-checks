@@ -1,4 +1,4 @@
-v 4.2.1
+v 4.3.0
 d 'IPACHECK': IPA Stata commands for high frequency checks
 d These commands perform common data quality checks useful
 d during the data collection and cleaning phases of field
@@ -10,7 +10,7 @@ d KW: data collection
 d
 d Requires: Stata version 17
 d
-d Distribution-Date: 20230213
+d Distribution-Date: 20240408
 d
 d Authors: Innovations for Poverty Action
 d Support: researchsupport@poverty-action.org
@@ -31,12 +31,7 @@ f ado/ipachecktimeuse.ado
 f ado/ipachecksurveydb.ado
 f ado/ipacheckenumdb.ado
 f ado/ipatracksurvey.ado
-f ado/ipasctocollate.ado
 f ado/ipacodebook.ado
-f ado/ipaanycount.ado
-f ado/ipagetcal.ado
-f ado/ipalabels.ado
-f ado/ipagettd.ado
 f ado/ipabcstats.ado
 d
 f sthlp/ipacheck.sthlp
@@ -56,18 +51,5 @@ f sthlp/ipachecktimeuse.sthlp
 f sthlp/ipachecksurveydb.sthlp
 f sthlp/ipacheckenumdb.sthlp
 f sthlp/ipatracksurvey.sthlp
-f sthlp/ipasctocollate.sthlp
 f sthlp/ipacodebook.sthlp
-f sthlp/ipaanycount.sthlp
-f sthlp/ipagetcal.sthlp
-f sthlp/ipalabels.sthlp
-f sthlp/ipagettd.sthlp
 f sthlp/ipabcstats.sthlp
-d
-f sthlp/addlines.sthlp
-f sthlp/addflags.sthlp
-f sthlp/colwidths.sthlp
-f sthlp/colformats.sthlp
-f sthlp/setfont.sthlp
-f sthlp/setheader.sthlp
-f sthlp/settotal.sthlp
