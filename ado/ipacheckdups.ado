@@ -148,7 +148,7 @@ program ipacheckdups, rclass
 			frame frm_subset {
 				gen _dp_row = _n + 1
 				keep if `tmv_serial' == `tmv_max_serial'
-				levelsof rows, loc(rows) clean
+				levelsof _dp_row, loc(rows) clean
 			}
 			frame drop frm_subset
 			
@@ -161,7 +161,7 @@ program ipacheckdups, rclass
 			if `c(N)' > 0 {
 				export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetmodify' `sheetreplace'
 				ipacolwidth using "`outfile'", sheet("`outsheet'")
-				iparowformat using "`outfile'", sheet("`outsheet'") row(1) type(header)
+				iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 				iparowline using "`outfile'", sheet("`outsheet'") rows(`rows') style("thin")
 			}			
 			

@@ -103,11 +103,11 @@ program ipacheckids, rclass
 			ipalabels `id' `key' `enumerator', `nolabel'
 			
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace' `sheetmodify'
-			ipacolwidth  ("`outfile'"), sheet("`outsheet'")
-			ipacolformat ("`outfile'"), sheet("`outsheet'") vars(`tmv_perc_diffs') format("percent_d2")	
-			ipacolformat ("`outfile'"), sheet("`outsheet'") vars(`tmv_diffs' `tmv_compared') format("number_sep")
-			ipacolformat ("`outfile'"), sheet("`outsheet'") vars(`date') format("date_d_mon_yy")	
-			iparowformat ("`outfile'"), sheet("`outsheet'")
+			ipacolwidth  using "`outfile'", sheet("`outsheet'")
+			ipacolformat using "`outfile'", sheet("`outsheet'") vars(`tmv_perc_diffs') format("percent_d2")	
+			ipacolformat using "`outfile'", sheet("`outsheet'") vars(`tmv_diffs' `tmv_compared') format("number_sep")
+			ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")	
+			iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 			
 			* get row numbers for seperator line
 			cap frame drop frm_subset
@@ -116,10 +116,10 @@ program ipacheckids, rclass
 			    bys `varlist' (`tmv_serial'): gen _dp_count = _N
 				gen _dp_row = _n + 1
 				keep if `tmv_serial' == _dp_count
-				mata: rows = st_data(., st_varindex("_dp_row"))
+				levelsof _dp_row, loc(rows) clean
 			}
 			frame drop frm_subset
-			iparowline using "`outfile'", sheet("`outsheet'") rows(1) style("thin")
+			iparowline using "`outfile'", sheet("`outsheet'") rows(`rows') style("thin")
 
 		}
 

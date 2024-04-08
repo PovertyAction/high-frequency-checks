@@ -117,9 +117,9 @@ program ipacheckmissing, rclass
 			
 			* export & format output
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetmodify' `sheetreplace'
-			ipacolwidths using "`outfile'", sheet("`outsheet'")
+			ipacolwidth using "`outfile'", sheet("`outsheet'")
 			ipacolformat using "`outfile'", sheet("`outsheet'") vars("percent_missing") format("percent_d2")
-			iparowformat using "`outfile'", sheet("`outsheet'") row(1) type(header)
+			iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 		}
 	}
 	

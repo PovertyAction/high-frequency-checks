@@ -291,9 +291,10 @@ program ipacheckoutliers, rclass
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
 			ipacolwidth using "`outfile'", sheet("`outsheet'")
-			ipacolformat using "`outfile'", sheet("`outsheet'") vars(value value_min value_mean value_max) format("number_sep_d2")	
+			ipacolformat using "`outfile'", sheet("`outsheet'") vars(value_min value_mean value_max) format("number_sep_d2")	
+			ipacolformat using "`outfile'", sheet("`outsheet'") vars(value_count) format("number_sep")
 			ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
-			iparowformat using "`outfile'", sheet("`outsheet'")
+			iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 			
 			tab variable
 			loc var_cnt `r(r)'

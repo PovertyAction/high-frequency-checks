@@ -117,16 +117,16 @@ program ipacheckversions, rclass
 			ipacolwidth using "`outfile'", sheet("`outsheet1'")
 			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(first_date last_date) format("date_d_mon_yy")
 			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(submitted outdated) format("number_sep")
-			iparowformat "`outfile'", sheet("`outsheet1'") rows(1) type(header)
-			iparowformat "`outfile'", sheet("`outsheet1'") rows(`=c(N)+1') type(total)
+			iparowformat using "`outfile'", sheet("`outsheet1'") type(header)
+			iparowformat using "`outfile'", sheet("`outsheet1'") type(total)
 
 			* highlight versions still in use
 			gen row = _n
 			loc lastdate = last_date[`=_N'-1]
 			levelsof row if last_date == `lastdate' & _n ~= `c(N)'-1, ///
-				loc(rows) sep(,) clean
+				loc(rows) clean
 			if "`rows'" ~= "" {
-				ipacellcolor "`outfile'", sheet("`outsheet1'") rows(`rows') vars(`varlist') color("lightpink")
+				ipacellcolor "`outfile'", sheet("`outsheet1'") rows(`rows') vars(last_date) color("lightpink")
 			}
 		}
 
@@ -145,7 +145,7 @@ program ipacheckversions, rclass
 			
 			ipacolwidth using "`outfile'", sheet("`outsheet2'")
 			ipacolformat using "`outfile'", sheet("`outsheet2'") vars(`date') format("date_d_mon_yy")
-			iparowformat using "`outfile'", sheet("`outsheet2'")
+			iparowformat using "`outfile'", sheet("`outsheet2'") type(header)
 		}
 
 		noi disp "Found {cmd:`outdated'} submissions with outdated forms."

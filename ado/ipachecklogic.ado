@@ -41,6 +41,7 @@ program ipachecklogic, rclass
 			
 			* import input data	
 			import excel using "`using'", clear sheet("`sheet'") first case(l) allstr
+
 			drop if missing(variable)
 
 			* check that the assert column is not missing for any of the rows
@@ -187,7 +188,7 @@ program ipachecklogic, rclass
 
 					ipacolwidth using "`outfile'", sheet("`outsheet'")
 					ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
-					iparowformat using "`outfile'", sheet("`outsheet'") rows(1) type(header)
+					iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 				}
 			}
 		}
