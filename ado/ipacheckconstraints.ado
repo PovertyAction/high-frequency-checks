@@ -1,4 +1,4 @@
-*! version 4.0.5 25jan2024
+*! version 4.3.0 06apr2024
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag constraints in numeric variables
 
@@ -256,9 +256,9 @@ program ipacheckconstraints, rclass
 					
 					export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-					cap mata: colwidths("`outfile'", "`outsheet'")
-					cap mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-					cap mata: setheader("`outfile'", "`outsheet'")
+					ipacolwidth using "`outfile'", sheet("`outsheet'")
+					ipacolformat using "`outfile'", sheet("`outsheet'") vars("`date'") format("date_d_mon_yy")
+					iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 				}
 			}
 		}
