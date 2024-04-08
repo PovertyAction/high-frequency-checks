@@ -1,4 +1,4 @@
-*! version 4.0.1 25jan2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipacheckids: Outputs duplicates in survey id
 
@@ -103,11 +103,11 @@ program ipacheckids, rclass
 			ipalabels `id' `key' `enumerator', `nolabel'
 			
 			export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace' `sheetmodify'
-			cap mata: colwidths("`outfile'", "`outsheet'")
-			cap mata: colformats("`outfile'", "`outsheet'", "`tmv_perc_diffs'", "percent_d2")	
-			cap mata: colformats("`outfile'", "`outsheet'", ("`tmv_diffs'", "`tmv_compared'"), "number_sep")
-			cap mata: colformats("`outfile'", "`outsheet'", "`date'", "date_d_mon_yy")	
-			cap mata: setheader("`outfile'", "`outsheet'")
+			ipacolwidth  ("`outfile'"), sheet("`outsheet'")
+			ipacolformat ("`outfile'"), sheet("`outsheet'") vars(`tmv_perc_diffs') format("percent_d2")	
+			ipacolformat ("`outfile'"), sheet("`outsheet'") vars(`tmv_diffs' `tmv_compared') format("number_sep")
+			ipacolformat ("`outfile'"), sheet("`outsheet'") vars(`date') format("date_d_mon_yy")	
+			iparowformat ("`outfile'"), sheet("`outsheet'")
 			
 			* get row numbers for seperator line
 			cap frame drop frm_subset
@@ -119,7 +119,7 @@ program ipacheckids, rclass
 				mata: rows = st_data(., st_varindex("_dp_row"))
 			}
 			frame drop frm_subset
-			mata: addlines("`outfile'", "`outsheet'", rows, "thin")
+			iparowline using "`outfile'", sheet("`outsheet'") rows(1) style("thin")
 
 		}
 

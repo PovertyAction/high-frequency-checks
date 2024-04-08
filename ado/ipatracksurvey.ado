@@ -1,4 +1,4 @@
-*! version 4.0.2 21feb2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipasurveyprogress: Show survey progress
 
@@ -212,17 +212,17 @@ program ipatracksurvey, rclass
 			}
 
 			export excel using "`outfile'", first(varl) sheet("survey progress") replace
-			cap mata: colwidths("`outfile'", "survey progress")
-			cap mata: setheader("`outfile'", "survey progress")
-			cap mata: settotal("`outfile'", "survey progress")
-			cap mata: colformats("`outfile'", "survey progress", ("`tmv_fdate'", "`tmv_ldate'"), "date_d_mon_yy")
+			ipacolwidth using "`outfile'", sheet("survey progress")
+			iparowformat using "`outfile'", sheet("survey progress") row(1) type(header)
+			iparowformat using "`outfile'", sheet("survey progress") row(`=c(N)+1') type(total)
+			ipacolformat using "`outfile'", sheet("survey progress") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
 			if "`outcome'" ~= "" {
-			    cap mata: colformats("`outfile'", "survey progress", ("`target'", "`tmv_survey'", "`tmv_complete'"), "number_sep")
-				cap mata: colformats("`outfile'", "survey progress", ("`tmv_survey_perc'", "`tmv_complete_perc'"), "percent_d2")
+			    ipacolformat "`outfile'", sheet("survey progress") vars(`target' `tmv_survey' `tmv_complete') format("number_sep")
+				ipacolformat "`outfile'", sheet("survey progress") vars(`tmv_survey_perc' `tmv_complete_perc') format("percent_d2")
 			}
 			else {
-			    cap mata: colformats("`outfile'", "survey progress", ("`target'", "`tmv_survey'"), "number_sep")
-				cap mata: colformats("`outfile'", "survey progress", ("`tmv_survey_perc'"), "percent_d2")
+			    ipacolformat "`outfile'", sheet("survey progress") vars(`target' `tmv_survey') format("number_sep")
+				ipacolformat "`outfile'", sheet("survey progress") vars(`tmv_survey_perc') format("percent_d2")
 			}
 			
 			if "`surveyok'" ~= "" {
@@ -234,12 +234,10 @@ program ipatracksurvey, rclass
 					if "`keepsurvey'" ~= "" ipalabels `keepsurvey', `nolabel'
 					ipalabels `id', `nolabel'
 					export excel using "`outfile'", sheet("Unmatched IDs from Survey") first(varl)
-					cap mata: colwidths("`outfile'", "Unmatched IDs from Survey")
-					cap mata: setheader("`outfile'", "Unmatched IDs from Survey")
+					ipacolwidth using "`outfile'", sheet("Unmatched IDs from Survey")
+					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") row(1) type(header)
 					ds, has(format %td) 
-					foreach var of varlist `r(varlist)' {
-						mata: colformats("`outfile'", "Unmatched IDs from Survey", "`var'", "date_d_mon_yy")
-					}
+					ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") var(`r(varlist)') format("date_d_mon_yy")
 				}
 			}
 			
@@ -352,17 +350,17 @@ program ipatracksurvey, rclass
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("summary") replace
 			
-			cap mata: colwidths("`outfile'", "summary")
-			cap mata: setheader("`outfile'", "summary")
-			cap mata: settotal("`outfile'", "summary")
-			cap mata: colformats("`outfile'", "summary", ("`tmv_fdate'", "`tmv_ldate'"), "date_d_mon_yy")
+			ipacolwidth using "`outfile'", sheet("summary")
+			iparowformat using "`outfile'", sheet("summary") row(1) type(header)
+			iparowformat using "`outfile'", sheet("summary") row(`=c(N)+1') type(type)
+			ipacolformat using "`outfile'", sheet("summary") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
 			if "`outcome'" ~= "" {
-			    cap mata: colformats("`outfile'", "summary", ("`tmv_target'", "`tmv_survey'", "`tmv_complete'"), "number_sep")
-				cap mata: colformats("`outfile'", "summary", ("`tmv_survey_perc'", "`tmv_complete_perc'"), "percent_d2")
+			    ipacolformats using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey' `tmv_complete') format("number_sep")
+				ipacolformats using "`outfile'", sheet("summary") vars(`tmv_survey_perc' `tmv_complete_perc') format("percent_d2")
 			}
 			else {
-			    cap mata: colformats("`outfile'", "summary", ("`tmv_target'", "`tmv_survey'"), "number_sep")
-				cap mata: colformats("`outfile'", "summary", ("`tmv_survey_perc'"), "percent_d2")
+			    ipacolformats using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey') format("number_sep")
+				ipacolformats using "`outfile'", sheet("summary") vars(`tmv_survey_perc') format("percent_d2")
 			}
 			
 			use "`tmf_input_data'", clear
@@ -391,12 +389,10 @@ program ipatracksurvey, rclass
 					}
 					ipalabels `id', `nolabel'
 					export excel using "`outfile'", sheet("Unmatched IDs from Survey") first(varl)
-					cap mata: colwidths("`outfile'", "Unmatched IDs from Survey")
-					cap mata: setheader("`outfile'", "Unmatched IDs from Survey")
+					ipacolwidth using "`outfile'", sheet("Unmatched IDs from Survey")
+					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") row(1) type(header)
 					ds, has(format %td) 
-					foreach var of varlist `r(varlist)' {
-						cap mata: colformats("`outfile'", "Unmatched IDs from Survey", "`var'", "date_d_mon_yy")
-					}
+					ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") vars(`r(varlist)') format("date_d_mon_yy")
 				}
 			}
 			use "`tmf_summary_master'", clear
@@ -452,12 +448,11 @@ program ipatracksurvey, rclass
 							loc sheet "`group'"
 						}
 						
-						cap mata: colwidths("`file'", "`sheet'")
-						cap mata: setheader("`file'", "`sheet'")
+						ipacolwidth using "`file'", sheet("`sheet'")
+						iparowformat using "`file'", sheet("`sheet'") row(1) type(header)
 						ds, has(format %td) 
-						foreach var of varlist `r(varlist)' {
-							mata: colformats("`file'", "`sheet'", "`var'", "date_d_mon_yy")
-						}
+						ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
+
 						
 						loc ++i
 						noi _dots `i' 0
@@ -491,12 +486,10 @@ program ipatracksurvey, rclass
 							loc sheet 	"`group'"
 						}
 						
-						cap mata: colwidths("`file'", "`sheet'")
-						cap mata: setheader("`file'", "`sheet'")
+						ipacolwidth using "`file'", sheet("`sheet'")
+						iparowformat using "`file'", sheet("`sheet'") row(1) type(header)
 						ds, has(format %td) 
-						foreach var of varlist `r(varlist)' {
-							mata: colformats("`file'", "`sheet'", "`var'", "date_d_mon_yy")
-						}
+						ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
 						
 						loc ++i
 						noi _dots `i' 0
