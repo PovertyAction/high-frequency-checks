@@ -1,4 +1,4 @@
-*! version 4.0.2 25jan2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipachecksurveydb: Outputs general survey statistics
 
@@ -411,16 +411,16 @@ program ipachecksurveydb, rclass
 
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("summary (grouped)")
-			cap mata: colwidths("`outfile'", "summary (grouped)")
-			cap mata: setheader("`outfile'", "summary (grouped)")
+			ipacolwidths using "`outfile'", sheet("summary (grouped)")
+			iparowformat using "`outfile'", sheet("summary (grouped)") rows(1) type(header)
 
-			if `_cons' 	cap mata: colformats("`outfile'", "summary (grouped)", ("consent_rate", "missing_rate"), "percent_d2")
-			if `_dk' 	cap mata: colformats("`outfile'", "summary (grouped)", ("dontknow_rate"), "percent_d2")
-			if `_ref' 	cap mata: colformats("`outfile'", "summary (grouped)", ("refuse_rate"), "percent_d2")
-			if `_other' cap mata: colformats("`outfile'", "summary (grouped)", ("other_rate"), "percent_d2")
-			if `_dur'   cap mata: colformats("`outfile'", "summary (grouped)", ("duration_min", "duration_mean", "duration_median", "duration_max"), "number_sep")
-						cap mata: colformats("`outfile'", "summary (grouped)", ("enumerators", "formversion", "days"), "number_sep")
-						cap mata: colformats("`outfile'", "summary (grouped)", ("firstdate", "lastdate"), "date_d_mon_yy")
+			if `_cons' 	ipacolformats using "`outfile'", sheet("summary (grouped)") vars(consent_rate missing_rate) format("percent_d2")
+			if `_dk' 	ipacolformats using "`outfile'", sheet("summary (grouped)") vars(dontknow_rate) format("percent_d2")
+			if `_ref' 	ipacolformats using "`outfile'", sheet("summary (grouped)") vars(refuse_rate) format("percent_d2")
+			if `_other' ipacolformats using "`outfile'", sheet("summary (grouped)") vars(other_rate) format("percent_d2")
+			if `_dur'   ipacolformats using "`outfile'", sheet("summary (grouped)") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
+						ipacolformats using "`outfile'", sheet("summary (grouped)") vars(enumerators formversion days) format("number_sep")
+						ipacolformats using "`outfile'", sheet("summary (grouped)") vars(firstdate lastdate) format("date_d_mon_yy")
 					
 		}
 		
@@ -456,19 +456,19 @@ program ipachecksurveydb, rclass
 		}
 		
 		export excel using "`outfile'", first(var) sheet("`period' productivity")
-		cap mata: colwidths("`outfile'", "`period' productivity")
-		cap mata: setheader("`outfile'", "`period' productivity")
+		ipacolwidth using "`outfile'", sheet("`period' productivity")
+		iparowformat using "`outfile'", sheet("`period' productivity") row(1) type(header)
 		if "`period'" == "daily" {
-			cap mata: colformats("`outfile'", "`period' productivity", ("day", "submissions"), "number_sep")
-			cap mata: colformats("`outfile'", "`period' productivity", ("`date'"), "date_d_mon_yy")
+			ipacolformat using "`outfile'", sheet("`period' productivity") vars(day submissions) format("number_sep")
+			ipacolformat using "`outfile'", sheet("`period' productivity") vars(`date') format("date_d_mon_yy")
 		}
 		else if "`period'" == "weekly" {
-			cap mata: colformats("`outfile'", "`period' productivity", ("week", "submissions"), "number_sep")
-			cap mata: colformats("`outfile'", "`period' productivity", ("startdate", "enddate"), "date_d_mon_yy")
+			ipacolformat using "`outfile'", sheet("`period' productivity") vars(week submissions) format("number_sep")
+			ipacolformat using "`outfile'", sheet("`period' productivity") vars(startdate enddate) format("date_d_mon_yy")
 		}
 		else {
-			cap mata: colformats("`outfile'", "`period' productivity", ("month", "submissions"), "number_sep")
-			cap mata: colformats("`outfile'", "`period' productivity", ("startdate", "enddate"), "date_d_mon_yy")
+			ipacolformat using "`outfile'", sheet("`period' productivity") vars(month submissions) format("number_sep")
+			ipacolformat using "`outfile'", sheet("`period' productivity") vars(startdate enddate) format("date_d_mon_yy")
 		}
 		
 		*** productivity by group ***
@@ -522,12 +522,116 @@ program ipachecksurveydb, rclass
 			replace submissions = scalar(sum) in `add'
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("`period' productivity (grouped)")
-			cap mata: colwidths("`outfile'", "`period' productivity (grouped)")
-			cap mata: setheader("`outfile'", "`period' productivity (grouped)")
-			cap mata: colformats("`outfile'", "`period' productivity (grouped)", st_varname(2..st_nvar()), "number_sep")
-			cap mata: settotal("`outfile'", "`period' productivity (grouped)")
+			ipacolwidth using "`outfile'", sheet("`period' productivity (grouped)")
+			iparowformat using "`outfile'", sheet("`period' productivity (grouped)") rows(1) type(header)
+			ds, has(type numeric)
+			ipacolformat using "`outfile'", sheet("`period' productivity (grouped)" cols(`r(varlist)') format("number_sep")
+			iparowformat using "`outfile'", sheet("`period' productivity (grouped)") rows(`=c(N)+1')
 
 		}
 	}
 	
+end
+
+mata:
+mata clear
+
+void format_sdb_summary(string scalar file, string scalar sheet, real scalar consent, real scalar dontknow, real scalar refuse, real scalar other, real scalar duration, string scalar firstdate, string scalar lastdate) 
+{
+	real scalar i
+	class xl scalar b
+	b = xl()
+	b.load_book(file)
+	b.set_sheet(sheet)
+	b.set_mode("open")
+	
+	b.set_column_width(1, 1, 2)
+	b.set_column_width(2, 2, 42)
+	b.set_column_width(3, 3, 16)
+	
+	b.set_border((1, st_nobs()), (2, 3), "thin")
+	b.set_bottom_border((1, 1), (2, 3), "medium")
+		
+	b.set_horizontal_align((1, st_nobs()), (3, 3), "center")
+	b.set_font_bold((1, st_nobs()), (2, 2), "on")
+	b.set_font_bold((2, 2), (2, 2), "off")
+	b.set_font_italic((2, 2), (2, 2), "on")
+	b.set_font_italic((1, st_nobs()), (3, 3), "on")
+	
+	b.set_sheet_merge(sheet, (1, 1), (2, 3))
+	b.set_horizontal_align((1, 1), (2, 3), "center")
+	b.set_sheet_merge(sheet, (2, 2), (2, 3))
+	b.set_horizontal_align((2, 2), (2, 3), "center")
+	b.set_sheet_merge(sheet, (3, 3), (2, 3))
+	b.set_horizontal_align((3, 3), (2, 3), "center")
+	b.set_fill_pattern((3, 3), (2, 3), "solid", "255 192 0")
+	b.set_number_format((4, 7), (3, 3), "number_sep")
+
+
+	b.set_sheet_merge(sheet, (8, 8), (2, 3))
+	b.set_horizontal_align((8, 8), (2, 3), "center")
+	b.set_fill_pattern((8, 8), (2, 3), "solid", "255 192 0")
+	
+	b.set_number_format((9, 9), (3, 3), "percent_d2")
+	
+	if (consent == 0) {
+		b.put_string(9, 3, "-")
+	}
+	
+	b.set_sheet_merge(sheet, (10, 10), (2, 3))
+	b.set_horizontal_align((10, 10), (2, 3), "center")
+	b.set_fill_pattern((10, 10), (2, 3), "solid", "255 192 0")
+	
+	if (dontknow == 0) {
+		b.put_string(12, 3, "-")
+	}
+	
+	if (refuse == 0) {
+		b.put_string(13, 3, "-")
+	}
+	
+	b.set_number_format((11, 13), (3, 3), "percent_d2")
+	
+	b.set_sheet_merge(sheet, (14, 14), (2, 3))
+	b.set_horizontal_align((14, 14), (2, 3), "center")
+	b.set_fill_pattern((14, 14), (2, 3), "solid", "255 192 0")
+	
+	if (other == 0) {
+		b.put_string(15, 3, "-")
+		b.put_string(16, 3, "-")
+	}
+	
+	b.set_number_format((15, 15), (3, 3), "number_sep")
+	b.set_number_format((16, 16), (3, 3), "percent_d2")
+	
+	b.set_sheet_merge(sheet, (17, 17), (2, 3))
+	b.set_horizontal_align((17, 17), (2, 3), "center")
+	b.set_fill_pattern((17, 17), (2, 3), "solid", "255 192 0")
+	b.set_number_format((18, 21), (3, 3), "number_sep")
+		
+	b.set_sheet_merge(sheet, (22, 22), (2, 3))
+	b.set_horizontal_align((22, 22), (2, 3), "center")
+	b.set_fill_pattern((22, 22), (2, 3), "solid", "255 192 0")
+	b.set_number_format((23, 26), (3, 3), "number_sep")
+	
+	if (duration == 0) {
+		b.put_string(23, 3, "-")
+		b.put_string(24, 3, "-")
+		b.put_string(25, 3, "-")
+		b.put_string(26, 3, "-")
+	}
+
+	b.set_sheet_merge(sheet, (27, 27), (2, 3))
+	b.set_horizontal_align((27, 27), (2, 3), "center")
+	b.set_fill_pattern((27, 27), (2, 3), "solid", "255 192 0")
+	b.set_number_format((28, 29), (3, 3), "number_sep")
+	b.set_number_format((32, 32), (3, 3), "number_sep")
+	
+	
+	b.put_string(30, 3, firstdate)
+	b.put_string(31, 3, lastdate)
+	
+	b.close_book()
+
+}
 end

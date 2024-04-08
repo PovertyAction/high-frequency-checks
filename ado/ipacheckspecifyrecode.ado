@@ -1,4 +1,4 @@
-*! version 4.0.4 25jan2024
+*! version 4.1.0 25jan2024
 *! Innovations for Poverty Action
 * ipacheckspecifyrecode: Recode other specify
 
@@ -218,8 +218,8 @@ program define ipacheckspecifyrecode, rclass
 					if "`keep'" ~= "" ipalabels `id' `keep', `nolabel'
 					
 					export excel using "`logfile'", sheet("`logsheet'") first(varl) `sheetreplace' `sheetmodify'
-					cap mata: colwidths("`logfile'", "`logsheet'")
-					cap mata: setheader("`logfile'", "`logsheet'")
+					ipacolwidths using "`logfile'", sheet("`logsheet'")
+					iparowformat using "`logfile'", sheet("`logsheet'") rows(1) type(header)
 				}
 			}
 		}
