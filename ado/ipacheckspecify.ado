@@ -285,8 +285,8 @@ program ipacheckspecify, rclass sortpreserve
 			ipalabels `id' `enumerator', `nolabel'
 			export excel using "`outfile'", sheet("`outsheet1'") first(varl) `sheetreplace' `sheetmodify'
 			ipacolwidth using "`outfile'", sheet("`outsheet1'")
-			ipacolformat using "`outfile'", sheet("`outsheet1'" vars(`date') format("date_d_mon_yy")
-			iparowformat using "`outfile'", sheet("`outsheet1'") rows(1) type(header)
+			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(`date') format("date_d_mon_yy")
+			iparowformat using "`outfile'", sheet("`outsheet1'") type(header)
 			
 			tab child
 			loc var_cnt `r(r)'
@@ -305,7 +305,7 @@ program ipacheckspecify, rclass sortpreserve
 
 				ipacolwidth using "`outfile'", sheet("`outsheet2'")
 				ipacolformat using "`outfile'", sheet("`outsheet2'") vars("percentage") format("percent_d2")	
-				iparowformat using "`outfile'", sheet("`outsheet2'") rows(1) type(header)
+				iparowformat using "`outfile'", sheet("`outsheet2'") type(header)
 				
 				* get row numbers for seperator line
 				cap frame drop frm_subset
@@ -315,10 +315,10 @@ program ipacheckspecify, rclass sortpreserve
 					bys variable (value): gen _dp_count = _N
 					gen _dp_row = _n + 1
 					keep if _dp_index == _dp_count
-					levelsof _dp_row, loc (rows) clear
+					levelsof _dp_row, loc (rows) clean
 				}
 				frame drop frm_subset
-				iparowaddline using "`outfile'", sheet("`outsheet2'") rows(`rows') style("thin")
+				iparowline using "`outfile'", sheet("`outsheet2'") rows(`rows') style("thin")
 			}
 			
 			frame drop frm_choice_list

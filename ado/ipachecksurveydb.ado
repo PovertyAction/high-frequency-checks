@@ -411,16 +411,16 @@ program ipachecksurveydb, rclass
 
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("summary (grouped)")
-			ipacolwidths using "`outfile'", sheet("summary (grouped)")
-			iparowformat using "`outfile'", sheet("summary (grouped)") rows(1) type(header)
+			ipacolwidth using "`outfile'", sheet("summary (grouped)")
+			iparowformat using "`outfile'", sheet("summary (grouped)") type(header)
 
-			if `_cons' 	ipacolformats using "`outfile'", sheet("summary (grouped)") vars(consent_rate missing_rate) format("percent_d2")
-			if `_dk' 	ipacolformats using "`outfile'", sheet("summary (grouped)") vars(dontknow_rate) format("percent_d2")
-			if `_ref' 	ipacolformats using "`outfile'", sheet("summary (grouped)") vars(refuse_rate) format("percent_d2")
-			if `_other' ipacolformats using "`outfile'", sheet("summary (grouped)") vars(other_rate) format("percent_d2")
-			if `_dur'   ipacolformats using "`outfile'", sheet("summary (grouped)") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
-						ipacolformats using "`outfile'", sheet("summary (grouped)") vars(enumerators formversion days) format("number_sep")
-						ipacolformats using "`outfile'", sheet("summary (grouped)") vars(firstdate lastdate) format("date_d_mon_yy")
+			if `_cons' 	ipacolformat using "`outfile'", sheet("summary (grouped)") vars(consent_rate missing_rate) format("percent_d2")
+			if `_dk' 	ipacolformat using "`outfile'", sheet("summary (grouped)") vars(dontknow_rate) format("percent_d2")
+			if `_ref' 	ipacolformat using "`outfile'", sheet("summary (grouped)") vars(refuse_rate) format("percent_d2")
+			if `_other' ipacolformat using "`outfile'", sheet("summary (grouped)") vars(other_rate) format("percent_d2")
+			if `_dur'   ipacolformat using "`outfile'", sheet("summary (grouped)") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
+						ipacolformat using "`outfile'", sheet("summary (grouped)") vars(enumerators formversion days) format("number_sep")
+						ipacolformat using "`outfile'", sheet("summary (grouped)") vars(firstdate lastdate) format("date_d_mon_yy")
 					
 		}
 		
@@ -457,7 +457,7 @@ program ipachecksurveydb, rclass
 		
 		export excel using "`outfile'", first(var) sheet("`period' productivity")
 		ipacolwidth using "`outfile'", sheet("`period' productivity")
-		iparowformat using "`outfile'", sheet("`period' productivity") row(1) type(header)
+		iparowformat using "`outfile'", sheet("`period' productivity") type(header)
 		if "`period'" == "daily" {
 			ipacolformat using "`outfile'", sheet("`period' productivity") vars(day submissions) format("number_sep")
 			ipacolformat using "`outfile'", sheet("`period' productivity") vars(`date') format("date_d_mon_yy")
@@ -523,10 +523,10 @@ program ipachecksurveydb, rclass
 			ipalabels `by', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("`period' productivity (grouped)")
 			ipacolwidth using "`outfile'", sheet("`period' productivity (grouped)")
-			iparowformat using "`outfile'", sheet("`period' productivity (grouped)") rows(1) type(header)
+			iparowformat using "`outfile'", sheet("`period' productivity (grouped)") type(header)
 			ds, has(type numeric)
-			ipacolformat using "`outfile'", sheet("`period' productivity (grouped)" cols(`r(varlist)') format("number_sep")
-			iparowformat using "`outfile'", sheet("`period' productivity (grouped)") rows(`=c(N)+1')
+			ipacolformat using "`outfile'", sheet("`period' productivity (grouped)") vars(`r(varlist)') format("number_sep")
+			iparowformat using "`outfile'", sheet("`period' productivity (grouped)") type(total)
 
 		}
 	}

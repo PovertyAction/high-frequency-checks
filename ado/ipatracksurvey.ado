@@ -213,8 +213,8 @@ program ipatracksurvey, rclass
 
 			export excel using "`outfile'", first(varl) sheet("survey progress") replace
 			ipacolwidth using "`outfile'", sheet("survey progress")
-			iparowformat using "`outfile'", sheet("survey progress") row(1) type(header)
-			iparowformat using "`outfile'", sheet("survey progress") row(`=c(N)+1') type(total)
+			iparowformat using "`outfile'", sheet("survey progress") type(header)
+			iparowformat using "`outfile'", sheet("survey progress") type(total)
 			ipacolformat using "`outfile'", sheet("survey progress") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
 			if "`outcome'" ~= "" {
 			    ipacolformat "`outfile'", sheet("survey progress") vars(`target' `tmv_survey' `tmv_complete') format("number_sep")
@@ -235,7 +235,7 @@ program ipatracksurvey, rclass
 					ipalabels `id', `nolabel'
 					export excel using "`outfile'", sheet("Unmatched IDs from Survey") first(varl)
 					ipacolwidth using "`outfile'", sheet("Unmatched IDs from Survey")
-					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") row(1) type(header)
+					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") type(header)
 					ds, has(format %td) 
 					ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") var(`r(varlist)') format("date_d_mon_yy")
 				}
@@ -351,16 +351,16 @@ program ipatracksurvey, rclass
 			export excel using "`outfile'", first(varl) sheet("summary") replace
 			
 			ipacolwidth using "`outfile'", sheet("summary")
-			iparowformat using "`outfile'", sheet("summary") row(1) type(header)
-			iparowformat using "`outfile'", sheet("summary") row(`=c(N)+1') type(type)
+			iparowformat using "`outfile'", sheet("summary") type(header)
+			iparowformat using "`outfile'", sheet("summary") type(total)
 			ipacolformat using "`outfile'", sheet("summary") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
 			if "`outcome'" ~= "" {
-			    ipacolformats using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey' `tmv_complete') format("number_sep")
-				ipacolformats using "`outfile'", sheet("summary") vars(`tmv_survey_perc' `tmv_complete_perc') format("percent_d2")
+			    ipacolformat using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey' `tmv_complete') format("number_sep")
+				ipacolformat using "`outfile'", sheet("summary") vars(`tmv_survey_perc' `tmv_complete_perc') format("percent_d2")
 			}
 			else {
-			    ipacolformats using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey') format("number_sep")
-				ipacolformats using "`outfile'", sheet("summary") vars(`tmv_survey_perc') format("percent_d2")
+			    ipacolformat using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey') format("number_sep")
+				ipacolformat using "`outfile'", sheet("summary") vars(`tmv_survey_perc') format("percent_d2")
 			}
 			
 			use "`tmf_input_data'", clear
@@ -390,7 +390,7 @@ program ipatracksurvey, rclass
 					ipalabels `id', `nolabel'
 					export excel using "`outfile'", sheet("Unmatched IDs from Survey") first(varl)
 					ipacolwidth using "`outfile'", sheet("Unmatched IDs from Survey")
-					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") row(1) type(header)
+					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") type(header)
 					ds, has(format %td) 
 					ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") vars(`r(varlist)') format("date_d_mon_yy")
 				}
@@ -449,7 +449,7 @@ program ipatracksurvey, rclass
 						}
 						
 						ipacolwidth using "`file'", sheet("`sheet'")
-						iparowformat using "`file'", sheet("`sheet'") row(1) type(header)
+						iparowformat using "`file'", sheet("`sheet'") type(header)
 						ds, has(format %td) 
 						ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
 
@@ -487,7 +487,7 @@ program ipatracksurvey, rclass
 						}
 						
 						ipacolwidth using "`file'", sheet("`sheet'")
-						iparowformat using "`file'", sheet("`sheet'") row(1) type(header)
+						iparowformat using "`file'", sheet("`sheet'") type(header)
 						ds, has(format %td) 
 						ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
 						

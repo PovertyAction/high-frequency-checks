@@ -10,11 +10,13 @@ program ipachecktextaudit, rclass
 			TEXTAUDITdata(string)
 			OUTFile(string)
 			[stats(name min = 1 max = 9)]
-			[SHEETMODify SHEETREPlace]
+			[SHEETMODify SHEETREPlace replace]
 			[NOLABel]
 		;
 	#d cr
-		
+
+	loc checker 1
+
 	qui {
 	    
 		preserve
@@ -91,7 +93,7 @@ program ipachecktextaudit, rclass
 			save "`tmf_ta'", replace
 			
 			*** FIELD STATS ***
-		
+			
 			collapse (count) count 	= duration ///
 					 (min)	 min 	= duration  ///
 					 (max)	 max	= duration  ///
@@ -105,15 +107,16 @@ program ipachecktextaudit, rclass
 			foreach stat of loc all_stats {
 				if !`:list stat in stats' drop `stat'
 			}
-					 
-			export excel using "`outfile'", sheet("field stats") first(var) replace
+
+			export excel using "`outfile'", sheet("field stats") first(var) `replace' `sheetmodify' `sheetreplace'
 			ipacolwidth using "`outfile'", sheet("field stats")
-			iparowformat using "`outfile'", sheet("field stats") rows(1) type(header)
+			iparowformat using "`outfile'", sheet("field stats") type(header)
 			
 			foreach stat of loc all_stats {
 				if `:list stat in stats' {
 					if inlist("`stat'", "count", "min", "max") {
 						ipacolformat using "`outfile'", sheet("field stats") vars(`stat') format("number_sep")
+					}
 					else {
 						ipacolformat using "`outfile'", sheet("field stats") vars(`stat') format("number_d2")
 					}
@@ -132,11 +135,14 @@ program ipachecktextaudit, rclass
 				gen varindex = _n
 				loc varcount `c(N)'
 			}
+
 			frlink m:1 fieldname, frame(frm_subset)
 			frget varindex = varindex, from(frm_subset)
 			drop fieldname frm_subset
 			reshape wide ta_, i(`enumerator') j(varindex) 
+			
 			* adjust varname lengths so that col widths will be properly adjusted
+	
 			forval i = 1/`varcount' {
 				frame frm_subset: loc var = fieldname[`i']
 				loc newname = "ta_`i'_" + ("0" * (length("`var'") - length("ta_`i'") - 1))
@@ -148,15 +154,14 @@ program ipachecktextaudit, rclass
 					
 			lab var `enumerator' "`enumerator'"
 			ipalabels `enumerator', `nolabel'
-			
+
 			export excel using "`outfile'", sheet("field average by enumerator") first(varl)
 			ipacolwidth using "`outfile'", sheet("field average by enumerator")
-			iparowformat using "`outfile'", sheet("field average by enumerator") rows(1) type(header)
-			ds, has(type numeric)
-			ipacolformat using "`outfile'", sheet("field average by enumerator") vars(`r(varlist)') format("number_sep_d2")		
+			iparowformat using "`outfile'", sheet("field average by enumerator") type(header)
+			*ipacolformat using "`outfile'", sheet("field average by enumerator") vars(ta_*) format("number_sep_d2")		
 			
 			*** GROUP STATS ***
-			
+		
 			use "`tmf_ta'", clear
 			count if !missing(groupname)
 			if `r(N)' > 0 {
@@ -190,7 +195,7 @@ program ipachecktextaudit, rclass
 								 (p50)	 p50 	= duration  ///
 								 (p75) 	 p75 	= duration, by(group)
 								 
-						 if `i' == 1 save "`tmf_ta_group_stats'"
+						 if `i' == 1 save "`tmf_ta_group_stats'", replace
 						 else {
 							append using "`tmf_ta_group_stats'"
 							save "`tmf_ta_group_stats'", replace
@@ -211,15 +216,15 @@ program ipachecktextaudit, rclass
 				
 				export excel using "`outfile'", sheet("group stats") first(var)
 				ipacolwidth using "`outfile'", sheet("group stats")
-				iparowformat using "`outfile'", sheet("group stats") rows(1) type(header)
+				iparowformat using "`outfile'", sheet("group stats") type(header)
 				
 				foreach stat of loc all_stats {
 					if `:list stat in stats' {
 						if inlist("`stat'", "count", "min", "max") {
-							ipacolformats using "`outfile'", sheet("group stats") vars(`stat') format("number_sep")
+							ipacolformat using "`outfile'", sheet("group stats") vars(`stat') format("number_sep")
 						}
 						else {
-							ipacolformats using "`outfile'", sheet("group stats") vars(`stat') format("number_d2")
+							ipacolformat using "`outfile'", sheet("group stats") vars(`stat') format("number_d2")
 						}
 					}
 				}
@@ -265,9 +270,8 @@ program ipachecktextaudit, rclass
 				ipalabels `enumerator', `nolabel'
 				export excel using "`outfile'", sheet("group average by enumerator") first(varl)
 				ipacolwidth using "`outfile'", sheet("group average by enumerator")
-				iparowformat using "`outfile'", sheet("group average by enumerator") rows(1) type(header)
-				ds, has(type numeric)
-				ipacolformat "`outfile'", sheet("group average by enumerator") vars(`r(varlist)') format("number_d2")
+				iparowformat using "`outfile'", sheet("group average by enumerator") type(header)
+				ipacolformat using "`outfile'", sheet("group average by enumerator") vars(ta_*) format("number_d2")
 			}
 		}
 		

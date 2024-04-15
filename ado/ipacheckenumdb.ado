@@ -263,9 +263,11 @@ program ipacheckenumdb, rclass
 		if !`_dur' 		drop duration_*
 
 		ipalabels `enumerator', `nolabel'
+		lab var `enumerator' ""
+
 		export excel using "`outfile'", first(varl) sheet("summary") `sheetreplace' `sheetmodify'
 		ipacolwidth using "`outfile'", sheet("summary")
-		iparowformat using "`outfile'", sheet("summary")
+		iparowformat using "`outfile'", sheet("summary") type(header)
 		if `_cons' 	ipacolformat using "`outfile'", sheet("summary") vars(consent_rate missing_rate) format("percent_d2")
 		if `_dk' 	ipacolformat using "`outfile'", sheet("summary") vars(dontknow_rate) format("percent_d2")
 		if `_ref' 	ipacolformat using "`outfile'", sheet("summary") vars(refuse_rate) format("percent_d2")
@@ -366,9 +368,10 @@ program ipacheckenumdb, rclass
 			if !`_dur' 		drop duration_*
 
 			ipalabels `team', `nolabel'
+			lab var `team' ""
 			export excel using "`outfile'", first(varl) sheet("summary (team)") `sheetreplace' `sheetmodify'
 			ipacolwidth using "`outfile'", sheet("summary (team)")
-			iparowformat using "`outfile'", sheet("summary (team)") row(1) type(header)
+			iparowformat using "`outfile'", sheet("summary (team)") type(header)
 			if `_cons' 	ipacolformat using "`outfile'", sheet("summary (team)") vars(consent_rate missing_rate) format("percent_d2")
 			if `_dk' 	ipacolformat using "`outfile'", sheet("summary (team)") vars(dontknow_rate) format("percent_d2")
 			if `_ref' 	ipacolformat using "`outfile'", sheet("summary (team)") vars(refuse_rate) format("percent_d2")
@@ -439,12 +442,14 @@ program ipacheckenumdb, rclass
 		replace submissions = scalar(sum) in `add'
 		
 		ipalabels `enumerator', `nolabel'
+		lab var `enumerator' ""
+
 		export excel using "`outfile'", first(varl) sheet("`period' productivity") `sheetreplace' `sheetmodify'
 		ipacolwidth using "`outfile'", sheet("`period' productivity")
-		iparowformat using "`outfile'", sheet("`period' productivity") row(1) type(header)
+		iparowformat using "`outfile'", sheet("`period' productivity") type(header)
 		ds, has(type numeric)
-		ipacolformat using "`outfile'", sheet("`period' productivity") vars(`r(varlist') format("number_sep")
-		iparowformat using "`outfile'", sheet("`period' productivity") row(`=c(N)+1') type(total)
+		ipacolformat using "`outfile'", sheet("`period' productivity") vars(vv_*) format("number_sep")
+		iparowformat using "`outfile'", sheet("`period' productivity") type(total)
 		*** productivity by team ***
 		
 		if `_team' {
@@ -498,11 +503,12 @@ program ipacheckenumdb, rclass
 			replace submissions = scalar(sum) in `add'
 			
 			ipalabels `team', `nolabel'
+			lab var `team' ""
 			export excel using "`outfile'", first(varl) sheet("`period' productivity (team)") `sheetreplace' `sheetmodify'
 			ipacolwidth using "`outfile'", sheet("`period' productivity (team)")
-			iparowformat using "`outfile'", sheet("`period' productivity (team)") row(1) type(header)
-			ipacolformat using "`outfile'", sheet("`period' productivity (team)") vars(`r(varlist') format("number_sep")
-			iparowformat using "`outfile'", sheet("`period' productivity (team)") row(`=c(N)+1') type(total)
+			iparowformat using "`outfile'", sheet("`period' productivity (team)") type(header)
+			ipacolformat using "`outfile'", sheet("`period' productivity (team)") vars(vv_*) format("number_sep")
+			iparowformat using "`outfile'", sheet("`period' productivity (team)") type(total)
 		}
 		
 		*** Variable Stats by enumerator ***
@@ -715,6 +721,7 @@ program ipacheckenumdb, rclass
 			frames drop frm_enumstats
 			
 			ipalabels `enumerator', `nolabel'
+			lab var `enumerator' ""
 			export excel using "`outfile'", first(varl) sheet("enumstats") cell(A2) `sheetreplace' `sheetmodify'
 			ipacolwidth using "`outfile'", sheet("enumstats")
 			mata: format_edb_stats("`outfile'", "enumstats", labs, percentcols)
