@@ -205,12 +205,6 @@ program define ipacheck_version
 				noi disp "Click {stata ipacheck update:here} to update"
 			}	
 		}
-
-		frames frm_verdate {
-			compress
-			sort program
-			noi list, noobs h sep(0)
-		}
 	}
 	
 end
