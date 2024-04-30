@@ -44,10 +44,10 @@ program define ipacheckcorrections, rclass
 			    disp as err "sheet option required with .xlsx, .xls or .xlsm files"
 				ex 198
 			}
-			import excel using "`using'", sheet("`sheet'") firstrow clear
+			import excel using "`using'", sheet("`sheet'") firstrow clear allstr
 		}
 		else if "`ext'" == ".csv" {
-			import delim using "`using'", clear varnames(1)
+			import delim using "`using'", clear varnames(1) stringcols(_all)
 		}
 		else {
 		    cap use "`using'", clear

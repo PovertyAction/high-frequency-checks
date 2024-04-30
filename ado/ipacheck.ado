@@ -82,7 +82,7 @@ program ipacheck, rclass
 		}
 		
 		if inlist("`subcmd'", "version", "update") {
-			noi ipahelper `subcmd', `force'
+			noi ipacheck `subcmd', `force'
 			ex
 		}
 	}
@@ -90,14 +90,11 @@ end
 
 program define ipacheck_update
 	
-	syntax, [branch(name)] url(string) force
+	syntax, [branch(name)] url(string) [force]
 	
 	qui {
 		loc branch 	= cond("`branch'" ~= "", "`branch'", "master")
 		noi net install ipacheck, replace from("`url'/`branch'")
-		qui do "`url'/`branch'/mlib/ipacheckmata.do"
-		noi disp "Mata library lipadms installed"
-		noi mata mata mlib index
 	}
 	
 end
