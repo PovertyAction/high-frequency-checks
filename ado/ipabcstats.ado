@@ -1456,7 +1456,7 @@ void format_enumstats(string scalar filename, string scalar sheetname, string sc
 {
 
 	class xl scalar b
-	real scalar column_width, columns, ncols, nrows, i, colmaxval, current_col
+	real scalar column_width, columns, ncols, nrows, i, colmaxval, current_col, collen //temp az: declaring collen here
 
 	ncols = st_nvar()
 	nrows = st_nobs() + 2
@@ -1525,7 +1525,7 @@ void adjust_column_width(string scalar filename, string scalar sheetname)
 {
 
 	class xl scalar b
-	real scalar column_width, columns, ncols, nrows, i, colmaxval
+	real scalar column_width, columns, ncols, nrows, i, colmaxval, collen //temp az: declaring namelen and collen here
 
 	ncols = st_nvar()
 	nrows = st_nobs() + 4
@@ -1582,6 +1582,7 @@ void add_summary_formatting(string scalar filename, string scalar sheetname, str
 	class xl scalar b
 	numeric scalar border
 	string scalar graphdir
+	real scalar i //temp az: declaring i here
 
 	b = xl()
 	
@@ -1651,7 +1652,7 @@ void format_comparison(string scalar filename, string scalar sheetname)
 {
 
 	class xl scalar b
-	real scalar idpos, enumpos, bcerpos, varpos, spos, bcpos, respos, datepos, keepspos, keepbcpos, lastcol
+	real scalar idpos, enumpos, bcerpos, varpos, spos, bcpos, respos, datepos, keepspos, keepbcpos, lastcol, nrows, ncols, okrpos, i //temp az: declaring nrows, ncols, okrpos, i
 	real matrix positions 
 
 	b = xl()
@@ -1737,7 +1738,7 @@ void format_comparison(string scalar filename, string scalar sheetname)
 
 void format_showids (string scalar filename, string scalar sheetname) {
 	class xl scalar b 
-	real scalar nrows, nvars
+	real scalar nrows, nvars, i, collen, namelen //temp az: declaring i, collen, namelen
 
 	b = xl()
 	nrows = st_nobs() + 3
@@ -1775,7 +1776,8 @@ void format_showids (string scalar filename, string scalar sheetname) {
 void format_varstats (string scalar filename, string scalar sheetname, real scalar mt, rlb) {
 
 	class xl scalar b 
-	real scalar nrows, nvars
+	real scalar nrows, nvars, ncols, testpos, rlbpos, i, collen, namelen //temp az: declaring ncols, testpos, rlbpos, i, collen, namelen
+	real matrix positions  //temp az: declaring positions
 
 	nrows = st_nobs() + 3
 	ncols = st_nvar()
@@ -1848,7 +1850,7 @@ void format_varstats (string scalar filename, string scalar sheetname, real scal
 
 void format_bconlyids (string scalar filename, string scalar sheetname) {
 	class xl scalar b 
-	real scalar nrows, nvars
+	real scalar nrows, nvars, i, collen, namelen //temp az: declaring i, collen, namelen
 
 
 	b = xl()
