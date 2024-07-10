@@ -15,12 +15,12 @@ program define ipacodebook, rclass
 	
 	preserve
 	
-	* mark sample
-	marksample touse, strok
-	keep if `touse'
-	drop `touse'
-	
 	qui {
+		
+		* mark sample
+		marksample touse, nov strok
+		keep if `touse'
+		drop `touse'
 	    
 		* check notes option
 		* expected format note(#, REPLace|COALesce|LONGer|SHORTer)
@@ -60,14 +60,14 @@ program define ipacodebook, rclass
 
 		if "`varlist'" ~= "" unab vars: `varlist'
 		else unab vars: _all
-
+		
 		* create & post stats for each variable
 		foreach var of varlist `vars' {
 			
 			* count missing values for var
 			qui count if missing(`var')
 			loc missing_cnt `r(N)'
-			
+						
 			* count number of unique nonmissing values for var
 			qui tab `var'
 			loc unique_cnt `r(r)'
