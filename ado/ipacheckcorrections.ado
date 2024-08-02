@@ -148,9 +148,8 @@ program define ipacheckcorrections, rclass
 			    
 			    if `str_var' cap assert `var' == "`val'" if `id' == _frval(frm_repfile, `id', `i')
 				else {
-					cap confirm double var `var'
-					if !_rc cap assert `var' == `val' if `id' == _frval(frm_repfile, `id', `i')
-					else cap assert `var' == float(`val') if `id' == _frval(frm_repfile, `id', `i')
+					if "`:type `var''" == "float" cap assert `var' == float(`val') if `id' == _frval(frm_repfile, `id', `i')
+					else cap assert `var' == `val' if `id' == _frval(frm_repfile, `id', `i')
 				}
 				if _rc == 9 {
 					frame frm_repfile: replace `tmv_status' = "failed" in `i'
