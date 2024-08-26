@@ -1,4 +1,4 @@
-*! version 4.0.3 25jan2025
+*! version 4.1.0 02aug2024
 *! Innovations for Poverty Action
 * ipacheckcorrections: Make corrections to data
 
@@ -44,10 +44,10 @@ program define ipacheckcorrections, rclass
 			    disp as err "sheet option required with .xlsx, .xls or .xlsm files"
 				ex 198
 			}
-			import excel using "`using'", sheet("`sheet'") firstrow clear
+			import excel using "`using'", sheet("`sheet'") firstrow clear allstr
 		}
 		else if "`ext'" == ".csv" {
-			import delim using "`using'", clear varnames(1)
+			import delim using "`using'", clear varnames(1) stringcols(_all)
 		}
 		else {
 		    cap use "`using'", clear
@@ -147,7 +147,10 @@ program define ipacheckcorrections, rclass
 				}
 			    
 			    if `str_var' cap assert `var' == "`val'" if `id' == _frval(frm_repfile, `id', `i')
-				else 		 cap assert `var' == float(`val') 	 if `id' == _frval(frm_repfile, `id', `i')
+				else {
+					if "`:type `var''" == "float" cap assert `var' == float(`val') if `id' == _frval(frm_repfile, `id', `i')
+					else cap assert `var' == `val' if `id' == _frval(frm_repfile, `id', `i')
+				}
 				if _rc == 9 {
 					frame frm_repfile: replace `tmv_status' = "failed" in `i'
 				}
@@ -200,8 +203,8 @@ program define ipacheckcorrections, rclass
 					lab var `tmv_status' "status"
 					ipalabels `id', `nolabel'
 					export excel using "`logfile'", sheet("`logsheet'") sheetreplace first(varl)
-					cap mata: colwidths("`logfile'", "`logsheet'")
-					cap mata: setheader("`logfile'", "`logsheet'")
+					ipacolwidth using "`logfile'", sheet("`logsheet'")
+					iparowformat using "`logfile'", sheet("`logsheet'") type(header)
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-*! version 4.0.5 25jan2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipacheckdups: check for duplicates in other variables
 
@@ -148,7 +148,7 @@ program ipacheckdups, rclass
 			frame frm_subset {
 				gen _dp_row = _n + 1
 				keep if `tmv_serial' == `tmv_max_serial'
-				mata: rows = st_data(., st_varindex("_dp_row"))
+				levelsof _dp_row, loc(rows) clean
 			}
 			frame drop frm_subset
 			
@@ -160,9 +160,9 @@ program ipacheckdups, rclass
 			
 			if `c(N)' > 0 {
 				export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetmodify' `sheetreplace'
-				cap mata: colwidths("`outfile'", "`outsheet'")
-				cap mata: setheader("`outfile'", "`outsheet'")
-				cap mata: addlines("`outfile'", "`outsheet'", rows, "thin")
+				ipacolwidth using "`outfile'", sheet("`outsheet'")
+				iparowformat using "`outfile'", sheet("`outsheet'") type(header)
+				iparowline using "`outfile'", sheet("`outsheet'") rows(`rows') style("thin")
 			}			
 			
 			tab `tmv_variable'

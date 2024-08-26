@@ -1,4 +1,4 @@
-*! version 4.0.3 25jan2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 *! ipacheckspecify: This program collates and list other specify values.
 
@@ -284,9 +284,9 @@ program ipacheckspecify, rclass sortpreserve
 			if "`keep'" ~= "" ipalabels `keep', `nolabel'
 			ipalabels `id' `enumerator', `nolabel'
 			export excel using "`outfile'", sheet("`outsheet1'") first(varl) `sheetreplace' `sheetmodify'
-			cap mata: colwidths("`outfile'", "`outsheet1'")
-			cap mata: colformats("`outfile'", "`outsheet1'", "`date'", "date_d_mon_yy")
-			cap mata: setheader("`outfile'", "`outsheet1'")
+			ipacolwidth using "`outfile'", sheet("`outsheet1'")
+			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(`date') format("date_d_mon_yy")
+			iparowformat using "`outfile'", sheet("`outsheet1'") type(header)
 			
 			tab child
 			loc var_cnt `r(r)'
@@ -303,9 +303,9 @@ program ipacheckspecify, rclass sortpreserve
 
 				export excel using "`outfile'", sheet("`outsheet2'") first(varl) `sheetreplace' `sheetmodify'
 
-				cap mata: colwidths("`outfile'", "`outsheet2'")
-				cap mata: colformats("`outfile'", "`outsheet2'", "percentage", "percent_d2")	
-				cap mata: setheader("`outfile'", "`outsheet2'")
+				ipacolwidth using "`outfile'", sheet("`outsheet2'")
+				ipacolformat using "`outfile'", sheet("`outsheet2'") vars("percentage") format("percent_d2")	
+				iparowformat using "`outfile'", sheet("`outsheet2'") type(header)
 				
 				* get row numbers for seperator line
 				cap frame drop frm_subset
@@ -315,10 +315,10 @@ program ipacheckspecify, rclass sortpreserve
 					bys variable (value): gen _dp_count = _N
 					gen _dp_row = _n + 1
 					keep if _dp_index == _dp_count
-					mata: rows = st_data(., st_varindex("_dp_row"))
+					levelsof _dp_row, loc (rows) clean
 				}
 				frame drop frm_subset
-				mata: addlines("`outfile'", "`outsheet2'", rows, "thin")
+				iparowline using "`outfile'", sheet("`outsheet2'") rows(`rows') style("thin")
 			}
 			
 			frame drop frm_choice_list

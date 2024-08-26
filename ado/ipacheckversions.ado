@@ -1,4 +1,4 @@
-*! version 4.0.3 25jan2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipacheckversion: Outputs a table showing number of submissions per formversion
 
@@ -114,18 +114,20 @@ program ipacheckversions, rclass
 											`sheetmodify' 				///
 											`sheetreplace'
 											
-			cap mata: colwidths("`outfile'", "`outsheet1'")
-			cap mata: colformats("`outfile'", "`outsheet1'", ("first_date", "last_date"), "date_d_mon_yy")
-			cap mata: colformats("`outfile'", "`outsheet1'", ("submitted", "outdated"), "number_sep")
-			cap mata: setheader("`outfile'", "`outsheet1'")
-			cap mata: settotal("`outfile'", "`outsheet1'")
+			ipacolwidth using "`outfile'", sheet("`outsheet1'")
+			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(first_date last_date) format("date_d_mon_yy")
+			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(submitted outdated) format("number_sep")
+			iparowformat using "`outfile'", sheet("`outsheet1'") type(header)
+			iparowformat using "`outfile'", sheet("`outsheet1'") type(total)
 
 			* highlight versions still in use
 			gen row = _n
 			loc lastdate = last_date[`=_N'-1]
 			levelsof row if last_date == `lastdate' & _n ~= `c(N)'-1, ///
-				loc(rows) sep(,) clean
-			if "`rows'" ~= "" mata: addflags("`outfile'", "`outsheet1'", (`rows'), ("`varlist'"), "lightpink")
+				loc(rows) clean
+			if "`rows'" ~= "" {
+				ipacellcolor "`outfile'", sheet("`outsheet1'") rows(`rows') vars(last_date) color("lightpink")
+			}
 		}
 
 		* export a list of outdate forms: ***
@@ -141,9 +143,9 @@ program ipacheckversions, rclass
 			ipalabels `enumerator', `nolabel'
 			export excel using "`outfile'", first(varl) sheet("`outsheet2'") `sheetreplace'
 			
-			cap mata: colwidths("`outfile'", "`outsheet2'")
-			cap mata: colformats("`outfile'", "`outsheet2'", ("`date'"), "date_d_mon_yy")
-			cap mata: setheader("`outfile'", "`outsheet2'")
+			ipacolwidth using "`outfile'", sheet("`outsheet2'")
+			ipacolformat using "`outfile'", sheet("`outsheet2'") vars(`date') format("date_d_mon_yy")
+			iparowformat using "`outfile'", sheet("`outsheet2'") type(header)
 		}
 
 		noi disp "Found {cmd:`outdated'} submissions with outdated forms."

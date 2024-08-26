@@ -1,4 +1,4 @@
-*! version 4.0.2 28mar2023
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipachecklogic: Flag logic violations in Survey
 
@@ -41,6 +41,7 @@ program ipachecklogic, rclass
 			
 			* import input data	
 			import excel using "`using'", clear sheet("`sheet'") first case(l) allstr
+
 			drop if missing(variable)
 
 			* check that the assert column is not missing for any of the rows
@@ -185,9 +186,9 @@ program ipachecklogic, rclass
 					
 					export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
-					cap mata: colwidths("`outfile'", "`outsheet'")
-					cap mata: colformats("`outfile'", "`outsheet'", ("`date'"), "date_d_mon_yy")
-					cap mata: setheader("`outfile'", "`outsheet'")
+					ipacolwidth using "`outfile'", sheet("`outsheet'")
+					ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
+					iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 				}
 			}
 		}

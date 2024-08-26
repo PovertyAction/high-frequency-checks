@@ -1,4 +1,4 @@
-*! version 4.0.1 25jan2024
+*! version 4.1.0 06apr2024
 *! Innovations for Poverty Action
 * ipacheckcomments: Collate & export field comments
 
@@ -75,6 +75,14 @@ program ipacheckcomments, rclass
 			egen `tmv_field' = ends(fieldname), last punct("/")
 			keep `enumerator' `keepvars' `tmv_comment' `tmv_field'
 			order `enumerator' `keepvars' `tmv_field' `tmv_comment'
+
+			* Remove var labels
+
+			foreach var of varlist _all {
+				lab var `var' "`var'"
+			}
+
+			* label selected vars
 			
 			lab var `tmv_comment' "comment"
 			lab var `tmv_field' "field"
@@ -87,9 +95,10 @@ program ipacheckcomments, rclass
 			
 			if "`keepvars'" ~= "" ipalabels `keepvars', `nolabel'
  			ipalabels `enumerator', `nolabel'
+
 			export excel using "`outfile'", sheet("`outsheet'") first(varl) `sheetreplace' `sheetmodify'
-			cap mata: colwidths("`outfile'", "`outsheet'")
-			cap mata: setheader("`outfile'", "`outsheet'")
+			ipacolwidth using "`outfile'", sheet("`outsheet'")
+			iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 			
 			noi disp "Found {cmd:`c(N)'} comments."
 		}

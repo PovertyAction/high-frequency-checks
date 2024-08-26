@@ -1,4 +1,4 @@
-*! version 4.0.4 25jan2024
+*! version 4.1.0 08apr2024
 *! Innovations for Poverty Action
 * ipacheckenumdb: Outputs survey statistics by enumerator
 
@@ -263,16 +263,18 @@ program ipacheckenumdb, rclass
 		if !`_dur' 		drop duration_*
 
 		ipalabels `enumerator', `nolabel'
+		lab var `enumerator' ""
+
 		export excel using "`outfile'", first(varl) sheet("summary") `sheetreplace' `sheetmodify'
-		cap mata: colwidths("`outfile'", "summary")
-		cap mata: setheader("`outfile'", "summary")
-		if `_cons' 	cap mata: colformats("`outfile'", "summary", ("consent_rate", "missing_rate"), "percent_d2")
-		if `_dk' 	cap mata: colformats("`outfile'", "summary", ("dontknow_rate"), "percent_d2")
-		if `_ref' 	cap mata: colformats("`outfile'", "summary", ("refuse_rate"), "percent_d2")
-		if `_other' cap mata: colformats("`outfile'", "summary", ("other_rate"), "percent_d2")
-		if `_dur'   cap mata: colformats("`outfile'", "summary", ("duration_min", "duration_mean", "duration_median", "duration_max"), "number_sep")
-					cap mata: colformats("`outfile'", "summary", ("formversion", "days"), "number_sep")
-					cap mata: colformats("`outfile'", "summary", ("firstdate", "lastdate"), "date_d_mon_yy")					
+		ipacolwidth using "`outfile'", sheet("summary")
+		iparowformat using "`outfile'", sheet("summary") type(header)
+		if `_cons' 	ipacolformat using "`outfile'", sheet("summary") vars(consent_rate missing_rate) format("percent_d2")
+		if `_dk' 	ipacolformat using "`outfile'", sheet("summary") vars(dontknow_rate) format("percent_d2")
+		if `_ref' 	ipacolformat using "`outfile'", sheet("summary") vars(refuse_rate) format("percent_d2")
+		if `_other' ipacolformat using "`outfile'", sheet("summary") vars(other_rate) format("percent_d2")
+		if `_dur'   ipacolformat using "`outfile'", sheet("summary") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
+					ipacolformat using "`outfile'", sheet("summary") vars(formversion days) format("number_sep")
+					ipacolformat using "`outfile'", sheet("summary") vars(firstdate lastdate) format("date_d_mon_yy")					
 					
 		*** Summary (by team) ***
 		
@@ -366,16 +368,17 @@ program ipacheckenumdb, rclass
 			if !`_dur' 		drop duration_*
 
 			ipalabels `team', `nolabel'
+			lab var `team' ""
 			export excel using "`outfile'", first(varl) sheet("summary (team)") `sheetreplace' `sheetmodify'
-			cap mata: colwidths("`outfile'", "summary (team)")
-			cap mata: setheader("`outfile'", "summary (team)")
-			if `_cons' 	cap mata: colformats("`outfile'", "summary (team)", ("consent_rate", "missing_rate"), "percent_d2")
-			if `_dk' 	cap mata: colformats("`outfile'", "summary (team)", ("dontknow_rate"), "percent_d2")
-			if `_ref' 	cap mata: colformats("`outfile'", "summary (team)", ("refuse_rate"), "percent_d2")
-			if `_other' cap mata: colformats("`outfile'", "summary (team)", ("other_rate"), "percent_d2")
-			if `_dur'   cap mata: colformats("`outfile'", "summary (team)", ("duration_min", "duration_mean", "duration_median", "duration_max"), "number_sep")
-						cap mata: colformats("`outfile'", "summary (team)", ("enumerators", "formversion", "days"), "number_sep")
-						cap mata: colformats("`outfile'", "summary (team)", ("firstdate", "lastdate"), "date_d_mon_yy")
+			ipacolwidth using "`outfile'", sheet("summary (team)")
+			iparowformat using "`outfile'", sheet("summary (team)") type(header)
+			if `_cons' 	ipacolformat using "`outfile'", sheet("summary (team)") vars(consent_rate missing_rate) format("percent_d2")
+			if `_dk' 	ipacolformat using "`outfile'", sheet("summary (team)") vars(dontknow_rate) format("percent_d2")
+			if `_ref' 	ipacolformat using "`outfile'", sheet("summary (team)") vars(refuse_rate) format("percent_d2")
+			if `_other' ipacolformat using "`outfile'", sheet("summary (team)") vars(other_rate) format("percent_d2")
+			if `_dur'   ipacolformat using "`outfile'", sheet("summary (team)") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
+						ipacolformat using "`outfile'", sheet("summary (team)") vars(enumerators formversion days) format("number_sep")
+						ipacolformat using "`outfile'", sheet("summary (team)") vars(firstdate lastdate) format("date_d_mon_yy")
 		
 		}
 		
@@ -439,11 +442,14 @@ program ipacheckenumdb, rclass
 		replace submissions = scalar(sum) in `add'
 		
 		ipalabels `enumerator', `nolabel'
+		lab var `enumerator' ""
+
 		export excel using "`outfile'", first(varl) sheet("`period' productivity") `sheetreplace' `sheetmodify'
-		cap mata: colwidths("`outfile'", "`period' productivity")
-		cap mata: setheader("`outfile'", "`period' productivity")
-		cap mata: colformats("`outfile'", "`period' productivity", st_varname(2..st_nvar()), "number_sep")
-		cap mata: settotal("`outfile'", "`period' productivity")
+		ipacolwidth using "`outfile'", sheet("`period' productivity")
+		iparowformat using "`outfile'", sheet("`period' productivity") type(header)
+		ds, has(type numeric)
+		ipacolformat using "`outfile'", sheet("`period' productivity") vars(vv_*) format("number_sep")
+		iparowformat using "`outfile'", sheet("`period' productivity") type(total)
 		*** productivity by team ***
 		
 		if `_team' {
@@ -497,11 +503,12 @@ program ipacheckenumdb, rclass
 			replace submissions = scalar(sum) in `add'
 			
 			ipalabels `team', `nolabel'
+			lab var `team' ""
 			export excel using "`outfile'", first(varl) sheet("`period' productivity (team)") `sheetreplace' `sheetmodify'
-			cap mata: colwidths("`outfile'", "`period' productivity (team)")
-			cap mata: setheader("`outfile'", "`period' productivity (team)")
-			cap mata: colformats("`outfile'", "`period' productivity (team)", st_varname(2..st_nvar()), "number_sep")
-			cap mata: settotal("`outfile'", "`period' productivity (team)")
+			ipacolwidth using "`outfile'", sheet("`period' productivity (team)")
+			iparowformat using "`outfile'", sheet("`period' productivity (team)") type(header)
+			ipacolformat using "`outfile'", sheet("`period' productivity (team)") vars(vv_*) format("number_sep")
+			iparowformat using "`outfile'", sheet("`period' productivity (team)") type(total)
 		}
 		
 		*** Variable Stats by enumerator ***
@@ -714,10 +721,70 @@ program ipacheckenumdb, rclass
 			frames drop frm_enumstats
 			
 			ipalabels `enumerator', `nolabel'
+			lab var `enumerator' ""
 			export excel using "`outfile'", first(varl) sheet("enumstats") cell(A2) `sheetreplace' `sheetmodify'
-			cap mata: colwidths("`outfile'", "enumstats")
-			cap mata: format_edb_stats("`outfile'", "enumstats", labs, percentcols)
+			ipacolwidth using "`outfile'", sheet("enumstats")
+			mata: format_edb_stats("`outfile'", "enumstats", labs, percentcols)
 		}
 	}
 	
+end
+
+mata:
+mata clear
+
+void format_edb_stats(string scalar file, string scalar sheet, string vector labs, string vector percentcols) 
+{
+	real scalar i, j, k
+	class xl scalar b
+	b = xl()
+	b.load_book(file)
+	b.set_sheet(sheet)
+	b.set_mode("open")
+	
+	real scalar n, startcol
+	string scalar var, nextvar, meanvar
+	
+	b.set_font_bold((1, 2), (1, st_nvar()), "on")
+	b.set_font_italic((1, 2), (1, st_nvar()), "on")
+	b.set_number_format((3, st_nobs() + 2), (2, st_nvar()), "number_d2")
+	b.set_bottom_border((2, 2), (1, st_nvar()), "medium")
+	
+	n = 2
+	for (i = 1; i <= length(labs); i++) {
+	    
+		startcol = n
+		var = st_varname(n)
+		b.put_string(1, n, labs[i])
+		for (j = 1; j <= 5;j++) {
+			if (n + 1 <= st_nvar()) {
+				nextvar = st_varname(n + 1)
+				if (regexm(nextvar, "_count") == 0) {
+					n = n + 1
+				}
+				if (regexm(nextvar, "_mean") == 1) {
+				    meanvar = nextvar
+				}
+			}
+		}
+		
+		b.set_sheet_merge(sheet, (1, 1), (startcol, n))
+		b.set_horizontal_align((1, 1), (startcol, n), "center")
+		b.set_left_border((1, st_nobs() + 2), (startcol, startcol), "medium")
+		
+		n = n + 1
+		
+		if (length(percentcols) > 0) {
+		    for (k=1; k <= length(percentcols); k++) {
+			    if (percentcols[k] == labs[i]) {
+				    b.set_number_format((3, st_nobs() + 2), (st_varindex(meanvar), st_varindex(meanvar)), "percent_d2")
+				}
+			}
+		} 
+	}
+	
+	
+	b.close_book()
+
+}
 end

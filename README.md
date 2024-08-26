@@ -25,23 +25,8 @@ ipacheck is Innovations for Poverty Action's Stata package for running high-freq
  ### Ancilliary programs
 
 - `ipacodebook` - export codebook to excel. Includes an option to use notes as variable labels
-- `ipasctocollate` - collate and export a dataset from SurveyCTO generated text audit or comments files.
-- `ipalabels` - remove labels or values from variables.
-- `ipagettd` - convert datetime variables to date.
-- `ipagetcal` - create a date calendar dataset.
-- `ipaanycount` - create a variable that returns the number of variables in varlist for which values are equal to any specified integer/string value.
 
-### Mata library
- 
-- `addlines` - add a lower boder line to a row in an excel file.
-- `addflags` - add a background color to a cell in an excel file.
-- `colwidths` - adjust column widths in excel file using length of values in current dataset.
-- `colformats` - apply number format to a column in an excel file.
-- `setfont` - set font size and type for a range of cells in an excel file.
-- `setheader` - set the first row in an excel file as a header row.
-- `settotal` - set the last row in an excel file as a total row.
-
-ipacheck comes with a folder structure for your project including a master do-file, a globals do-file, prep do-file and Excel-based inputs sheets. Results of checks are exported as nicely formatted Excel spreadsheets for distribution among field teams.
+ipacheck comes with a folder structure for your project including a master do-file, a globals do-file, prep do-file and Excel-based inputs sheets. Results of checks are exported as nicely formatted Excel spreadsheets for distribution among field teams. As of version 4.2.0, ipacheck now uses programs from the [ipahelper](https://github.com/PovertyAction/ipahelper/main).
 
 
 ## Installation
@@ -51,7 +36,7 @@ ipacheck comes with a folder structure for your project including a master do-fi
 net install ipacheck, all replace from("https://raw.githubusercontent.com/PovertyAction/high-frequency-checks/master")
 ipacheck update
 
-* after initial installation ipacheck can be updated at any time via
+* after initial installation ipacheck can be updated at any time using
 ipacheck update
 
 * to start a new project with folder structure and input files
