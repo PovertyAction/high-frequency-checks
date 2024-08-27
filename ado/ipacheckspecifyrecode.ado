@@ -219,7 +219,7 @@ program define ipacheckspecifyrecode, rclass
 					
 					export excel using "`logfile'", sheet("`logsheet'") first(varl) `sheetreplace' `sheetmodify'
 					ipacolwidth using "`logfile'", sheet("`logsheet'")
-					iparowformat using "`logfile'", sheet("`logsheet'") rows(1) type(header)
+					iparowformat using "`logfile'", sheet("`logsheet'") type(header)
 				}
 			}
 		}
