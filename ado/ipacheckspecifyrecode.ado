@@ -218,7 +218,7 @@ program define ipacheckspecifyrecode, rclass
 					if "`keep'" ~= "" ipalabels `id' `keep', `nolabel'
 					
 					export excel using "`logfile'", sheet("`logsheet'") first(varl) `sheetreplace' `sheetmodify'
-					ipacolwidths using "`logfile'", sheet("`logsheet'")
+					ipacolwidth using "`logfile'", sheet("`logsheet'")
 					iparowformat using "`logfile'", sheet("`logsheet'") rows(1) type(header)
 				}
 			}
