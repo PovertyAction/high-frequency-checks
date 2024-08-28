@@ -95,6 +95,8 @@ program define ipacheck_update
 	qui {
 		loc branch 	= cond("`branch'" ~= "", "`branch'", "master")
 		noi net install ipacheck, replace from("`url'/`branch'")
+
+		noi net install ipahelper, all replace from("https://raw.githubusercontent.com/PovertyAction/ipahelper/main")
 	}
 	
 end
