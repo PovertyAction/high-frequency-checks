@@ -126,7 +126,7 @@ program ipacheckversions, rclass
 			levelsof row if last_date == `lastdate' & _n ~= `c(N)'-1, ///
 				loc(rows) clean
 			if "`rows'" ~= "" {
-				ipacellcolor using "`outfile'", sheet("`outsheet1'") rows(`rows') vars(last_date) color("lightpink")
+				ipacellcolor using "`outfile'", sheet("`outsheet1'") rows(`rows') var(last_date) color("lightpink")
 			}
 		}
 
