@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.1.1 26sep2024
 *! Innovations for Poverty Action
 * ipacheckversion: Outputs a table showing number of submissions per formversion
 
@@ -126,7 +126,7 @@ program ipacheckversions, rclass
 			levelsof row if last_date == `lastdate' & _n ~= `c(N)'-1, ///
 				loc(rows) clean
 			if "`rows'" ~= "" {
-				ipacellcolor "`outfile'", sheet("`outsheet1'") rows(`rows') vars(last_date) color("lightpink")
+				ipacellcolor using "`outfile'", sheet("`outsheet1'") rows(`rows') vars(last_date) color("lightpink")
 			}
 		}
 
