@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 * ipacheckoutliers: Flag outliers in numeric variables
 
@@ -293,7 +293,7 @@ program ipacheckoutliers, rclass
 			ipacolwidth using "`outfile'", sheet("`outsheet'")
 			ipacolformat using "`outfile'", sheet("`outsheet'") vars(value_min value_mean value_max) format("number_sep_d2")	
 			ipacolformat using "`outfile'", sheet("`outsheet'") vars(value_count) format("number_sep")
-			ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
 			iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 			
 			tab variable

@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 * ipachecksurveydb: Outputs general survey statistics
 
@@ -420,7 +420,7 @@ program ipachecksurveydb, rclass
 			if `_other' ipacolformat using "`outfile'", sheet("summary (grouped)") vars(other_rate) format("percent_d2")
 			if `_dur'   ipacolformat using "`outfile'", sheet("summary (grouped)") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
 						ipacolformat using "`outfile'", sheet("summary (grouped)") vars(enumerators formversion days) format("number_sep")
-						ipacolformat using "`outfile'", sheet("summary (grouped)") vars(firstdate lastdate) format("date_d_mon_yy")
+						cap ipacolformat using "`outfile'", sheet("summary (grouped)") vars(firstdate lastdate) format("date_d_mon_yy")
 					
 		}
 		
@@ -460,15 +460,15 @@ program ipachecksurveydb, rclass
 		iparowformat using "`outfile'", sheet("`period' productivity") type(header)
 		if "`period'" == "daily" {
 			ipacolformat using "`outfile'", sheet("`period' productivity") vars(day submissions) format("number_sep")
-			ipacolformat using "`outfile'", sheet("`period' productivity") vars(`date') format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`period' productivity") vars(`date') format("date_d_mon_yy")
 		}
 		else if "`period'" == "weekly" {
 			ipacolformat using "`outfile'", sheet("`period' productivity") vars(week submissions) format("number_sep")
-			ipacolformat using "`outfile'", sheet("`period' productivity") vars(startdate enddate) format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`period' productivity") vars(startdate enddate) format("date_d_mon_yy")
 		}
 		else {
 			ipacolformat using "`outfile'", sheet("`period' productivity") vars(month submissions) format("number_sep")
-			ipacolformat using "`outfile'", sheet("`period' productivity") vars(startdate enddate) format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`period' productivity") vars(startdate enddate) format("date_d_mon_yy")
 		}
 		
 		*** productivity by group ***

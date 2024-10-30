@@ -1,4 +1,4 @@
-*! version 4.1.2 26sep2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 * ipacheckversion: Outputs a table showing number of submissions per formversion
 
@@ -115,7 +115,7 @@ program ipacheckversions, rclass
 											`sheetreplace'
 											
 			ipacolwidth using "`outfile'", sheet("`outsheet1'")
-			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(first_date last_date) format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`outsheet1'") vars(first_date last_date) format("date_d_mon_yy")
 			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(submitted outdated) format("number_sep")
 			iparowformat using "`outfile'", sheet("`outsheet1'") type(header)
 			iparowformat using "`outfile'", sheet("`outsheet1'") type(total)
@@ -144,7 +144,7 @@ program ipacheckversions, rclass
 			export excel using "`outfile'", first(varl) sheet("`outsheet2'") `sheetreplace'
 			
 			ipacolwidth using "`outfile'", sheet("`outsheet2'")
-			ipacolformat using "`outfile'", sheet("`outsheet2'") vars(`date') format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`outsheet2'") vars(`date') format("date_d_mon_yy")
 			iparowformat using "`outfile'", sheet("`outsheet2'") type(header)
 		}
 

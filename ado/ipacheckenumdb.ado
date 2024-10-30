@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 * ipacheckenumdb: Outputs survey statistics by enumerator
 
@@ -274,7 +274,7 @@ program ipacheckenumdb, rclass
 		if `_other' ipacolformat using "`outfile'", sheet("summary") vars(other_rate) format("percent_d2")
 		if `_dur'   ipacolformat using "`outfile'", sheet("summary") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
 					ipacolformat using "`outfile'", sheet("summary") vars(formversion days) format("number_sep")
-					ipacolformat using "`outfile'", sheet("summary") vars(firstdate lastdate) format("date_d_mon_yy")					
+					cap ipacolformat using "`outfile'", sheet("summary") vars(firstdate lastdate) format("date_d_mon_yy")					
 					
 		*** Summary (by team) ***
 		
@@ -378,7 +378,7 @@ program ipacheckenumdb, rclass
 			if `_other' ipacolformat using "`outfile'", sheet("summary (team)") vars(other_rate) format("percent_d2")
 			if `_dur'   ipacolformat using "`outfile'", sheet("summary (team)") vars(duration_min duration_mean duration_median duration_max) format("number_sep")
 						ipacolformat using "`outfile'", sheet("summary (team)") vars(enumerators formversion days) format("number_sep")
-						ipacolformat using "`outfile'", sheet("summary (team)") vars(firstdate lastdate) format("date_d_mon_yy")
+						cap ipacolformat using "`outfile'", sheet("summary (team)") vars(firstdate lastdate) format("date_d_mon_yy")
 		
 		}
 		

@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 *! ipacheckspecify: This program collates and list other specify values.
 
@@ -285,7 +285,7 @@ program ipacheckspecify, rclass sortpreserve
 			ipalabels `id' `enumerator', `nolabel'
 			export excel using "`outfile'", sheet("`outsheet1'") first(varl) `sheetreplace' `sheetmodify'
 			ipacolwidth using "`outfile'", sheet("`outsheet1'")
-			ipacolformat using "`outfile'", sheet("`outsheet1'") vars(`date') format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("`outsheet1'") vars(`date') format("date_d_mon_yy")
 			iparowformat using "`outfile'", sheet("`outsheet1'") type(header)
 			
 			tab child

@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 * ipasurveyprogress: Show survey progress
 
@@ -215,7 +215,7 @@ program ipatracksurvey, rclass
 			ipacolwidth using "`outfile'", sheet("survey progress")
 			iparowformat using "`outfile'", sheet("survey progress") type(header)
 			iparowformat using "`outfile'", sheet("survey progress") type(total)
-			ipacolformat using "`outfile'", sheet("survey progress") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("survey progress") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
 			if "`outcome'" ~= "" {
 			    ipacolformat "`outfile'", sheet("survey progress") vars(`target' `tmv_survey' `tmv_complete') format("number_sep")
 				ipacolformat "`outfile'", sheet("survey progress") vars(`tmv_survey_perc' `tmv_complete_perc') format("percent_d2")
@@ -237,7 +237,7 @@ program ipatracksurvey, rclass
 					ipacolwidth using "`outfile'", sheet("Unmatched IDs from Survey")
 					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") type(header)
 					ds, has(format %td) 
-					ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") var(`r(varlist)') format("date_d_mon_yy")
+					cap ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") var(`r(varlist)') format("date_d_mon_yy")
 				}
 			}
 			
@@ -353,7 +353,7 @@ program ipatracksurvey, rclass
 			ipacolwidth using "`outfile'", sheet("summary")
 			iparowformat using "`outfile'", sheet("summary") type(header)
 			iparowformat using "`outfile'", sheet("summary") type(total)
-			ipacolformat using "`outfile'", sheet("summary") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
+			cap ipacolformat using "`outfile'", sheet("summary") vars(`tmv_fdate' `tmv_ldate') format("date_d_mon_yy")
 			if "`outcome'" ~= "" {
 			    ipacolformat using "`outfile'", sheet("summary") vars(`tmv_target' `tmv_survey' `tmv_complete') format("number_sep")
 				ipacolformat using "`outfile'", sheet("summary") vars(`tmv_survey_perc' `tmv_complete_perc') format("percent_d2")
@@ -392,7 +392,7 @@ program ipatracksurvey, rclass
 					ipacolwidth using "`outfile'", sheet("Unmatched IDs from Survey")
 					iparowformat using "`outfile'", sheet("Unmatched IDs from Survey") type(header)
 					ds, has(format %td) 
-					ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") vars(`r(varlist)') format("date_d_mon_yy")
+					cap ipacolformat using "`outfile'", sheet("Unmatched IDs from Survey") vars(`r(varlist)') format("date_d_mon_yy")
 				}
 			}
 			use "`tmf_summary_master'", clear
@@ -451,7 +451,7 @@ program ipatracksurvey, rclass
 						ipacolwidth using "`file'", sheet("`sheet'")
 						iparowformat using "`file'", sheet("`sheet'") type(header)
 						ds, has(format %td) 
-						ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
+						cap ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
 
 						
 						loc ++i
@@ -489,7 +489,7 @@ program ipatracksurvey, rclass
 						ipacolwidth using "`file'", sheet("`sheet'")
 						iparowformat using "`file'", sheet("`sheet'") type(header)
 						ds, has(format %td) 
-						ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
+						cap ipacolformat using "`file'", sheet("`sheet'") vars(`r(varlist)') format("date_d_mon_yy")
 						
 						loc ++i
 						noi _dots `i' 0

@@ -1,4 +1,4 @@
-*! version 4.1.0 08apr2024
+*! version 4.3.1 30oct2024
 *! Innovations for Poverty Action
 * ipachecklogic: Flag logic violations in Survey
 
@@ -187,7 +187,7 @@ program ipachecklogic, rclass
 					export excel using "`outfile'", first(varl) sheet("`outsheet'") `sheetreplace'
 
 					ipacolwidth using "`outfile'", sheet("`outsheet'")
-					ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
+					cap ipacolformat using "`outfile'", sheet("`outsheet'") vars(`date') format("date_d_mon_yy")
 					iparowformat using "`outfile'", sheet("`outsheet'") type(header)
 				}
 			}
