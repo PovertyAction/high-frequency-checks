@@ -263,6 +263,7 @@ program ipachecktextaudit, rclass
 					frame frm_subset: loc group = group[`i']
 					loc newname = "ta_`i'_" + ("0" * (length("`group'") - length("ta_`i'") - 1))
 					lab var ta_`i' "`group'" 
+					loc newname = cond(length("`newname'") > 32, substr("`newname'", 1, 32), "`newname'")
 					ren ta_`i'  `newname'
 				}
 						
