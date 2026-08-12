@@ -31,7 +31,6 @@ f ado/ipachecktimeuse.ado
 f ado/ipachecksurveydb.ado
 f ado/ipacheckenumdb.ado
 f ado/ipatracksurvey.ado
-f ado/ipacodebook.ado
 f ado/ipabcstats.ado
 d
 f sthlp/ipacheck.sthlp
@@ -51,5 +50,4 @@ f sthlp/ipachecktimeuse.sthlp
 f sthlp/ipachecksurveydb.sthlp
 f sthlp/ipacheckenumdb.sthlp
 f sthlp/ipatracksurvey.sthlp
-f sthlp/ipacodebook.sthlp
 f sthlp/ipabcstats.sthlp
